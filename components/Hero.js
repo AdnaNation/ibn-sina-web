@@ -1,45 +1,78 @@
-import { Search } from 'lucide-react';
+import { Search } from "lucide-react";
+import Ecg from "./Ecg";
+import Crosses from "./Crosses";
+import { getT } from "@/lib/i18n";
 
-const field = 'w-full rounded-lg border border-pine-100 bg-paper px-3 py-3 text-[15px] focus:border-pine-600';
+const field =
+  "w-full rounded-lg border border-pine-100 bg-paper px-3 py-3 text-[15px] focus:border-pine-600";
 
-export default function Hero({ units, departments }) {
+export default async function Hero({ units, departments }) {
+  const { t, n } = await getT();
   const unitNames = [...new Set(units.map((u) => `${u.area}, ${u.city}`))];
+  const cities = new Set(units.map((u) => u.city)).size;
+
   return (
-    <section className="relative bg-pine-900 lattice text-white">
-      <div className="mx-auto max-w-7xl px-4 pt-16 pb-36 md:pt-24 md:pb-44">
-        <p className="rise text-brass-light font-medium">Pioneer in healthcare, since June 1980</p>
-        <h1 className="rise-2 mt-4 max-w-3xl font-serif text-5xl md:text-7xl leading-[1.05] tracking-tight">
-          Good medicine should not depend on what you can afford.
+    <section className="relative text-white bg-pine-900 lattice">
+      {/* decoration lives in its own clipped layer so the search panel can overlap the edge */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="beat absolute -right-28 -top-10 size-[22rem] md:size-[32rem] rounded-full bg-flag opacity-60 md:opacity-95 shadow-[0_0_140px_30px_rgba(244,42,65,.35)]" />
+        <Ecg className="absolute right-0 top-[38%] hidden md:block w-[62%] text-white" />
+        <Crosses />
+      </div>
+
+      <div className="relative px-4 pt-16 mx-auto max-w-7xl pb-36 md:pt-24 md:pb-44">
+        <p className="font-medium rise text-brass-light">{t.eyebrow}</p>
+        <h1 className="rise-2 mt-4 max-w-3xl font-serif text-5xl md:text-7xl leading-[1.08] tracking-tight">
+          {t.h1}
         </h1>
-        <p className="rise-3 mt-6 max-w-xl text-lg text-pine-100">
-          Hospitals, diagnostic centers and consultation units in {new Set(units.map((u) => u.city)).size} cities,
-          with 25% off on all diagnostic tests.
+        <p className="max-w-xl mt-6 text-lg rise-3 text-pine-100">
+          {t.heroSub(n(cities))}
         </p>
       </div>
 
-      {/* Search panel overlaps the hero edge */}
       <div className="absolute inset-x-0 bottom-0 translate-y-1/2">
-        <form action="/doctors" className="mx-auto w-[calc(100%-2rem)] max-w-5xl rounded-2xl bg-white p-4 md:p-5 shadow-2xl shadow-pine-950/20 grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_auto] text-ink">
+        <form
+          action="/doctors"
+          className="mx-auto w-[calc(100%-2rem)] max-w-5xl rounded-2xl bg-white p-4 md:p-5 shadow-2xl shadow-pine-950/25 grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_auto] text-ink border-t-4 border-flag"
+        >
           <label className="block">
-            <span className="text-sm font-semibold text-pine-800">Doctor or specialty</span>
-            <input name="q" placeholder="e.g. Cardiology, Dr. Hayee" className={`mt-1 ${field}`} />
+            <span className="text-sm font-semibold text-pine-800">
+              {t.doctorOrSpec}
+            </span>
+            <input name="q" placeholder={t.ph} className={`mt-1 ${field}`} />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-pine-800">Department</span>
-            <select name="department" className={`mt-1 ${field}`} defaultValue="">
-              <option value="">Any department</option>
-              {departments.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
+            <span className="text-sm font-semibold text-pine-800">
+              {t.dept}
+            </span>
+            <select
+              name="department"
+              className={`mt-1 ${field}`}
+              defaultValue=""
+            >
+              <option value="">{t.anyDept}</option>
+              {departments.map((d) => (
+                <option key={d.slug} value={d.slug}>
+                  {d.name}
+                </option>
+              ))}
             </select>
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-pine-800">Branch</span>
+            <span className="text-sm font-semibold text-pine-800">
+              {t.branch}
+            </span>
             <select name="branch" className={`mt-1 ${field}`} defaultValue="">
-              <option value="">Any branch</option>
-              {unitNames.map((n) => <option key={n} value={n}>{n}</option>)}
+              <option value="">{t.anyBranch}</option>
+              {unitNames.map((x) => (
+                <option key={x} value={x}>
+                  {x}
+                </option>
+              ))}
             </select>
           </label>
-          <button className="self-end inline-flex items-center justify-center gap-2 rounded-lg bg-brass px-6 py-3 font-semibold text-pine-950 hover:bg-brass-light">
-            <Search size={18} aria-hidden /> Find a doctor
+          <button className="inline-flex items-center self-end justify-center gap-2 px-6 py-3 font-semibold rounded-lg bg-brass text-pine-950 hover:bg-brass-light">
+            <Search size={18} aria-hidden /> {t.find}
           </button>
         </form>
       </div>

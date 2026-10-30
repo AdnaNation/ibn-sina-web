@@ -1,65 +1,84 @@
 import Link from "next/link";
 import { Phone, Menu } from "lucide-react";
+import { getT } from "@/lib/i18n";
+import { setLang } from "@/app/actions";
 
-const links = [
-  ["Find a doctor", "/doctors"],
-  ["Services", "/services"],
-  ["Our units", "/units"],
-  ["Health packages", "/packages"],
-  ["Patient care", "/patient-care"],
-  ["About", "/about"],
-  ["News", "/news"],
-  ["Live queue", "/live"],
-  ["Track my turn", "/track"],
+const hrefs = [
+  "/doctors",
+  "/services",
+  "/units",
+  "/packages",
+  "/about",
+  "/live",
+  "/track",
 ];
 
-export default function Navbar() {
+export default async function Navbar() {
+  const { lang, t, n } = await getT();
+  const links = t.nav.map((label, i) => [label, hrefs[i]]);
+
   return (
-    <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur border-b border-pine-100">
-      <div className="bg-pine-950 text-pine-100 text-sm">
-        <div className="mx-auto max-w-7xl px-4 h-9 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur">
+      <div className="text-sm bg-pine-950 text-pine-100">
+        <div className="flex items-center justify-between gap-4 px-4 mx-auto max-w-7xl h-9">
           <a
             href="tel:10615"
             className="flex items-center gap-2 font-medium hover:text-white"
           >
-            <Phone size={14} aria-hidden /> Hotline 10615
+            <span className="relative flex size-2" aria-hidden>
+              <span className="absolute inline-flex rounded-full opacity-75 size-full bg-flag animate-ping motion-reduce:animate-none" />
+              <span className="relative rounded-full size-2 bg-flag" />
+            </span>
+            <Phone size={14} aria-hidden /> {t.hotline} {n(10615)}
           </a>
           <div className="flex items-center gap-4">
             <Link
               href="/notice"
-              className="hidden sm:inline text-brass-light hover:text-white"
+              className="hidden md:inline text-brass-light hover:text-white"
             >
-              Job fraud notice: we never charge for jobs
+              {t.fraud}
             </Link>
-            <span className="flex gap-1 text-xs" aria-label="Language">
-              <button className="px-2 py-0.5 rounded bg-pine-800 text-white">
-                EN
-              </button>
-              <button className="px-2 py-0.5 rounded hover:bg-pine-800">
-                বাংলা
-              </button>
-            </span>
+            <form
+              action={setLang}
+              className="flex gap-1 text-xs"
+              aria-label="Language"
+            >
+              {[
+                ["en", "EN"],
+                ["bn", "বাংলা"],
+              ].map(([code, label]) => (
+                <button
+                  key={code}
+                  name="lang"
+                  value={code}
+                  aria-pressed={lang === code}
+                  className={`px-2.5 py-1 rounded ${lang === code ? "bg-pine-700 text-white" : "hover:bg-pine-800"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </form>
           </div>
         </div>
       </div>
 
       <nav
-        className="mx-auto max-w-7xl px-4 h-16 flex items-center justify-between"
+        className="flex items-center justify-between h-16 px-4 mx-auto max-w-7xl"
         aria-label="Main"
       >
         <Link href="/" className="flex items-center gap-3">
-          <span className="grid place-items-center size-9 rounded-full bg-pine-900 text-brass-light font-serif text-lg">
+          <span className="grid font-serif text-xl text-white rounded-full place-items-center size-10 bg-flag ring-4 ring-pine-800">
             ই
           </span>
           <span className="font-serif text-xl leading-none text-pine-900">
-            Ibn Sina Trust
-            <span className="block text-[11px] font-sans text-pine-600 mt-1">
-              Serving humanity since 1980
+            {t.brand}
+            <span className="block text-[11px] font-sans text-pine-700 mt-1">
+              {t.tagline}
             </span>
           </span>
         </Link>
 
-        <ul className="hidden lg:flex items-center gap-7 text-[15px] font-medium">
+        <ul className="hidden xl:flex items-center gap-6 text-[15px] font-medium">
           {links.map(([label, href]) => (
             <li key={href}>
               <Link href={href} className="text-ink/80 hover:text-pine-700">
@@ -71,20 +90,19 @@ export default function Navbar() {
 
         <Link
           href="/appointment"
-          className="hidden lg:inline-flex rounded-full bg-pine-900 px-5 py-2 text-sm font-semibold text-white hover:bg-pine-700"
+          className="hidden px-5 py-2 text-sm font-semibold text-white rounded-full xl:inline-flex bg-pine-800 hover:bg-pine-700"
         >
-          Book an appointment
+          {t.book}
         </Link>
 
-        {/* Mobile menu: no JS needed */}
-        <details className="lg:hidden relative">
+        <details className="relative xl:hidden">
           <summary
-            className="list-none cursor-pointer p-2 -mr-2"
+            className="p-2 -mr-2 list-none cursor-pointer"
             aria-label="Menu"
           >
             <Menu />
           </summary>
-          <div className="absolute right-0 top-12 w-64 rounded-xl bg-white shadow-xl border border-pine-100 p-3">
+          <div className="absolute right-0 w-64 p-3 bg-white border shadow-xl top-12 rounded-xl border-pine-100">
             {links.map(([label, href]) => (
               <Link
                 key={href}
@@ -96,13 +114,14 @@ export default function Navbar() {
             ))}
             <Link
               href="/appointment"
-              className="mt-2 block text-center rounded-full bg-pine-900 py-2 text-white font-semibold"
+              className="block py-2 mt-2 font-semibold text-center text-white rounded-full bg-pine-800"
             >
-              Book an appointment
+              {t.book}
             </Link>
           </div>
         </details>
       </nav>
+      <div className="jamdani" aria-hidden />
     </header>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { fmtTime } from "@/lib/time";
+import Ecg from "./Ecg";
 
 const LABEL = {
   live: "Seeing patients",
@@ -46,6 +47,7 @@ export default function LiveBoard({ initial }) {
               Today’s doctors and the serial being seen right now. Updated{" "}
               {fmtTime(data.now)}.
             </p>
+            <Ecg className="h-10 mt-3 w-72 text-emerald-300" />
           </div>
           <select
             value={unit}

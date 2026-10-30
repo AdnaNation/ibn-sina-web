@@ -12,7 +12,7 @@ export default function QueueJourney({ current, serial, status }) {
 
   return (
     <ol
-      className="mt-6 flex items-start gap-2 overflow-x-auto pb-1"
+      className="flex items-start gap-2 pb-1 mt-6 overflow-x-auto"
       aria-label="Queue positions"
     >
       {nums.map((n, i) => {
@@ -27,14 +27,14 @@ export default function QueueJourney({ current, serial, status }) {
         const style = you
           ? "bg-white text-pine-900 font-bold ring-4 ring-brass"
           : now
-            ? "bg-brass text-pine-950 font-bold animate-pulse"
+            ? "bg-brass text-pine-950 font-bold sonar"
             : n < current
               ? "bg-pine-700 text-pine-100"
               : "border border-pine-600 text-pine-100";
         return (
           <li
             key={n}
-            className="flex w-12 shrink-0 flex-col items-center gap-1"
+            className="flex flex-col items-center w-12 gap-1 shrink-0"
           >
             <span
               className={`grid size-11 place-items-center rounded-full ${style}`}

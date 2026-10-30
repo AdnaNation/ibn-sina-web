@@ -5,6 +5,7 @@ import { BellRing, Clock, MapPin, Stethoscope } from "lucide-react";
 import { fmtTime, fmtDate } from "@/lib/time";
 import { cancelAppointment } from "@/app/track/actions";
 import QueueJourney from "./QueueJourney";
+import Ecg from "./Ecg";
 
 const stamp = (ms) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
 
@@ -87,18 +88,22 @@ export default function LiveTicket({ initial, isNew }) {
       {isNew && (
         <p
           role="status"
-          className="rounded-xl bg-pine-50 border border-pine-100 px-4 py-3"
+          className="px-4 py-3 border rounded-xl bg-pine-50 border-pine-100"
         >
           Booked. Save your tracking code <strong>{t.ref}</strong> or keep this
           page open.
         </p>
       )}
-
-      <section className="rounded-3xl bg-pine-900 lattice text-white p-7">
+      <section className="relative overflow-hidden text-white rounded-3xl bg-pine-900 lattice p-7">
+        <Ecg className="absolute w-40 right-3 top-3 text-pine-100" />
         <p className="text-pine-100">
           Hello {t.firstName}, your serial number is
         </p>
-        <p className="font-serif text-8xl leading-none mt-2">{t.serial}</p>
+        <p
+          className={`font-serif text-8xl leading-none mt-2 ${t.status === "serving" ? "beat" : ""}`}
+        >
+          {t.serial}
+        </p>
         <p className="mt-5 text-xl font-semibold" aria-live="polite">
           {headline}
         </p>
@@ -112,9 +117,9 @@ export default function LiveTicket({ initial, isNew }) {
             aria-valuemax={100}
             aria-label="Queue progress"
           >
-            <div className="h-2 rounded-full bg-pine-800 overflow-hidden">
+            <div className="h-2 overflow-hidden rounded-full bg-pine-800">
               <div
-                className="h-full bg-brass transition-all duration-700"
+                className="h-full transition-all duration-700 bg-brass"
                 style={{ width: `${pct}%` }}
               />
             </div>
@@ -127,7 +132,7 @@ export default function LiveTicket({ initial, isNew }) {
       </section>
 
       {t.status === "waiting" && t.eta && (
-        <section className="rounded-2xl bg-white border border-pine-100 p-5 flex gap-4">
+        <section className="flex gap-4 p-5 bg-white border rounded-2xl border-pine-100">
           <Clock className="text-pine-700 shrink-0" aria-hidden />
           <div>
             <p className="font-semibold">
@@ -135,7 +140,7 @@ export default function LiveTicket({ initial, isNew }) {
                 ? "Your turn is about to come"
                 : `About ${t.eta.minutes} min to go, around ${fmtTime(t.eta.at)}`}
             </p>
-            <p className="text-sm text-ink/70 mt-1">
+            <p className="mt-1 text-sm text-ink/70">
               {t.eta.minutes > 30
                 ? `You can leave home around ${fmtTime(t.eta.comeBy)}.`
                 : `Please be at the hospital by ${fmtTime(t.eta.comeBy)}.`}{" "}
@@ -146,7 +151,7 @@ export default function LiveTicket({ initial, isNew }) {
       )}
 
       {(phaseNote || s.delayMin > 0 || s.notice) && (
-        <section className="rounded-2xl bg-brass-light/50 border border-brass/30 p-5 text-sm space-y-1">
+        <section className="p-5 space-y-1 text-sm border rounded-2xl bg-brass-light/50 border-brass/30">
           {s.delayMin > 0 && (
             <p className="font-semibold">
               The doctor is running about {s.delayMin} minutes late.
@@ -157,7 +162,7 @@ export default function LiveTicket({ initial, isNew }) {
         </section>
       )}
 
-      <section className="rounded-2xl bg-white border border-pine-100 p-5 text-sm space-y-2">
+      <section className="p-5 space-y-2 text-sm bg-white border rounded-2xl border-pine-100">
         <p className="flex gap-2">
           <Stethoscope size={16} className="mt-0.5 shrink-0" aria-hidden />{" "}
           {t.doctor}, {t.department}
