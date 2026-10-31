@@ -1,127 +1,50 @@
 import Link from "next/link";
-import { Phone, Menu } from "lucide-react";
+import { Phone, ArrowUpRight, Menu, HeartPulse } from "lucide-react";
 import { getT } from "@/lib/i18n";
 import { setLang } from "@/app/actions";
 
-const hrefs = [
-  "/doctors",
-  "/services",
-  "/units",
-  "/packages",
-  "/about",
-  "/live",
-  "/track",
-];
-
 export default async function Navbar() {
   const { lang, t, n } = await getT();
-  const links = t.nav.map((label, i) => [label, hrefs[i]]);
-
+  const links = [
+    [t.nav[0], "/doctors"],
+    [t.nav[1], "/#services"],
+    [t.nav[2], "/units"],
+    [t.nav[5], "/live"],
+  ];
   return (
-    <header className="sticky top-0 z-40 bg-paper/95 backdrop-blur">
-      <div className="text-sm bg-pine-950 text-pine-100">
-        <div className="flex items-center justify-between gap-4 px-4 mx-auto max-w-7xl h-9">
-          <a
-            href="tel:10615"
-            className="flex items-center gap-2 font-medium hover:text-white"
-          >
-            <span className="relative flex size-2" aria-hidden>
-              <span className="absolute inline-flex rounded-full opacity-75 size-full bg-flag animate-ping motion-reduce:animate-none" />
-              <span className="relative rounded-full size-2 bg-flag" />
-            </span>
-            <Phone size={14} aria-hidden /> {t.hotline} {n(10615)}
+    <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 shadow-[0_8px_30px_rgba(9,54,40,.045)] backdrop-blur-xl">
+      <div className="bg-pine-950 text-white">
+        <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-3 px-4 text-xs sm:text-sm">
+          <a href="tel:10615" className="inline-flex items-center gap-2 font-semibold tracking-wide hover:text-brass-light">
+            <span className="grid size-5 place-items-center rounded-full bg-white/10"><Phone size={11}/></span>
+            {t.hotline}: {n(10615)}
           </a>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/notice"
-              className="hidden md:inline text-brass-light hover:text-white"
-            >
-              {t.fraud}
-            </Link>
-            <form
-              action={setLang}
-              className="flex gap-1 text-xs"
-              aria-label="Language"
-            >
-              {[
-                ["en", "EN"],
-                ["bn", "বাংলা"],
-              ].map(([code, label]) => (
-                <button
-                  key={code}
-                  name="lang"
-                  value={code}
-                  aria-pressed={lang === code}
-                  className={`px-2.5 py-1 rounded ${lang === code ? "bg-pine-700 text-white" : "hover:bg-pine-800"}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </form>
-          </div>
+          <span className="hidden text-pine-100/80 sm:block">{t.topline}</span>
+          <form action={setLang} aria-label="Select language" className="flex items-center gap-1 rounded-full bg-white/10 p-0.5">
+            {[["en","EN"],["bn","বাংলা"]].map(([code,label]) => <button key={code} name="lang" value={code} aria-pressed={lang===code} className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition ${lang===code ? "bg-white text-pine-950" : "text-white/80 hover:bg-white/10"}`}>{label}</button>)}
+          </form>
         </div>
       </div>
-
-      <nav
-        className="flex items-center justify-between h-16 px-4 mx-auto max-w-7xl"
-        aria-label="Main"
-      >
-        <Link href="/" className="flex items-center gap-3">
-          <span className="grid font-serif text-xl text-white rounded-full place-items-center size-10 bg-flag ring-4 ring-pine-800">
-            ই
-          </span>
-          <span className="font-serif text-xl leading-none text-pine-900">
-            {t.brand}
-            <span className="block text-[11px] font-sans text-pine-700 mt-1">
-              {t.tagline}
-            </span>
-          </span>
+      <nav aria-label="Main navigation" className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-4">
+        <Link href="/" className="group flex min-w-0 items-center gap-3" aria-label={t.brand + " home"}>
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-pine-900 text-white shadow-lg shadow-pine-900/15 transition group-hover:-rotate-3"><HeartPulse size={25} strokeWidth={2.1}/></span>
+          <span className="min-w-0"><span className="block truncate font-serif text-[19px] font-semibold leading-tight text-pine-950 sm:text-[21px]">{t.brand}</span><span className="mt-1 block text-[10px] font-semibold uppercase tracking-[.15em] text-pine-600">{t.tagline}</span></span>
         </Link>
-
-        <ul className="hidden xl:flex items-center gap-6 text-[15px] font-medium">
-          {links.map(([label, href]) => (
-            <li key={href}>
-              <Link href={href} className="text-ink/80 hover:text-pine-700">
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <Link
-          href="/appointment"
-          className="hidden px-5 py-2 text-sm font-semibold text-white rounded-full xl:inline-flex bg-pine-800 hover:bg-pine-700"
-        >
-          {t.book}
-        </Link>
-
-        <details className="relative xl:hidden">
-          <summary
-            className="p-2 -mr-2 list-none cursor-pointer"
-            aria-label="Menu"
-          >
-            <Menu />
-          </summary>
-          <div className="absolute right-0 w-64 p-3 bg-white border shadow-xl top-12 rounded-xl border-pine-100">
-            {links.map(([label, href]) => (
-              <Link
-                key={href}
-                href={href}
-                className="block px-3 py-2 rounded-lg hover:bg-pine-50"
-              >
-                {label}
-              </Link>
-            ))}
-            <Link
-              href="/appointment"
-              className="block py-2 mt-2 font-semibold text-center text-white rounded-full bg-pine-800"
-            >
-              {t.book}
-            </Link>
+        <div className="hidden items-center gap-7 lg:flex">
+          {links.map(([label,href]) => <Link key={href} href={href} className="text-[13px] font-semibold text-slate-600 transition hover:text-pine-800">{label}</Link>)}
+        </div>
+        <div className="hidden items-center gap-3 lg:flex">
+          <Link href="/track" className="text-[13px] font-semibold text-pine-800 hover:text-pine-600">{t.track}</Link>
+          <Link href="/appointment" className="inline-flex items-center gap-2 rounded-full bg-pine-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-pine-900/15 transition hover:-translate-y-0.5 hover:bg-pine-700">{t.book}<ArrowUpRight size={16}/></Link>
+        </div>
+        <details className="group relative lg:hidden">
+          <summary aria-label="Open navigation menu" className="grid size-11 cursor-pointer list-none place-items-center rounded-xl border border-pine-100 text-pine-900 hover:bg-pine-50 [&::-webkit-details-marker]:hidden"><Menu size={21}/></summary>
+          <div className="absolute right-0 top-[58px] z-50 w-[min(88vw,340px)] rounded-2xl border border-pine-100 bg-white p-3 shadow-2xl shadow-pine-950/15">
+            <div className="space-y-1">{links.map(([label,href]) => <Link key={href} href={href} className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-pine-50 hover:text-pine-800">{label}</Link>)}<Link href="/track" className="block rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-pine-50">{t.track}</Link></div>
+            <Link href="/appointment" className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-pine-800 px-4 py-3 text-sm font-bold text-white">{t.book}<ArrowUpRight size={16}/></Link>
           </div>
         </details>
       </nav>
-      <div className="jamdani" aria-hidden />
     </header>
   );
 }

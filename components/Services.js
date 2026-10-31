@@ -1,41 +1,6 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { getT } from "@/lib/i18n";
-export default async function Services({ services }) {
-  const { t } = await getT();
-  return (
-    <section className="mx-auto max-w-7xl px-4 py-20 grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-      <div className="self-start lg:sticky lg:top-32">
-        <h2 className="font-serif text-4xl leading-tight md:text-5xl text-pine-900">
-          {t.servicesTitle}
-        </h2>
-        <p className="max-w-sm mt-4 text-ink/70">{t.servicesSub}</p>
-
-        <Link
-          href="/packages"
-          className="inline-flex items-center gap-2 mt-6 font-semibold text-pine-700 hover:text-pine-900"
-        >
-          Compare health check-up packages → {t.packages}
-        </Link>
-      </div>
-
-      <ul className="divide-y divide-pine-100 border-y border-pine-100">
-        {services.map((s) => (
-          <li key={s.slug}>
-            <Link
-              href={s.href}
-              className="group grid gap-1 py-6 md:grid-cols-[14rem_1fr_auto] md:gap-8 md:items-baseline hover:bg-pine-50/60 px-2 -mx-2 rounded-lg"
-            >
-              <h3 className="font-serif text-2xl text-pine-800">{s.title}</h3>
-              <p className="text-ink/75 max-w-prose">{s.text}</p>
-              <ArrowRight
-                className="hidden transition-transform md:block text-pine-600 group-hover:translate-x-1"
-                aria-hidden
-              />
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
+import {ArrowUpRight,Activity,ScanLine,FlaskConical,HeartPulse,Accessibility,Smile} from "lucide-react";
+import {getT} from "@/lib/i18n";
+const icons=[HeartPulse,ScanLine,FlaskConical,Activity,Accessibility,Smile];
+const bnServices={hospital:["হাসপাতাল সেবা","জরুরি বিভাগ, ভর্তি, বহির্বিভাগ এবং বিভিন্ন বিশেষায়িত চিকিৎসাসেবা সম্পর্কে জানুন।"],radiology:["রেডিওলজি ও ইমেজিং","এমআরআই, সিটি স্ক্যান, এক্স-রে, আল্ট্রাসনোগ্রাফি এবং অন্যান্য ইমেজিং সেবা।"],laboratory:["ল্যাবরেটরি সেবা","প্যাথলজি, বায়োকেমিস্ট্রি, হেমাটোলজি এবং অন্যান্য ডায়াগনস্টিক পরীক্ষা।"],diabetes:["ডায়াবেটিস সেন্টার","ডায়াবেটিস ও বিপাকজনিত সমস্যার স্ক্রিনিং, পর্যবেক্ষণ এবং চিকিৎসাসেবা।"],"pain-physiotherapy":["ব্যথা ও ফিজিওথেরাপি","ব্যথা ব্যবস্থাপনা, পুনর্বাসন এবং ফিজিওথেরাপি সেবা।"],dental:["ডেন্টাল সেন্টার","সাধারণ দন্তচিকিৎসা, ওরাল সার্জারি এবং অন্যান্য ডেন্টাল সেবা।"]};
+export default async function Services({services}){const {t,lang}=await getT();return <section id="services" className="mx-auto max-w-7xl px-4 py-20 md:py-24"><div className="mx-auto max-w-2xl text-center"><p className="text-xs font-bold uppercase tracking-[.2em] text-pine-700">{t.servicesEyebrow}</p><h2 className="mt-3 font-serif text-4xl font-medium tracking-tight text-pine-950 md:text-5xl">{t.servicesTitle}</h2><p className="mt-4 text-sm leading-7 text-slate-500 md:text-base">{t.servicesSub}</p></div><div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{services.map((s,i)=>{const Icon=icons[i%icons.length],translated=lang==="bn"?bnServices[s.slug]:null;return <Link href={s.href||"/units"} key={s.slug} className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-pine-200 hover:shadow-xl hover:shadow-pine-900/5"><span className="grid size-12 place-items-center rounded-2xl bg-pine-50 text-pine-800 transition group-hover:bg-pine-800 group-hover:text-white"><Icon size={22}/></span><h3 className="mt-5 font-serif text-2xl text-pine-950">{translated?.[0]||s.title}</h3><p className="mt-2 min-h-[72px] text-sm leading-6 text-slate-500">{translated?.[1]||s.text}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-pine-800">{t.exploreService}<ArrowUpRight size={15}/></span></Link>})}</div><div className="mt-8 flex justify-center"><Link href="/units" className="inline-flex items-center gap-2 text-sm font-bold text-pine-800 hover:text-pine-600">{t.viewAllServices}<ArrowUpRight size={16}/></Link></div></section>}

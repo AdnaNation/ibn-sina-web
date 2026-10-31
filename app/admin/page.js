@@ -35,7 +35,13 @@ export default async function Overview() {
       <AdminNav p={p} current="/admin" />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <AutoRefresh every={15000} />
-        <h1 className="font-serif text-3xl text-pine-900">Today at a glance</h1>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">Hospital administration</p>
+            <h1 className="mt-2 font-serif text-3xl text-pine-900">Today at a glance</h1>
+          </div>
+          <Link href="/admin/schedules" className="rounded-full bg-pine-900 px-5 py-3 text-sm font-semibold text-white hover:bg-pine-700">Manage doctor schedules</Link>
+        </div>
         {!st && (
           <p className="mt-4 text-alert">The database is not connected.</p>
         )}

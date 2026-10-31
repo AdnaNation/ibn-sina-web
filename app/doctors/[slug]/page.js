@@ -1,61 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Phone, MapPin, Stethoscope } from "lucide-react";
-import { getDoctor } from "@/lib/data";
-import { initials } from "@/components/DoctorCard";
-
-export async function generateMetadata({ params }) {
-  const d = await getDoctor((await params).slug);
-  return {
-    title: d
-      ? `${d.name}, ${d.department} | Ibn Sina Trust`
-      : "Doctor not found",
-  };
-}
-
-export default async function DoctorPage({ params }) {
-  const d = await getDoctor((await params).slug);
-  if (!d) notFound();
-
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-14">
-      <Link href="/doctors" className="text-sm font-semibold text-pine-700">
-        All doctors
-      </Link>
-      <div className="mt-6 grid gap-8 md:grid-cols-[auto_1fr] items-start">
-        <span className="grid place-items-center size-32 rounded-full bg-pine-900 text-brass-light font-serif text-5xl">
-          {initials(d.name)}
-        </span>
-        <div>
-          <h1 className="font-serif text-4xl md:text-5xl text-pine-900">
-            {d.name}
-          </h1>
-          <ul className="mt-5 space-y-2 text-ink/80">
-            <li className="flex gap-2">
-              <Stethoscope size={18} className="mt-0.5" aria-hidden />{" "}
-              {d.department}
-            </li>
-            <li className="flex gap-2">
-              <MapPin size={18} className="mt-0.5" aria-hidden /> {d.unit}
-            </li>
-            <li className="flex gap-2">
-              <Phone size={18} className="mt-0.5" aria-hidden /> Hotline{" "}
-              <a
-                href={`tel:${d.phone}`}
-                className="font-semibold text-pine-700"
-              >
-                {d.phone}
-              </a>
-            </li>
-          </ul>
-          <Link
-            href={`/appointment?doctor=${d.slug}`}
-            className="mt-8 inline-block rounded-full bg-pine-900 px-7 py-3 font-semibold text-white hover:bg-pine-700"
-          >
-            Book an appointment
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+import {notFound} from "next/navigation";
+import {Phone,MapPin,Stethoscope,ArrowLeft,CalendarDays,ShieldCheck} from "lucide-react";
+import {getDoctor} from "@/lib/data";
+import {initials} from "@/components/DoctorCard";
+import {getT} from "@/lib/i18n";
+export async function generateMetadata({params}){const d=await getDoctor((await params).slug);return {title:d?`${d.name}, ${d.department} | Ibn Sina Trust`:"Doctor not found"}}
+export default async function DoctorPage({params}){const [d,{t}]=await Promise.all([getDoctor((await params).slug),getT()]);if(!d)notFound();return <div className="min-h-screen bg-[#f6f9f7]"><div className="mx-auto max-w-5xl px-4 py-10 md:py-14"><Link href="/doctors" className="inline-flex items-center gap-2 text-sm font-bold text-pine-700 hover:text-pine-900"><ArrowLeft size={16}/>{t.allDoctorsLink}</Link><div className="mt-7 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm"><div className="h-32 bg-gradient-to-r from-pine-950 via-pine-800 to-[#3e9475]"/><div className="px-6 pb-8 sm:px-9"><div className="-mt-14 flex flex-wrap items-end justify-between gap-5"><span className="grid size-28 place-items-center rounded-[1.7rem] border-4 border-white bg-pine-50 font-serif text-4xl font-semibold text-pine-800 shadow-lg">{initials(d.name)}</span><Link href={`/appointment?doctor=${d.slug}`} className="inline-flex items-center gap-2 rounded-full bg-pine-800 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-pine-900/10 hover:bg-pine-700"><CalendarDays size={17}/>{t.book}</Link></div><p className="mt-6 text-xs font-bold uppercase tracking-[.16em] text-pine-700">{t.doctorProfile}</p><h1 className="mt-2 font-serif text-3xl text-pine-950 sm:text-4xl">{d.name}</h1><p className="mt-2 inline-flex items-center gap-2 rounded-full bg-pine-50 px-3 py-1.5 text-sm font-semibold text-pine-800"><Stethoscope size={15}/>{d.department}</p><div className="mt-8 grid gap-4 border-t border-slate-100 pt-7 sm:grid-cols-2"><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t.branchLabel}</p><p className="mt-2 flex items-start gap-2 text-sm font-semibold leading-6 text-slate-800"><MapPin size={17} className="mt-0.5 shrink-0 text-pine-700"/>{d.unit}</p></div><div className="rounded-2xl bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t.hotline}</p><a href={`tel:${d.phone||"10615"}`} className="mt-2 flex items-center gap-2 text-sm font-semibold text-pine-800"><Phone size={16}/>{d.phone||"10615"}</a></div></div><p className="mt-5 flex items-start gap-2 text-xs leading-6 text-slate-500"><ShieldCheck size={15} className="mt-0.5 shrink-0 text-pine-700"/>{t.doctorScheduleNote}</p></div></div></div></div>}

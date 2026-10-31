@@ -7,6 +7,7 @@ export default function AdminNav({ p, current }) {
     ...(p.role === "owner"
       ? [
           ["Overview", "/admin"],
+          ["Schedules", "/admin/schedules"],
           ["Staff accounts", "/admin/staff"],
         ]
       : []),

@@ -1,28 +1,5 @@
-import { redirect } from "next/navigation";
-
-export const metadata = { title: "Track my turn | Ibn Sina Trust" };
-
-export default async function TrackLookup({ searchParams }) {
-  const { code } = await searchParams;
-  if (code) redirect(`/track/${encodeURIComponent(code.trim().toUpperCase())}`);
-  return (
-    <div className="max-w-md px-4 py-20 mx-auto">
-      <h1 className="font-serif text-4xl text-pine-900">Track my turn</h1>
-      <p className="mt-3 text-ink/70">
-        Enter the tracking code you received when you booked.
-      </p>
-      <form className="flex gap-3 mt-8">
-        <input
-          name="code"
-          required
-          placeholder="IST-7K3F9Q"
-          aria-label="Tracking code"
-          className="flex-1 px-3 py-3 uppercase bg-white border rounded-lg border-pine-100 focus:border-pine-600"
-        />
-        <button className="px-6 font-semibold text-white rounded-full bg-pine-900 hover:bg-pine-700">
-          Track
-        </button>
-      </form>
-    </div>
-  );
-}
+import {redirect} from "next/navigation";
+import {Search,ShieldCheck} from "lucide-react";
+import {getT} from "@/lib/i18n";
+export const metadata={title:"Track appointment | Ibn Sina Trust"};
+export default async function TrackLookup({searchParams}){const [{code},{t}]=await Promise.all([searchParams,getT()]);if(code)redirect(`/track/${encodeURIComponent(code.trim().toUpperCase())}`);return <div className="min-h-[65vh] bg-[#f6f9f7] px-4 py-16"><div className="mx-auto max-w-xl rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-10"><span className="grid size-12 place-items-center rounded-2xl bg-pine-50 text-pine-800"><Search size={22}/></span><h1 className="mt-5 font-serif text-3xl text-pine-950">{t.trackTitle}</h1><p className="mt-3 text-sm leading-7 text-slate-500">{t.trackIntro}</p><form className="mt-7"><label className="block text-xs font-bold text-slate-700">{t.trackingCode}<input name="code" required placeholder="IST-7K3F9Q" aria-label={t.trackingCode} className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm uppercase outline-none focus:border-pine-500 focus:bg-white focus:ring-4 focus:ring-pine-100"/></label><button className="mt-4 w-full rounded-full bg-pine-800 px-6 py-3.5 text-sm font-bold text-white hover:bg-pine-700">{t.trackButton}</button></form><p className="mt-5 flex items-start gap-2 text-[11px] leading-5 text-slate-400"><ShieldCheck size={14} className="mt-0.5 shrink-0"/>{t.appointmentSecure}</p></div></div>}

@@ -60,3 +60,12 @@
   html { scroll-behavior: auto; }
   .rise, .rise-2, .rise-3, .beat, .ecg-pulse, .plus, .sonar::after, .siren, .ambulance, .light { animation: none; }
 }
+/* Premium, accessible interaction defaults */
+html { scroll-padding-top: 6rem; }
+body { min-width: 320px; }
+::selection { background: #cce8da; color: #063b2d; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:disabled { cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

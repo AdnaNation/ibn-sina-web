@@ -1,23 +1,6 @@
 import { getT } from "@/lib/i18n";
-
-export default async function Stats({ units, doctorCount }) {
-  const { t, n } = await getT();
-  const items = [n(1980), n(units.length), `${n(doctorCount)}+`, `${n(25)}%`];
-  return (
-    <section className="pt-40 pb-6 md:pt-36">
-      <dl className="grid grid-cols-2 px-4 mx-auto max-w-7xl md:grid-cols-4 gap-y-8">
-        {items.map((num, i) => (
-          <div
-            key={i}
-            className={`px-4 ${i ? "md:border-l border-pine-100" : ""}`}
-          >
-            <dt className="font-serif text-4xl text-pine-800">{num}</dt>
-            <dd className="mt-1 text-sm text-ink/70 max-w-[16rem]">
-              {t.stats[i]}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-  );
+export default async function Stats() {
+  const { t } = await getT();
+  const items = [["1980", t.statFounded],["10615",t.statHotline],["EN · বাংলা",t.statLanguages],["Bangladesh",t.statNetwork]];
+  return <section id="about" className="relative z-10 mx-auto -mt-1 max-w-7xl px-4 py-9"><div className="grid grid-cols-2 gap-5 rounded-3xl border border-pine-100 bg-white p-6 shadow-[0_18px_50px_rgba(8,58,42,.07)] md:grid-cols-4 md:p-8">{items.map(([value,label],i)=><div key={label} className={`${i%2?"md:border-l md:pl-7":""} ${i>1?"border-t border-pine-100 pt-5 md:border-t-0 md:pt-0":""}`}><p className="font-serif text-2xl font-semibold tracking-tight text-pine-900 sm:text-3xl">{value}</p><p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">{label}</p></div>)}</div></section>;
 }

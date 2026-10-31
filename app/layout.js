@@ -26,9 +26,9 @@ const sans = Hind_Siliguri({
 });
 
 export const metadata = {
-  title: "The Ibn Sina Trust | Healthcare at affordable cost since 1980",
+  title: "Ibn Sina Trust | Hospitals, Doctors & Healthcare Services",
   description:
-    "Hospitals, diagnostic centers and consultation units across Bangladesh. Find a doctor, book an appointment, track your serial live. Hotline 10615.",
+    "Explore Ibn Sina Trust hospitals, diagnostic centres and consultation services. Find a doctor, book an appointment and track your serial. Hotline 10615.",
 };
 
 export default async function RootLayout({ children }) {

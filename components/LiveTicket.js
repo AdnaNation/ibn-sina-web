@@ -1,240 +1,32 @@
 "use client";
-import { useEffect, useRef, useState, useTransition } from "react";
+import {useEffect,useRef,useState,useTransition} from "react";
 import Link from "next/link";
-import { BellRing, Clock, MapPin, Stethoscope } from "lucide-react";
-import { fmtTime, fmtDate } from "@/lib/time";
-import { cancelAppointment } from "@/app/track/actions";
+import {BellRing,Clock,MapPin,Stethoscope,CalendarPlus,AlertCircle} from "lucide-react";
+import {fmtTime,fmtDate} from "@/lib/time";
+import {cancelAppointment} from "@/app/track/actions";
 import QueueJourney from "./QueueJourney";
 import Ecg from "./Ecg";
-
-const stamp = (ms) => new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g, "");
-
-export default function LiveTicket({ initial, isNew }) {
-  const [t, setT] = useState(initial);
-  const [alerts, setAlerts] = useState(false);
-  const [pending, start] = useTransition();
-  const sent = useRef({});
-
-  const refresh = async () => {
-    try {
-      const r = await fetch(`/api/queue/${initial.ref}`, { cache: "no-store" });
-      if (r.ok) setT(await r.json());
-    } catch {}
-  };
-
-  useEffect(() => {
-    const tick = () => {
-      if (!document.hidden) refresh();
-    };
-    const id = setInterval(tick, 8000);
-    document.addEventListener("visibilitychange", tick);
-    return () => {
-      clearInterval(id);
-      document.removeEventListener("visibilitychange", tick);
-    };
-  }, [initial.ref]);
-
-  useEffect(() => {
-    if (!alerts) return;
-    const key =
-      t.status === "serving"
-        ? "now"
-        : t.status === "waiting" && t.ahead <= 2
-          ? "soon"
-          : null;
-    if (!key || sent.current[key]) return;
-    sent.current[key] = true;
-    navigator.vibrate?.([250, 120, 250]);
-    new Notification(
-      key === "now" ? "It is your turn" : "Your turn is almost here",
-      {
-        body:
-          key === "now"
-            ? `Serial ${t.serial}: please go to the room of ${t.doctor}.`
-            : `${t.ahead} patient${t.ahead === 1 ? "" : "s"} ahead of serial ${t.serial}.`,
-      },
-    );
-  }, [t, alerts]);
-
-  async function enableAlerts() {
-    if (!("Notification" in window)) return;
-    setAlerts((await Notification.requestPermission()) === "granted");
-  }
-
-  const s = t.session;
-  const pct =
-    t.serial > 1
-      ? Math.round(((t.serial - 1 - t.ahead) / (t.serial - 1)) * 100)
-      : 0;
-  const headline = {
-    waiting:
-      t.ahead === 0
-        ? "You are next."
-        : `${t.ahead} patient${t.ahead === 1 ? "" : "s"} ahead of you.`,
-    serving: "It is your turn. Please go to the doctor’s room.",
-    done: "Your visit is complete.",
-    skipped: "Your serial was skipped. Please see the reception desk.",
-    cancelled: "This serial was cancelled.",
-  }[t.status];
-  const phaseNote = {
-    late: "The doctor has not started yet. Your estimate updates as soon as they do.",
-    break: "The doctor is on a short break.",
-    waiting_start: `The session starts at ${fmtTime(s.startsAt)}.`,
-    finished: "This session has ended.",
-  }[s.phase];
-
-  return (
-    <div className="space-y-5">
-      {isNew && (
-        <p
-          role="status"
-          className="px-4 py-3 border rounded-xl bg-pine-50 border-pine-100"
-        >
-          Booked. Save your tracking code <strong>{t.ref}</strong> or keep this
-          page open.
-        </p>
-      )}
-      <section className="relative overflow-hidden text-white rounded-3xl bg-pine-900 lattice p-7">
-        <Ecg className="absolute w-40 right-3 top-3 text-pine-100" />
-        <p className="text-pine-100">
-          Hello {t.firstName}, your serial number is
-        </p>
-        <p
-          className={`font-serif text-8xl leading-none mt-2 ${t.status === "serving" ? "beat" : ""}`}
-        >
-          {t.serial}
-        </p>
-        <p className="mt-5 text-xl font-semibold" aria-live="polite">
-          {headline}
-        </p>
-
-        {t.status === "waiting" && (
-          <div
-            className="mt-5"
-            role="progressbar"
-            aria-valuenow={pct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Queue progress"
-          >
-            <div className="h-2 overflow-hidden rounded-full bg-pine-800">
-              <div
-                className="h-full transition-all duration-700 bg-brass"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <p className="mt-2 text-sm text-pine-100">
-              Now seeing serial {s.current || "none yet"}
-            </p>
-          </div>
-        )}
-        <QueueJourney current={s.current} serial={t.serial} status={t.status} />
-      </section>
-
-      {t.status === "waiting" && t.eta && (
-        <section className="flex gap-4 p-5 bg-white border rounded-2xl border-pine-100">
-          <Clock className="text-pine-700 shrink-0" aria-hidden />
-          <div>
-            <p className="font-semibold">
-              {t.eta.minutes <= 1
-                ? "Your turn is about to come"
-                : `About ${t.eta.minutes} min to go, around ${fmtTime(t.eta.at)}`}
-            </p>
-            <p className="mt-1 text-sm text-ink/70">
-              {t.eta.minutes > 30
-                ? `You can leave home around ${fmtTime(t.eta.comeBy)}.`
-                : `Please be at the hospital by ${fmtTime(t.eta.comeBy)}.`}{" "}
-              Average consultation today: {s.avgMin} min.
-            </p>
-          </div>
-        </section>
-      )}
-
-      {(phaseNote || s.delayMin > 0 || s.notice) && (
-        <section className="p-5 space-y-1 text-sm border rounded-2xl bg-brass-light/50 border-brass/30">
-          {s.delayMin > 0 && (
-            <p className="font-semibold">
-              The doctor is running about {s.delayMin} minutes late.
-            </p>
-          )}
-          {s.notice && <p>{s.notice}</p>}
-          {phaseNote && <p>{phaseNote}</p>}
-        </section>
-      )}
-
-      <section className="p-5 space-y-2 text-sm bg-white border rounded-2xl border-pine-100">
-        <p className="flex gap-2">
-          <Stethoscope size={16} className="mt-0.5 shrink-0" aria-hidden />{" "}
-          {t.doctor}, {t.department}
-        </p>
-        <p className="flex gap-2">
-          <MapPin size={16} className="mt-0.5 shrink-0" aria-hidden /> {t.unit}
-        </p>
-        <p>
-          {fmtDate(t.date)}. Tracking code <strong>{t.ref}</strong>
-        </p>
-      </section>
-
-      <div className="flex flex-wrap gap-3">
-        {t.status === "waiting" && !alerts && "Notification" in globalThis && (
-          <button
-            onClick={enableAlerts}
-            className="inline-flex items-center gap-2 rounded-full bg-pine-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pine-700"
-          >
-            <BellRing size={16} aria-hidden /> Alert me when it is almost my
-            turn
-          </button>
-        )}
-        {alerts && (
-          <p className="text-sm text-pine-700">
-            Alerts are on. Keep this page open.
-          </p>
-        )}
-        {t.status === "waiting" && (
-          <button
-            disabled={pending}
-            onClick={() =>
-              confirm("Cancel this serial?") &&
-              start(async () => {
-                await cancelAppointment(t.ref);
-                await refresh();
-              })
-            }
-            className="rounded-full border border-alert px-5 py-2.5 text-sm font-semibold text-alert hover:bg-red-50 disabled:opacity-60"
-          >
-            Cancel my serial
-          </button>
-        )}
-
-        {/* 3. inside the buttons <div>, before the "See the live board" link */}
-        {t.status === "waiting" && t.eta && (
-          <a
-            download="ibn-sina-appointment.ics"
-            href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
-              [
-                "BEGIN:VCALENDAR",
-                "VERSION:2.0",
-                "BEGIN:VEVENT",
-                `DTSTART:${stamp(t.eta.comeBy)}`,
-                `DTEND:${stamp(t.eta.at + 30 * 60000)}`,
-                `SUMMARY:Ibn Sina: ${t.doctor} (serial ${t.serial})`,
-                `DESCRIPTION:Tracking code ${t.ref}`,
-                "END:VEVENT",
-                "END:VCALENDAR",
-              ].join("\r\n"),
-            )}`}
-            className="rounded-full border border-pine-700 px-5 py-2.5 text-sm font-semibold text-pine-800 hover:bg-pine-50"
-          >
-            Add to calendar
-          </a>
-        )}
-        <Link
-          href="/live"
-          className="rounded-full border border-pine-700 px-5 py-2.5 text-sm font-semibold text-pine-800 hover:bg-pine-50"
-        >
-          See the live board
-        </Link>
-      </div>
-    </div>
-  );
+const stamp=ms=>new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g,"");
+const copy={
+ en:{booked:"Your appointment is booked. Save this tracking code or keep this page open.",hello:"Hello",serialLabel:"Your serial number",statuses:{waiting:(n)=>n===0?"You are next.":`${n} patient${n===1?"":"s"} ahead of you.`,serving:"It is your turn. Please go to the doctor’s room.",done:"Your visit is complete.",skipped:"Your serial was skipped. Please see the reception desk.",cancelled:"This serial was cancelled."},late:"The doctor has not started yet. Your estimate updates when the session begins.",break:"The doctor is on a short break.",waitingStart:"The session starts at",finished:"This session has ended.",queueProgress:"Queue progress",seeing:"Now seeing serial",none:"Not started",soon:"Your turn is about to come",about:(n,time)=>`About ${n} min to go, around ${time}`,leave:(time)=>`You can leave home around ${time}.`,arrive:(time)=>`Please be at the hospital by ${time}.`,average:"Average consultation today",minutes:"min",lateBy:(n)=>`The doctor is running about ${n} minutes late.`,tracking:"Tracking code",alertNow:"It is your turn",alertSoon:"Your turn is almost here",notifyNow:(n,d)=>`Serial ${n}: please go to the room of ${d}.`,notifySoon:(n,s)=>`${n} patient${n===1?"":"s"} ahead of serial ${s}.`,enable:"Alert me when it is almost my turn",alertsOn:"Alerts are on. Keep this page open.",cancel:"Cancel my serial",cancelConfirm:"Cancel this serial?",calendar:"Add to calendar",live:"See the live board",notAvailable:"Queue updates are temporarily unavailable."},
+ bn:{booked:"আপনার অ্যাপয়েন্টমেন্ট বুক হয়েছে। ট্র্যাকিং কোডটি সংরক্ষণ করুন অথবা এই পেজটি খোলা রাখুন।",hello:"স্বাগতম",serialLabel:"আপনার সিরিয়াল নম্বর",statuses:{waiting:(n)=>n===0?"আপনার পরবর্তী সিরিয়াল।":`আপনার আগে ${new Intl.NumberFormat("bn-BD").format(n)} জন রোগী আছেন।`,serving:"এখন আপনার সিরিয়াল। অনুগ্রহ করে চিকিৎসকের কক্ষে যান।",done:"আপনার চিকিৎসা সম্পন্ন হয়েছে।",skipped:"আপনার সিরিয়ালটি বাদ পড়েছে। অনুগ্রহ করে রিসেপশনে যোগাযোগ করুন।",cancelled:"এই সিরিয়ালটি বাতিল করা হয়েছে।"},late:"চিকিৎসকের সেশন এখনো শুরু হয়নি। সেশন শুরু হলে সম্ভাব্য সময় হালনাগাদ হবে।",break:"চিকিৎসক অল্প সময়ের বিরতিতে আছেন।",waitingStart:"সেশন শুরু হবে",finished:"এই সেশন শেষ হয়েছে।",queueProgress:"সিরিয়ালের অগ্রগতি",seeing:"এখন যে সিরিয়াল চলছে",none:"এখনো শুরু হয়নি",soon:"আপনার সিরিয়াল প্রায় চলে এসেছে",about:(n,time)=>`সম্ভাব্য আরও ${new Intl.NumberFormat("bn-BD").format(n)} মিনিট, আনুমানিক ${time}।`,leave:(time)=>`প্রায় ${time} সময়ে বাসা থেকে রওনা হতে পারেন।`,arrive:(time)=>`অনুগ্রহ করে ${time}-এর মধ্যে হাসপাতালে উপস্থিত থাকুন।`,average:"আজকের গড় সাক্ষাতের সময়",minutes:"মিনিট",lateBy:(n)=>`চিকিৎসক প্রায় ${new Intl.NumberFormat("bn-BD").format(n)} মিনিট দেরিতে আছেন।`,tracking:"ট্র্যাকিং কোড",alertNow:"এখন আপনার সিরিয়াল",alertSoon:"আপনার সিরিয়াল প্রায় চলে এসেছে",notifyNow:(n,d)=>`সিরিয়াল ${n}: অনুগ্রহ করে ${d}-এর কক্ষে যান।`,notifySoon:(n,s)=>`সিরিয়াল ${s}-এর আগে ${n} জন রোগী আছেন।`,enable:"সিরিয়ালের সময় হলে নোটিফিকেশন দিন",alertsOn:"নোটিফিকেশন চালু আছে। এই পেজটি খোলা রাখুন।",cancel:"সিরিয়াল বাতিল করুন",cancelConfirm:"আপনি কি এই সিরিয়ালটি বাতিল করতে চান?",calendar:"ক্যালেন্ডারে যোগ করুন",live:"লাইভ সিরিয়াল বোর্ড দেখুন",notAvailable:"সিরিয়ালের তথ্য সাময়িকভাবে পাওয়া যাচ্ছে না."}
+};
+export default function LiveTicket({initial,isNew,lang="en"}){
+ const [ticket,setTicket]=useState(initial),[alerts,setAlerts]=useState(false),[pending,start]=useTransition();const sent=useRef({});const c=copy[lang]||copy.en;const bn=lang==="bn";
+ const refresh=async()=>{try{const r=await fetch(`/api/queue/${initial.ref}`,{cache:"no-store"});if(r.ok)setTicket(await r.json())}catch{}};
+ useEffect(()=>{const tick=()=>{if(!document.hidden)refresh()};const id=setInterval(tick,8000);document.addEventListener("visibilitychange",tick);return()=>{clearInterval(id);document.removeEventListener("visibilitychange",tick)}},[initial.ref]);
+ useEffect(()=>{if(!alerts)return;const key=ticket.status==="serving"?"now":ticket.status==="waiting"&&ticket.ahead<=2?"soon":null;if(!key||sent.current[key])return;sent.current[key]=true;navigator.vibrate?.([250,120,250]);new Notification(key==="now"?c.alertNow:c.alertSoon,{body:key==="now"?c.notifyNow(ticket.serial,ticket.doctor):c.notifySoon(ticket.ahead,ticket.serial)})},[ticket,alerts,c]);
+ async function enableAlerts(){if(!("Notification" in window))return;setAlerts((await Notification.requestPermission())==="granted")}
+ const session=ticket.session;const pct=ticket.serial>1?Math.round(((ticket.serial-1-ticket.ahead)/(ticket.serial-1))*100):0;const digits=n=>new Intl.NumberFormat(bn?"bn-BD":"en-US",{useGrouping:false}).format(n);
+ const headline=ticket.status==="waiting"?c.statuses.waiting(ticket.ahead):c.statuses[ticket.status]||c.notAvailable;
+ const phaseNote=session.phase==="late"?c.late:session.phase==="break"?c.break:session.phase==="waiting_start"?`${c.waitingStart} ${fmtTime(session.startsAt)}.`:session.phase==="finished"?c.finished:null;
+ const dateText=bn?new Intl.DateTimeFormat("bn-BD",{weekday:"short",day:"numeric",month:"short",timeZone:"Asia/Dhaka"}).format(new Date(`${ticket.date}T12:00:00+06:00`)):fmtDate(ticket.date);
+ return <div className="space-y-5">
+  {isNew&&<p role="status" className="rounded-xl border border-pine-100 bg-pine-50 px-4 py-3 text-sm text-pine-900">{c.booked} <strong className="whitespace-nowrap">{ticket.ref}</strong></p>}
+  <section className="relative overflow-hidden rounded-3xl bg-pine-900 p-7 text-white lattice"><Ecg className="absolute right-3 top-3 w-40 text-pine-100"/><p className="text-pine-100">{c.hello} {ticket.firstName}, {c.serialLabel}</p><p className={`mt-2 font-serif text-8xl leading-none ${ticket.status==="serving"?"beat":""}`}>{digits(ticket.serial)}</p><p className="mt-5 text-lg font-semibold" aria-live="polite">{headline}</p>{ticket.status==="waiting"&&<div className="mt-5" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={c.queueProgress}><div className="h-2 overflow-hidden rounded-full bg-pine-800"><div className="h-full bg-brass transition-all duration-700" style={{width:`${pct}%`}}/></div><p className="mt-2 text-sm text-pine-100">{c.seeing} {session.current?digits(session.current):c.none}</p></div>}<QueueJourney current={session.current} serial={ticket.serial} status={ticket.status} lang={lang}/></section>
+  {ticket.status==="waiting"&&ticket.eta&&<section className="flex gap-4 rounded-2xl border border-pine-100 bg-white p-5"><Clock className="shrink-0 text-pine-700"/><div><p className="font-semibold text-slate-900">{ticket.eta.minutes<=1?c.soon:c.about(digits(ticket.eta.minutes),fmtTime(ticket.eta.at))}</p><p className="mt-1 text-sm leading-6 text-slate-600">{ticket.eta.minutes>30?c.leave(fmtTime(ticket.eta.comeBy)):c.arrive(fmtTime(ticket.eta.comeBy))} {c.average}: {digits(session.avgMin)} {c.minutes}.</p></div></section>}
+  {(phaseNote||session.delayMin>0||session.notice)&&<section className="space-y-1 rounded-2xl border border-brass/30 bg-brass-light/50 p-5 text-sm text-slate-800">{session.delayMin>0&&<p className="font-semibold">{c.lateBy(digits(session.delayMin))}</p>}{session.notice&&<p>{session.notice}</p>}{phaseNote&&<p>{phaseNote}</p>}</section>}
+  <section className="space-y-3 rounded-2xl border border-pine-100 bg-white p-5 text-sm text-slate-700"><p className="flex gap-2"><Stethoscope size={16} className="mt-0.5 shrink-0"/>{ticket.doctor}, {ticket.department}</p><p className="flex gap-2"><MapPin size={16} className="mt-0.5 shrink-0"/>{ticket.unit}</p><p>{dateText}. {c.tracking} <strong>{ticket.ref}</strong></p></section>
+  <div className="flex flex-wrap gap-3">{ticket.status==="waiting"&&!alerts&&"Notification" in globalThis&&<button onClick={enableAlerts} className="inline-flex items-center gap-2 rounded-full bg-pine-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pine-700"><BellRing size={16}/>{c.enable}</button>}{alerts&&<p className="text-sm text-pine-700">{c.alertsOn}</p>}{ticket.status==="waiting"&&<button disabled={pending} onClick={()=>window.confirm(c.cancelConfirm)&&start(async()=>{await cancelAppointment(ticket.ref);await refresh()})} className="inline-flex items-center gap-2 rounded-full border border-alert px-5 py-2.5 text-sm font-semibold text-alert hover:bg-red-50 disabled:opacity-60"><AlertCircle size={15}/>{c.cancel}</button>}{ticket.status==="waiting"&&ticket.eta&&<a download="ibn-sina-appointment.ics" href={`data:text/calendar;charset=utf-8,${encodeURIComponent(["BEGIN:VCALENDAR","VERSION:2.0","BEGIN:VEVENT",`DTSTART:${stamp(ticket.eta.comeBy)}`,`DTEND:${stamp(ticket.eta.at+30*60000)}`,`SUMMARY:Ibn Sina: ${ticket.doctor} (serial ${ticket.serial})`,`DESCRIPTION:Tracking code ${ticket.ref}`,"END:VEVENT","END:VCALENDAR"].join("\r\n"))}`} className="inline-flex items-center gap-2 rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-800 hover:bg-pine-50"><CalendarPlus size={15}/>{c.calendar}</a>}<Link href="/live" className="rounded-full border border-pine-200 px-5 py-2.5 text-sm font-semibold text-pine-800 hover:bg-pine-50">{c.live}</Link></div>
+ </div>
 }

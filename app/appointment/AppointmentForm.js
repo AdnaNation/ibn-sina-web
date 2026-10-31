@@ -1,220 +1,46 @@
 "use client";
-import { useActionState, useEffect, useState } from "react";
-import { Search, CheckCircle2 } from "lucide-react";
-import { bookAppointment } from "./actions";
-import { fmtTime, fmtDate } from "@/lib/time";
-import { todayDhaka } from "@/lib/time";
+import {useActionState,useEffect,useMemo,useState} from "react";
+import {Search,CheckCircle2,CalendarDays,UserRound,Stethoscope,MapPin,Clock3,AlertCircle,RefreshCw,ArrowRight,ShieldCheck} from "lucide-react";
+import {bookAppointment} from "./actions";
+import {fmtTime} from "@/lib/time";
 
-const field =
-  "mt-1 w-full rounded-lg border border-pine-100 bg-white px-3 py-2.5 focus:border-pine-600";
-const Step = ({ n, title, done, children }) => (
-  <section className="rounded-2xl border border-pine-100 bg-white p-5">
-    <h2 className="flex items-center gap-3 font-semibold text-lg">
-      <span
-        className={`grid size-7 place-items-center rounded-full text-sm ${done ? "bg-pine-700 text-white" : "bg-pine-100 text-pine-800"}`}
-      >
-        {done ? <CheckCircle2 size={16} aria-hidden /> : n}
-      </span>
-      {title}
-    </h2>
-    <div className="mt-4">{children}</div>
-  </section>
-);
-
-export default function AppointmentForm({ doctors, selected }) {
-  const [state, action, pending] = useActionState(bookAppointment, {});
-  const [q, setQ] = useState("");
-  const [doctor, setDoctor] = useState(
-    doctors.find((d) => d.slug === selected) || null,
-  );
-  const [avail, setAvail] = useState(null);
-  const [date, setDate] = useState("");
-  const v = state.values || {};
-
-  useEffect(() => {
-    if (!doctor) return;
-    setAvail(null);
-    setDate("");
-    fetch(`/api/availability?doctor=${doctor.slug}`)
-      .then((r) => r.json())
-      .then(setAvail)
-      .catch(() => setAvail([]));
-  }, [doctor]);
-
-  const matches = doctors
-    .filter((d) =>
-      `${d.name} ${d.department} ${d.unit}`
-        .toLowerCase()
-        .includes(q.toLowerCase()),
-    )
-    .slice(0, 30);
-  const day = avail?.find((a) => a.date === date);
-
-  return (
-    <form action={action} className="space-y-5">
-      <input
-        name="website"
-        tabIndex={-1}
-        autoComplete="off"
-        className="hidden"
-        aria-hidden
-      />
-      <input type="hidden" name="doctor" value={doctor?.slug || ""} />
-      <input type="hidden" name="date" value={date} />
-
-      <Step n={1} title="Choose your doctor" done={!!doctor}>
-        {doctor ? (
-          <p className="flex flex-wrap items-center justify-between gap-3">
-            <span>
-              <strong>{doctor.name}</strong>, {doctor.department}
-              <br />
-              <span className="text-sm text-ink/70">
-                {doctor.unit.replace("Ibn Sina ", "")}
-              </span>
-            </span>
-            <button
-              type="button"
-              onClick={() => setDoctor(null)}
-              className="text-sm font-semibold text-pine-700"
-            >
-              Change doctor
-            </button>
-          </p>
-        ) : (
-          <>
-            <label className="relative block">
-              <Search
-                size={18}
-                className="absolute left-3 top-3.5 text-ink/50"
-                aria-hidden
-              />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search by name, specialty or branch"
-                aria-label="Search doctors"
-                className={`${field} !mt-0 pl-10`}
-              />
-            </label>
-            <ul className="mt-3 max-h-72 overflow-auto divide-y divide-pine-100">
-              {matches.map((d) => (
-                <li key={d.slug}>
-                  <button
-                    type="button"
-                    onClick={() => setDoctor(d)}
-                    className="w-full text-left py-3 px-2 rounded-lg hover:bg-pine-50"
-                  >
-                    <span className="font-semibold">{d.name}</span>
-                    <span className="block text-sm text-ink/70">
-                      {d.department}, {d.unit.replace("Ibn Sina ", "")}
-                    </span>
-                  </button>
-                </li>
-              ))}
-              {!matches.length && (
-                <li className="py-3 text-ink/70">
-                  No doctor found. Try a different word.
-                </li>
-              )}
-            </ul>
-          </>
-        )}
-      </Step>
-
-      {doctor && (
-        <Step n={2} title="Choose a day" done={!!date}>
-          {!avail ? (
-            <p className="text-ink/70">Checking seats…</p>
-          ) : (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {avail.map((a) => (
-                <li key={a.date}>
-                  <button
-                    type="button"
-                    disabled={!a.left}
-                    onClick={() => setDate(a.date)}
-                    aria-pressed={date === a.date}
-                    className={`w-full rounded-xl border p-3 text-left disabled:opacity-40 ${date === a.date ? "border-pine-700 bg-pine-50 ring-2 ring-pine-700" : "border-pine-100 hover:bg-pine-50"}`}
-                  >
-                    <span className="block font-semibold">
-                      {a.date === todayDhaka() ? "Today" : fmtDate(a.date)}
-                    </span>
-                    <span
-                      className={`block text-sm ${a.left && a.left < 8 ? "text-alert" : "text-ink/70"}`}
-                    >
-                      {a.left
-                        ? `${a.left} seat${a.left === 1 ? "" : "s"} left`
-                        : "Full"}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {day && day.left > 0 && (
-            <p
-              role="status"
-              className="mt-4 rounded-xl bg-pine-900 px-4 py-3 text-white"
-            >
-              You would be <strong>serial {day.next}</strong>, seen around{" "}
-              <strong>{fmtTime(day.etaAt)}</strong>.
-              {day.delayMin > 0 &&
-                ` The doctor is running ${day.delayMin} min late today.`}
-            </p>
-          )}
-        </Step>
-      )}
-
-      {doctor && date && (
-        <Step n={3} title="Your details" done={false}>
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="block text-sm font-semibold text-pine-800">
-              Patient name
-              <input
-                name="name"
-                required
-                defaultValue={v.name}
-                autoComplete="name"
-                className={field}
-              />
-            </label>
-            <label className="block text-sm font-semibold text-pine-800">
-              Mobile number
-              <input
-                name="phone"
-                required
-                type="tel"
-                inputMode="numeric"
-                defaultValue={v.phone}
-                autoComplete="tel"
-                placeholder="01712345678"
-                className={field}
-              />
-            </label>
-            <label className="block text-sm font-semibold text-pine-800 md:col-span-2">
-              Anything we should know? (optional)
-              <textarea
-                name="note"
-                rows={2}
-                maxLength={500}
-                defaultValue={v.note}
-                className={field}
-              />
-            </label>
-          </div>
-          {state.error && (
-            <p role="alert" className="mt-4 font-medium text-alert">
-              {state.error}
-            </p>
-          )}
-          <button
-            disabled={pending}
-            className="mt-5 rounded-full bg-pine-900 px-8 py-3 font-semibold text-white hover:bg-pine-700 disabled:opacity-60"
-          >
-            {pending ? "Booking…" : "Confirm and get my serial"}
-          </button>
-        </Step>
-      )}
-    </form>
-  );
+const field="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-pine-500 focus:ring-4 focus:ring-pine-100";
+function Panel({number,title,icon,done,children,lang="en",completeLabel="Complete",stepLabel="STEP"}){const Icon=icon;return <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,45,35,.035)]"><div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6"><span className={`grid size-9 place-items-center rounded-xl ${done?"bg-pine-800 text-white":"bg-pine-50 text-pine-800"}`}>{done?<CheckCircle2 size={18}/>:<Icon size={18}/>}</span><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">{stepLabel} {number}</p><h2 className="text-sm font-bold text-slate-900 sm:text-base">{title}</h2></div>{done&&<span className="ml-auto text-[11px] font-bold text-pine-700">{completeLabel}</span>}</div><div className="p-5 sm:p-6">{children}</div></section>}
+export default function AppointmentForm({doctors,selected,minDate,maxDate,lang="en",t}){
+ const copy=t||{};
+ const [state,action,pending]=useActionState(bookAppointment,{});
+ const [q,setQ]=useState("");
+ const [doctor,setDoctor]=useState(doctors.find(d=>d.slug===selected)||null);
+ const [availability,setAvailability]=useState({status:"idle",days:[]});
+ const [date,setDate]=useState("");
+ const [patient,setPatient]=useState({name:state.values?.name||"",phone:state.values?.phone||"",note:state.values?.note||""});
+ const matches=useMemo(()=>doctors.filter(d=>`${d.name} ${d.department} ${d.unit}`.toLowerCase().includes(q.toLowerCase())).slice(0,40),[doctors,q]);
+ useEffect(()=>{if(!doctor)return;let active=true;setDate("");setAvailability({status:"loading",days:[]});fetch(`/api/availability?doctor=${encodeURIComponent(doctor.slug)}`,{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("availability");return r.json()}).then(days=>{if(active)setAvailability({status:"ready",days:Array.isArray(days)?days:[]})}).catch(()=>{if(active)setAvailability({status:"error",days:[]})});return()=>{active=false}},[doctor]);
+ const day=availability.days.find(a=>a.date===date);
+ const canSubmit=!!doctor&&!!date&&patient.name.trim().length>=3&&/^(?:\+?88)?01[3-9]\d{8}$/.test(patient.phone.replace(/[\s-]/g,""));
+ const bn=lang==="bn";
+ const digits=(value)=>new Intl.NumberFormat(bn?"bn-BD":"en-US",{useGrouping:false}).format(value);
+ const tomorrowDate=new Date(new Date(`${minDate}T12:00:00+06:00`).getTime()+86400000).toISOString().slice(0,10);
+ const dateLabel=(value)=>{if(value===minDate)return copy.today;if(value===tomorrowDate)return copy.tomorrow;return new Intl.DateTimeFormat(bn?"bn-BD":"en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"Asia/Dhaka"}).format(new Date(`${value}T12:00:00+06:00`))};
+ const update=(key,value)=>setPatient(p=>({...p,[key]:value}));
+ const days=availability.days.filter(a=>!maxDate||a.date<=maxDate);
+ return <form action={action} className="space-y-5">
+  <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true"/>
+  <input type="hidden" name="doctor" value={doctor?.slug||""}/><input type="hidden" name="date" value={date}/>
+  <Panel number="01" title={copy.stepDoctor} icon={Stethoscope} done={!!doctor} lang={lang} completeLabel={copy.complete} stepLabel={copy.stepLabel}>
+   {doctor?<div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-pine-50/80 p-4"><div className="flex items-center gap-3"><span className="grid size-12 place-items-center rounded-xl bg-white font-serif text-lg font-semibold text-pine-800">{doctor.name.split(/\s+/).filter(w=>! /^(dr|prof|professor)\.?$/i.test(w)).slice(0,2).map(w=>w[0]).join("")}</span><div><p className="font-bold text-slate-900">{doctor.name}</p><p className="mt-0.5 text-xs text-pine-700">{doctor.department}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-slate-500"><MapPin size={12}/>{doctor.unit.replace("Ibn Sina ","")}</p></div></div><button type="button" onClick={()=>{setDoctor(null);setAvailability({status:"idle",days:[]});setDate("")}} className="rounded-full border border-pine-200 bg-white px-4 py-2 text-xs font-bold text-pine-800 hover:bg-pine-100">{copy.changeDoctor}</button></div>:<><label className="relative block"><Search size={17} className="absolute left-3.5 top-3.5 text-slate-400"/><input value={q} onChange={e=>setQ(e.target.value)} placeholder={copy.searchDoctor} aria-label={copy.searchDoctor} className={`${field} !mt-0 pl-10`}/></label><p className="mt-3 text-xs text-slate-500">{copy.chooseDoctor}</p><div className="mt-2 grid max-h-[390px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">{matches.map(d=><button type="button" key={d.slug} onClick={()=>setDoctor(d)} className="group flex min-w-0 items-start gap-3 rounded-xl border border-slate-200 p-3 text-left transition hover:border-pine-300 hover:bg-pine-50"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-slate-100 font-serif font-semibold text-pine-800 group-hover:bg-white">{d.name.split(/\s+/).filter(w=>! /^(dr|prof|professor)\.?$/i.test(w)).slice(0,2).map(w=>w[0]).join("")}</span><span className="min-w-0"><span className="block truncate text-xs font-bold text-slate-900">{d.name}</span><span className="mt-1 block text-[11px] text-pine-700">{d.department}</span><span className="mt-1 block truncate text-[10px] text-slate-400">{d.unit.replace("Ibn Sina ","")}</span></span></button>)}</div>{!matches.length&&<p className="mt-4 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{copy.noDoctor}</p>}</>}
+  </Panel>
+  {doctor&&<Panel number="02" title={copy.stepDate} icon={CalendarDays} done={!!date} lang={lang} completeLabel={copy.complete} stepLabel={copy.stepLabel}>
+   {availability.status==="loading"&&<p className="flex items-center gap-2 text-sm text-slate-500"><span className="size-4 animate-spin rounded-full border-2 border-pine-200 border-t-pine-700"/>{copy.loadingAvailability}</p>}
+   {availability.status==="error"&&<div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-4"><p className="flex items-center gap-2 text-sm font-semibold text-amber-900"><AlertCircle size={17}/>{copy.availabilityError}</p><button type="button" onClick={()=>setDoctor({...doctor})} className="mt-3 inline-flex items-center gap-2 text-xs font-bold text-amber-900 underline"><RefreshCw size={13}/>{copy.retry}</button></div>}
+   {availability.status==="ready"&&<><div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{days.map(a=><button type="button" key={a.date} disabled={a.closed||!a.left} onClick={()=>setDate(a.date)} aria-pressed={date===a.date} className={`rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:bg-slate-50 disabled:opacity-55 ${date===a.date?"border-pine-700 bg-pine-50 ring-2 ring-pine-700/15":"border-slate-200 hover:border-pine-300 hover:bg-pine-50/60"}`}><span className="block text-xs font-bold text-slate-900">{dateLabel(a.date)}</span><span className={`mt-1 block text-[10px] font-semibold ${a.left&&a.left<8?"text-amber-700":"text-slate-500"}`}>{a.unscheduled?copy.notScheduled:a.closedReason==="closed"?copy.sessionClosed:a.left?`${digits(a.left)} ${copy.seatsLeft}`:copy.fullyBooked}</span></button>)}</div>{day&&day.left>0&&<div role="status" className="mt-4 rounded-xl bg-pine-950 p-4 text-white"><div className="grid grid-cols-2 gap-4"><div><p className="text-[10px] font-semibold uppercase tracking-wider text-pine-200">{copy.serialEstimate}</p><p className="mt-1 font-serif text-2xl">#{digits(day.next)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wider text-pine-200">{copy.estimatedTime}</p><p className="mt-1 inline-flex items-center gap-1.5 font-serif text-xl"><Clock3 size={17}/>{day.etaAt?fmtTime(day.etaAt):"—"}</p></div></div>{day.delayMin>0&&<p className="mt-3 border-t border-white/15 pt-3 text-xs text-pine-100">{copy.runningLate} {digits(day.delayMin)} {copy.minutes}.</p>}</div>}</>}
+  </Panel>}
+  {doctor&&date&&<Panel number="03" title={copy.stepDetails} icon={UserRound} done={false} lang={lang} completeLabel={copy.complete} stepLabel={copy.stepLabel}>
+   <div className="grid gap-4 sm:grid-cols-2"><label className="block text-xs font-bold text-slate-700">{copy.patientName}<input name="name" required minLength={3} maxLength={100} autoComplete="name" value={patient.name} onChange={e=>update("name",e.target.value)} className={field} placeholder={bn?"রোগীর নাম লিখুন":"Enter patient name"}/>{patient.name.length>0&&patient.name.trim().length<3&&<span className="mt-1 block text-[11px] font-medium text-rose-600">{copy.formNameError}</span>}</label><label className="block text-xs font-bold text-slate-700">{copy.mobile}<input name="phone" required type="tel" inputMode="tel" autoComplete="tel" value={patient.phone} onChange={e=>update("phone",e.target.value)} className={field} placeholder={copy.mobilePlaceholder}/>{patient.phone.length>0&&!/^(?:\+?88)?01[3-9]\d{8}$/.test(patient.phone.replace(/[\s-]/g,""))&&<span className="mt-1 block text-[11px] font-medium text-rose-600">{copy.formPhoneError}</span>}</label><label className="block text-xs font-bold text-slate-700 sm:col-span-2">{copy.noteLabel}<textarea name="note" rows={3} maxLength={500} value={patient.note} onChange={e=>update("note",e.target.value)} placeholder={copy.notePlaceholder} className={`${field} resize-y`}/></label></div>
+   <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">{copy.bookingSummary}</p><div className="mt-3 grid gap-3 text-xs sm:grid-cols-2"><div><span className="block text-slate-400">{copy.doctorLabel}</span><b className="mt-1 block text-slate-800">{doctor.name}</b></div><div><span className="block text-slate-400">{copy.specialtyLabel}</span><b className="mt-1 block text-slate-800">{doctor.department}</b></div><div><span className="block text-slate-400">{copy.branchLabel}</span><b className="mt-1 block text-slate-800">{doctor.unit}</b></div><div><span className="block text-slate-400">{copy.dateLabel}</span><b className="mt-1 block text-slate-800">{dateLabel(date)} · {day?.etaAt?fmtTime(day.etaAt):""}</b></div><div><span className="block text-slate-400">{copy.patientName}</span><b className="mt-1 block text-slate-800">{patient.name||"—"}</b></div><div><span className="block text-slate-400">{copy.mobile}</span><b className="mt-1 block text-slate-800">{patient.phone||"—"}</b></div></div></div>
+   {state.error&&<p role="alert" className="mt-4 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-700"><AlertCircle size={16} className="shrink-0"/>{state.error}</p>}
+   <button type="submit" disabled={pending||!canSubmit} className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-pine-800 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-pine-900/10 transition hover:bg-pine-700 disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto">{pending?copy.booking:copy.confirmBooking}<ArrowRight size={16}/></button><p className="mt-3 flex items-center gap-1.5 text-[10px] text-slate-400"><ShieldCheck size={13}/>{copy.appointmentSecure}</p>
+  </Panel>}
+  {!doctor&&<div className="flex items-start gap-3 rounded-2xl border border-pine-100 bg-pine-50/70 p-4 text-xs leading-5 text-pine-900"><ShieldCheck size={17} className="mt-0.5 shrink-0"/>{copy.appointmentSecure}</div>}
+ </form>
 }

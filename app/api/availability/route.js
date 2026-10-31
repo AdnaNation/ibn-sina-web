@@ -7,7 +7,7 @@ export async function GET(req) {
   const doctor = new URL(req.url).searchParams.get("doctor") || "";
   if (!/^[a-z0-9-]+$/.test(doctor))
     return NextResponse.json([], { status: 400 });
-  return NextResponse.json(await getAvailability(doctor), {
-    headers: { "Cache-Control": "no-store" },
-  });
+  const availability = await getAvailability(doctor, 15);
+  if (!availability) return NextResponse.json({ error: "availability_unavailable" }, { status: 503, headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(availability, { headers: { "Cache-Control": "no-store" } });
 }

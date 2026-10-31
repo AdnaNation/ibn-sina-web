@@ -1,64 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import {notFound} from "next/navigation";
+import {MapPin,Phone,ArrowUpRight,Building2,CalendarDays} from "lucide-react";
 import DoctorCard from "@/components/DoctorCard";
-import { getUnit, getDoctorsByArea } from "@/lib/data";
-
-export async function generateMetadata({ params }) {
-  const u = await getUnit((await params).slug);
-  return {
-    title: u ? `${u.name}, ${u.area} | Ibn Sina Trust` : "Unit not found",
-  };
-}
-
-export default async function UnitPage({ params }) {
-  const unit = await getUnit((await params).slug);
-  if (!unit) notFound();
-  const doctors = await getDoctorsByArea(unit.area);
-
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-14">
-      <Link href="/units" className="text-sm font-semibold text-pine-700">
-        All units
-      </Link>
-      <h1 className="mt-4 font-serif text-4xl md:text-5xl text-pine-900">
-        {unit.name}, {unit.area}
-      </h1>
-      <p className="mt-2 text-ink/70">
-        {unit.type} in {unit.city}. Hotline{" "}
-        <a href={`tel:${unit.hotline}`} className="font-semibold text-pine-700">
-          {unit.hotline}
-        </a>
-      </p>
-      <div className="mt-6 flex gap-3">
-        <Link
-          href="/appointment"
-          className="rounded-full bg-pine-900 px-6 py-2.5 font-semibold text-white hover:bg-pine-700"
-        >
-          Book an appointment
-        </Link>
-        <a
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full border border-pine-700 px-6 py-2.5 font-semibold text-pine-800 hover:bg-pine-50"
-          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${unit.name} ${unit.area} ${unit.city}`)}`}
-        >
-          Directions
-        </a>
-      </div>
-
-      <h2 className="mt-14 font-serif text-3xl text-pine-900">Doctors here</h2>
-      {doctors.length ? (
-        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {doctors.map((d) => (
-            <DoctorCard key={d.slug} d={d} />
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-4 text-ink/70">
-          The doctor list for this unit is being added. Call {unit.hotline} for
-          today’s schedule.
-        </p>
-      )}
-    </div>
-  );
-}
+import {getUnit,getAllDoctors} from "@/lib/data";
+import {getT} from "@/lib/i18n";
+export async function generateMetadata({params}){const u=await getUnit((await params).slug);return {title:u?`${u.name}, ${u.area} | Ibn Sina Trust`:"Unit not found"}}
+export default async function UnitPage({params}){const [unit,{t}]=await Promise.all([getUnit((await params).slug),getT()]);if(!unit)notFound();const doctors=(await getAllDoctors()).filter(d=>d.unit===unit.name);return <div className="min-h-screen bg-[#f6f9f7]"><div className="bg-pine-950 text-white"><div className="mx-auto max-w-7xl px-4 py-12 md:py-16"><Link href="/units" className="inline-flex items-center gap-2 text-xs font-semibold text-pine-200 hover:text-white"><ArrowUpRight size={14}/>{t.allBranches}</Link><div className="mt-7 flex flex-wrap items-end justify-between gap-6"><div><span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold text-pine-100"><Building2 size={14}/>{unit.type}</span><h1 className="mt-4 max-w-3xl font-serif text-3xl md:text-5xl">{unit.name}, {unit.area}</h1><p className="mt-3 flex items-center gap-2 text-sm text-pine-100/75"><MapPin size={15}/>{unit.city}</p></div><div className="flex flex-wrap gap-3"><a href={`tel:${unit.hotline}`} className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-pine-950"><Phone size={16}/>{t.callBranch}</a><Link href="/appointment" className="inline-flex items-center gap-2 rounded-full bg-[#d5aa62] px-5 py-3 text-sm font-bold text-pine-950"><CalendarDays size={16}/>{t.book}</Link></div></div></div></div><div className="mx-auto max-w-7xl px-4 py-12"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-pine-700">{t.doctorSectionEyebrow}</p><h2 className="mt-2 font-serif text-3xl text-pine-950">{t.doctorsAtUnit}</h2><p className="mt-2 text-sm text-slate-500">{t.doctorsAtUnitIntro}</p></div><a target="_blank" rel="noopener noreferrer" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${unit.name} ${unit.area} ${unit.city}`)}`} className="inline-flex items-center gap-2 rounded-full border border-pine-200 bg-white px-5 py-3 text-xs font-bold text-pine-800"><MapPin size={15}/>{t.directions}<ArrowUpRight size={14}/></a></div>{doctors.length?<ul className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{doctors.map(d=><DoctorCard key={d.slug} d={d}/>)}</ul>:<div className="mt-7 rounded-2xl border border-slate-200 bg-white p-7 text-sm leading-7 text-slate-500">{t.doctorListPending} <a href={`tel:${unit.hotline}`} className="font-bold text-pine-800">{unit.hotline}</a></div>}</div></div>}

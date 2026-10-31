@@ -1,28 +1,8 @@
+import {ShieldCheck, Phone, CalendarDays, ClipboardCheck, HeartPulse} from "lucide-react";
 import AppointmentForm from "./AppointmentForm";
-import { getAllDoctors } from "@/lib/data";
-import { todayDhaka } from "@/lib/time";
-
-export const metadata = { title: "Book an appointment | Ibn Sina Trust" };
-export const dynamic = "force-dynamic";
-
-export default async function AppointmentPage({ searchParams }) {
-  const { doctor } = await searchParams;
-  const doctors = await getAllDoctors();
-  return (
-    <div className="max-w-3xl px-4 mx-auto py-14">
-      <h1 className="font-serif text-4xl md:text-5xl text-pine-900">
-        Book an appointment
-      </h1>
-      <p className="mt-3 mb-10 text-ink/70">
-        You get a serial number straight away and can follow the queue live from
-        home. In an emergency, call 10615.
-      </p>
-      <AppointmentForm
-        doctors={doctors}
-        selected={doctor}
-        minDate={todayDhaka()}
-        maxDate={todayDhaka(14)}
-      />
-    </div>
-  );
-}
+import {getAllDoctors} from "@/lib/data";
+import {todayDhaka} from "@/lib/time";
+import {getT} from "@/lib/i18n";
+export const metadata={title:"Book an appointment | Ibn Sina Trust",description:"Find a doctor and book an appointment at an Ibn Sina Trust location."};
+export const dynamic="force-dynamic";
+export default async function AppointmentPage({searchParams}){const [{doctor},doctors,{t,lang}]=await Promise.all([searchParams,getAllDoctors(),getT()]);return <div className="min-h-screen bg-[#f5f8f6]"><div className="relative overflow-hidden bg-pine-950 text-white"><div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(53,155,116,.3),transparent_35%)]"/><div className="relative mx-auto max-w-7xl px-4 py-12 md:py-16"><div className="max-w-3xl"><span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-pine-100"><CalendarDays size={14}/>{t.appointmentEyebrow}</span><h1 className="mt-5 font-serif text-4xl font-medium tracking-tight md:text-5xl">{t.appointmentTitle}</h1><p className="mt-4 max-w-2xl text-sm leading-7 text-pine-100/75 md:text-base">{t.appointmentIntro}</p></div><div className="mt-8 flex flex-wrap gap-5 text-xs font-medium text-pine-100/80"><span className="inline-flex items-center gap-2"><ShieldCheck size={15}/>{t.appointmentSecure}</span><a href="tel:10615" className="inline-flex items-center gap-2 hover:text-white"><Phone size={15}/>{t.emergencyHelp}: 10615</a></div></div></div><div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 pb-16 lg:grid-cols-[minmax(0,1fr)_320px] lg:py-12"><div className="min-w-0"><AppointmentForm doctors={doctors} selected={doctor} minDate={todayDhaka()} maxDate={todayDhaka(14)} lang={lang} t={Object.fromEntries(Object.entries(t).filter(([key,value])=>typeof value === "string"))}/></div><aside className="space-y-4 lg:sticky lg:top-32 lg:self-start"><div className="rounded-3xl border border-pine-100 bg-white p-6 shadow-sm"><span className="grid size-11 place-items-center rounded-2xl bg-pine-50 text-pine-800"><HeartPulse size={22}/></span><h2 className="mt-4 font-serif text-2xl text-pine-950">{t.bookingSummary}</h2><p className="mt-2 text-sm leading-6 text-slate-500">{t.appointmentIntro}</p><div className="mt-5 space-y-3 border-t border-slate-100 pt-5 text-xs text-slate-500"><p className="flex items-start gap-2"><ShieldCheck size={15} className="mt-0.5 text-pine-700"/>{t.appointmentSecure}</p><p className="flex items-start gap-2"><ClipboardCheck size={15} className="mt-0.5 text-pine-700"/>{t.appointmentConfirmedOnly}</p></div></div><div className="rounded-3xl bg-[#e9f3ed] p-6"><p className="text-xs font-bold uppercase tracking-[.15em] text-pine-700">{t.patientSupport}</p><h3 className="mt-2 font-serif text-2xl text-pine-950">{t.needHelp||"Need help booking?"}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{t.bannerSub}</p><a href="tel:10615" className="mt-5 inline-flex items-center gap-2 rounded-full bg-pine-800 px-5 py-3 text-sm font-bold text-white hover:bg-pine-700"><Phone size={15}/>10615</a></div><p className="px-2 text-[11px] leading-5 text-slate-400">{t.emergencyDisclaimer}</p></aside></div></div>}
