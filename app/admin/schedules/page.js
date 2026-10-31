@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
-import { getSession } from "@/lib/auth";
+import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getAllDoctors } from "@/lib/data";
 import { getScheduleList } from "@/lib/queue";
 import { todayDhaka, fmtDate } from "@/lib/time";
@@ -27,14 +27,15 @@ const statusText = {
 
 export default async function ScheduleManager({ searchParams }) {
   const p = await getSession();
-  if (p?.role !== "owner") redirect(p ? "/admin/queue" : "/admin/login");
+  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) redirect(p ? "/admin/queue" : "/admin/login");
   const sp = await searchParams;
   const from = todayDhaka();
   const to = todayDhaka(14);
   const [doctors, schedules] = await Promise.all([
     getAllDoctors(),
-    getScheduleList(from, to),
+    getScheduleList(from, to, p),
   ]);
+  const branchDoctors = doctors.filter((d) => p.role === "owner" || d.unit === p.unit);
   const grouped = (schedules || []).reduce((acc, item) => {
     (acc[item.date] ||= []).push(item);
     return acc;
@@ -46,8 +47,8 @@ export default async function ScheduleManager({ searchParams }) {
       <main className="mx-auto max-w-6xl px-4 py-8 md:py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">Owner workspace</p>
-            <h1 className="mt-2 font-serif text-3xl text-pine-950 md:text-4xl">Doctor schedules</h1>
+            <p className="text-xs font-bold uppercase tracking-[.22em] text-emerald-700">{p.role === "owner" ? "Main admin workspace" : "Branch admin workspace"}</p>
+            <h1 className="mt-2 font-serif text-3xl text-pine-950 md:text-4xl">{p.role === "owner" ? "All branch doctor schedules" : "Branch doctor schedules"}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/65">Publish consultation sessions before patients book. Only published dates appear as available on the public appointment page.</p>
           </div>
           <Link href="/admin/queue" className="rounded-full border border-pine-200 px-5 py-3 text-sm font-semibold text-pine-800 transition hover:bg-pine-50">Open live queue <span aria-hidden="true">↗</span></Link>
@@ -66,14 +67,14 @@ export default async function ScheduleManager({ searchParams }) {
                 <p className="text-xs text-ink/60">Available for the next 14 days</p>
               </div>
             </div>
-            {!doctors.length ? (
+            {!branchDoctors.length ? (
               <p className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">No doctors are available in the directory. Add doctor records before publishing schedules.</p>
             ) : (
               <form action={publishScheduleAction} className="mt-6 space-y-4">
                 <label className="block text-sm font-semibold text-pine-900">Doctor
                   <select name="doctorSlug" required defaultValue="" className={field}>
                     <option value="" disabled>Select a doctor</option>
-                    {doctors.map((d) => <option key={d.slug} value={d.slug}>{d.name} · {d.department} · {d.unit}</option>)}
+                    {branchDoctors.map((d) => <option key={d.slug} value={d.slug}>{d.name} · {d.department} · {d.unit}</option>)}
                   </select>
                 </label>
                 <div className="grid grid-cols-2 gap-3">

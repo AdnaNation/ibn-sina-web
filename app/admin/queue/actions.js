@@ -1,6 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { getSession, canSee, canDoctor } from "@/lib/auth";
+import { getSession, canSee, canDoctor, hasPermission } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
 import {
   advance,
@@ -19,12 +19,12 @@ const done = () => revalidatePath("/admin/queue");
 async function guard(key) {
   const p = await getSession();
   const s = p && (await sessionDoc(key));
-  if (!p || !s || !canSee(p, s)) throw new Error("Not allowed");
+  if (!p || !hasPermission(p, "queue.manage") || !s || !canSee(p, s)) throw new Error("Not allowed");
 }
 async function guardDoctor(slug) {
   const p = await getSession();
   const doctor = p && (await getDoctor(slug));
-  if (!p || !doctor || !canDoctor(p, doctor)) throw new Error("Not allowed");
+  if (!p || !hasPermission(p, "queue.manage") || !doctor || !canDoctor(p, doctor)) throw new Error("Not allowed");
   return doctor;
 }
 

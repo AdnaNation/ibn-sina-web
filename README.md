@@ -43,10 +43,10 @@ npm run seed
 - `/appointment` — doctor/date/patient appointment flow
 - `/track` and `/track/[ref]` — appointment tracking
 - `/live` — public live queue
-- `/admin` — owner overview
-- `/admin/schedules` — publish and manage doctor sessions (owner only)
+- `/admin` — Main Admin overview or staff landing page
+- `/admin/schedules` — publish and manage doctor sessions (Main Admin across all branches; authorized branch users within their branch)
 - `/admin/queue` — live patient queue console
-- `/admin/staff` — branch and doctor staff accounts (owner only)
+- `/admin/staff` — Main Admin creates branch admins/staff; Branch Admin creates staff for their own branch
 
 ## Appointment safety notes
 
@@ -63,3 +63,41 @@ Sign in as the owner and open **Admin → Schedules**. Choose a doctor, consulta
 An unused future session can be removed. A session with issued serials or an active consultation cannot be removed from the schedule manager; manage it from the queue console instead. This avoids silently deleting or invalidating patient tickets.
 
 The `sessions` collection is the source of published appointment availability. The booking flow still enforces the published session and assigns serials atomically. Before going live, the hospital should verify every doctor, branch, clinic hour, capacity, and estimated consultation duration.
+
+## Multi-branch administration and permissions
+
+The administration area now supports a three-level account hierarchy:
+
+1. **Main Admin (`owner`)** — signs in with username `admin` and `ADMIN_PASSWORD`. Can view the organization-wide overview, publish schedules across branches, and create branch administrators or branch staff.
+2. **Branch Admin (`branch_admin`)** — created by the Main Admin and assigned to one exact branch/unit. Can manage schedules and the queue for that branch, and create/remove staff accounts only inside that same branch. A branch admin cannot create another branch admin or access another branch by changing a URL.
+3. **Branch Staff (`staff`)** — created by their Branch Admin. The Branch Admin chooses an individual permission set when creating the account. The staff member is restricted to the assigned branch.
+
+Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. Select the branch and account type. For a Branch Admin, the system grants the full branch-admin role. To create staff, select the individual permissions such as viewing appointments, operating the live queue, or managing schedules. A Branch Admin sees only their own branch and creates staff with that branch preselected and locked.
+
+### Permission keys
+
+- `appointments.view` — view appointment information
+- `appointments.manage` — create/update appointments
+- `patients.view` — view patient details
+- `queue.manage` — use the live queue console and its server actions
+- `schedules.manage` — publish/remove schedules within the assigned branch
+- `doctors.view` — view branch doctor information
+- `reports.view` — view branch reports
+- `billing.view` / `billing.manage` — billing access levels
+
+The current project has live UI/server-side enforcement for queue and schedule access. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
+
+Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permission changes take effect after the user signs in again because the signed session contains a permission snapshot.
+
+For production, add an audited account-edit/deactivation workflow, enforce password reset on first login, add login rate limiting and MFA, and test cross-branch access using separate staging accounts before onboarding real staff.
+
+
+## Main Admin: branch management, accounts and audit trail
+
+The Main Admin dashboard at `/admin` now shows organization-wide counts and a branch-wise operational table for today's doctors, active branch admins, active staff, bookings, waiting patients and completed consultations. Use `/admin/branches` to create a new branch, activate/deactivate existing branches, and activate/deactivate branch administrator accounts. Branch creation writes to the MongoDB `units` collection using the same `{ slug, name, area, city, type, hotline, address, active }` shape used by the public branch directory. Existing branches without an `active` field are treated as active for backward compatibility.
+
+Account status is stored on the `staff` document as `active`. Deactivation does not delete staff or patient data. Staff sessions are revalidated against the current account and branch status on each server request, so a deactivated account or a deactivated branch loses access without waiting for the signed cookie to expire. Branch admins can activate/deactivate their own branch's staff from `/admin/staff`; only the Main Admin can manage branch-admin accounts.
+
+The Main Admin audit trail is at `/admin/audit`. It records branch creation/status changes and staff account creation/status changes in the MongoDB `audit_logs` collection. It currently shows the newest 200 events and supports an action-name filter. The audit log is an application-level activity trail, not a tamper-proof regulatory audit system; production deployment should restrict database write access and configure backups/retention.
+
+The public navigation now uses native anchor navigation for page links instead of client-side route transitions. This trades a small full-page navigation reload for predictable navigation, including on mobile menus and hash links such as Services.

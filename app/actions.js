@@ -1,13 +1,8 @@
 "use server";
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { logout } from "@/lib/auth";
 
-export async function setLang(fd) {
-  const lang = fd.get("lang") === "bn" ? "bn" : "en";
-  (await cookies()).set("lang", lang, {
-    path: "/",
-    maxAge: 31536000,
-    sameSite: "lax",
-  });
-  revalidatePath("/", "layout");
+export async function logoutAction() {
+  await logout();
+  redirect("/admin/login");
 }

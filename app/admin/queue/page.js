@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import AdminNav from "@/components/AdminNav";
 import AutoRefresh from "@/components/AutoRefresh";
-import { getSession, canDoctor } from "@/lib/auth";
+import { getSession, canDoctor, hasPermission } from "@/lib/auth";
 import { getConsole } from "@/lib/queue";
 import { getAllDoctors } from "@/lib/data";
 import { todayDhaka } from "@/lib/time";
@@ -43,6 +43,7 @@ const CHIP = {
 export default async function QueueConsole({ searchParams }) {
   const p = await getSession();
   if (!p) redirect("/admin/login");
+  if (!hasPermission(p, "queue.manage")) redirect("/admin/login");
   const sp = await searchParams;
   const date = /^\d{4}-\d{2}-\d{2}$/.test(sp.date || "")
     ? sp.date

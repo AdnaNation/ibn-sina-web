@@ -3,9 +3,10 @@ import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import AdminNav from "@/components/AdminNav";
 import AutoRefresh from "@/components/AutoRefresh";
-import { getSession } from "@/lib/auth";
+import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getStats, loadDemo } from "@/lib/queue";
 import { todayDhaka } from "@/lib/time";
+import { getOrganizationStats } from "@/lib/management";
 
 export const dynamic = "force-dynamic";
 
@@ -19,8 +20,21 @@ const Tile = ({ n, label }) => (
 export default async function Overview() {
   const p = await getSession();
   if (!p) redirect("/admin/login");
-  if (p.role !== "owner") redirect("/admin/queue");
-  const st = await getStats(todayDhaka());
+  if (p.role !== "owner") {
+    if (isBranchAdmin(p) || hasPermission(p, "queue.manage")) redirect("/admin/queue");
+    if (hasPermission(p, "schedules.manage")) redirect("/admin/schedules");
+    return <>
+      <AdminNav p={p} current="/admin" />
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">Staff workspace</p>
+        <h1 className="mt-2 font-serif text-3xl text-pine-900">Welcome, {p.name}</h1>
+        <p className="mt-2 text-ink/70">Your account is limited to {p.scope || "your assigned branch"}. The following permissions have been assigned to you.</p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">{(p.permissions || []).map((permission) => <div key={permission} className="rounded-xl border border-pine-100 bg-white p-4 text-sm font-semibold text-pine-800">{permission.replaceAll(".", " · ").replaceAll("_", " ")}</div>)}</div>
+        {!p.permissions?.length && <p className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">No modules have been assigned. Contact your branch administrator.</p>}
+      </main>
+    </>;
+  }
+  const [st, org] = await Promise.all([getStats(todayDhaka()), getOrganizationStats(todayDhaka())]);
 
   async function demo() {
     "use server";
@@ -37,15 +51,23 @@ export default async function Overview() {
         <AutoRefresh every={15000} />
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">Hospital administration</p>
-            <h1 className="mt-2 font-serif text-3xl text-pine-900">Today at a glance</h1>
+            <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">Organization-wide control center</p>
+            <h1 className="mt-2 font-serif text-3xl text-pine-900">Main Admin Dashboard</h1>
+            <p className="mt-1 text-sm text-ink/60">All branches · {todayDhaka()} · Bangladesh time</p>
           </div>
-          <Link href="/admin/schedules" className="rounded-full bg-pine-900 px-5 py-3 text-sm font-semibold text-white hover:bg-pine-700">Manage doctor schedules</Link>
+          <div className="flex flex-wrap gap-2"><Link href="/admin/branches" className="rounded-full bg-pine-900 px-5 py-3 text-sm font-semibold text-white hover:bg-pine-700">Manage branches</Link><Link href="/admin/schedules" className="rounded-full border border-pine-200 px-5 py-3 text-sm font-semibold text-pine-900 hover:bg-pine-50">Manage schedules</Link></div>
         </div>
+        {org && <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          {[[org.totals.branches,"Branches"],[org.totals.activeBranches,"Active branches"],[org.totals.inactiveBranches,"Inactive branches"],[org.totals.activeBranchAdmins,"Active branch admins"],[org.totals.activeStaff,"Active staff"],[org.totals.doctors,"Doctors"],[org.totals.booked,"Today's bookings"],[org.totals.waiting,"Waiting patients"]].map(([n,l])=><div key={l} className="rounded-2xl border border-pine-100 bg-white p-4"><p className="font-serif text-3xl text-pine-900">{n}</p><p className="mt-1 text-[11px] text-ink/60">{l}</p></div>)}
+        </section>}
         {!st && (
           <p className="mt-4 text-alert">The database is not connected.</p>
         )}
 
+        {org && <section className="mt-8 rounded-2xl border border-pine-100 bg-white p-5">
+          <div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="font-serif text-2xl text-pine-900">Branch-wise performance</h2><p className="mt-1 text-xs text-ink/60">Live counts for today, grouped by branch</p></div><Link href="/admin/branches" className="text-sm font-bold text-emerald-800 underline underline-offset-4">Open branch workspace ↗</Link></div>
+          <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[720px] text-left text-sm"><thead><tr className="border-b border-pine-100 text-xs text-ink/50"><th className="py-3 pr-3">Branch</th><th className="py-3 pr-3">Status</th><th className="py-3 pr-3">Doctors</th><th className="py-3 pr-3">Admins</th><th className="py-3 pr-3">Staff</th><th className="py-3 pr-3">Booked</th><th className="py-3 pr-3">Waiting</th><th className="py-3">Seen</th></tr></thead><tbody>{org.branches.map(b=><tr key={b.slug} className="border-b border-pine-50 last:border-0"><td className="py-3 pr-3 font-semibold text-pine-950">{b.name}<span className="block text-xs font-normal text-ink/50">{b.area}, {b.city}</span></td><td className="py-3 pr-3"><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${b.active===false?"bg-rose-50 text-rose-700":"bg-emerald-50 text-emerald-800"}`}>{b.active===false?"Inactive":"Active"}</span></td><td className="py-3 pr-3">{b.doctors}</td><td className="py-3 pr-3">{b.activeAdmins}</td><td className="py-3 pr-3">{b.activeStaff}</td><td className="py-3 pr-3">{b.booked}</td><td className="py-3 pr-3">{b.waiting}</td><td className="py-3">{b.seen}</td></tr>)}</tbody></table></div>
+        </section>}
         {st && (
           <>
             <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -65,37 +87,7 @@ export default async function Overview() {
               />
             </div>
 
-            <section className="mt-8 rounded-2xl border border-pine-100 bg-white p-5">
-              <h2 className="font-semibold">By branch</h2>
-              {!st.branches.length && (
-                <p className="mt-3 text-ink/70">No bookings yet today.</p>
-              )}
-              <ul className="mt-4 space-y-4">
-                {st.branches.map((b) => (
-                  <li key={b.unit}>
-                    <p className="flex justify-between text-sm">
-                      <span>{b.unit.replace("Ibn Sina ", "")}</span>
-                      <span>
-                        {b.seen} seen of {b.booked}
-                      </span>
-                    </p>
-                    <div className="mt-1 h-3 overflow-hidden rounded-full bg-pine-50">
-                      <div
-                        className="h-full bg-pine-100"
-                        style={{ width: `${(b.booked / max) * 100}%` }}
-                      >
-                        <div
-                          className="h-full bg-pine-700"
-                          style={{
-                            width: `${b.booked ? (b.seen / b.booked) * 100 : 0}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
+
           </>
         )}
 
