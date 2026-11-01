@@ -1,59 +1,65 @@
-import { logoutAction } from "@/app/admin/actions";
-import { hasPermission, isBranchAdmin } from "@/lib/auth";
 import Link from "next/link";
+import { HeartPulse, LogOut, Languages } from "lucide-react";
+import { logoutAction } from "@/app/admin/actions";
+import { setLang } from "@/app/actions";
+import { hasPermission, isBranchAdmin } from "@/lib/auth";
+import { getAdmin } from "@/lib/adminT";
 
-export default function AdminNav({ p, current }) {
+export default async function AdminNav({ p, current }) {
+  const { tr, lang } = await getAdmin();
+  const owner = p.role === "owner";
+  const admin = owner || isBranchAdmin(p);
   const links = [
-    ...(p.role === "owner" ||
-    isBranchAdmin(p) ||
-    hasPermission(p, "queue.manage")
-      ? [["Queue", "/admin/queue"]]
-      : []),
-    ...(p.role === "owner"
-      ? [
-          ["Overview", "/admin"],
-          ["Branches", "/admin/branches"],
-          ["Audit log", "/admin/audit"],
-        ]
-      : []),
-    ...(p.role === "owner" ||
-    isBranchAdmin(p) ||
-    hasPermission(p, "schedules.manage")
-      ? [["Schedules", "/admin/schedules"]]
-      : []),
-    ...(p.role === "owner" || isBranchAdmin(p)
-      ? [["Users & permissions", "/admin/staff"]]
-      : []),
-  ];
+    owner && ["Overview", "/admin"],
+    (admin || hasPermission(p, "queue.manage")) && ["Queue", "/admin/queue"],
+    (admin || hasPermission(p, "appointments.view")) && ["Appointments", "/admin/appointments"],
+    (admin || hasPermission(p, "schedules.manage")) && ["Schedules", "/admin/schedules"],
+    (admin || hasPermission(p, "doctors.view")) && ["Doctors", "/admin/doctors"],
+    owner && ["Branches", "/admin/branches"],
+    admin && ["Users & permissions", "/admin/staff"],
+    owner && ["Audit log", "/admin/audit"],
+  ].filter(Boolean);
+  const roleLabel = owner ? "Main Admin" : isBranchAdmin(p) ? "Branch Admin" : "Staff";
+
   return (
-    <header className="border-b border-pine-100 bg-white">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <p className="text-sm">
-          <strong>{p.name}</strong>{" "}
-          <span className="text-ink/60">({p.scope})</span>
-        </p>
-        <nav
-          className="flex items-center gap-5 text-sm font-semibold"
-          aria-label="Admin"
-        >
-          {links.map(([l, h]) => (
-            <Link
-              key={h}
-              href={h}
-              className={
-                current === h
-                  ? "text-pine-900 underline underline-offset-8"
-                  : "text-pine-700"
-              }
-            >
-              {l}
-            </Link>
-          ))}
+    <header className="sticky top-0 z-40 border-b border-pine-100 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5">
+        <Link href={owner ? "/admin" : "/admin/queue"} className="flex min-w-0 items-center gap-2.5">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-pine-900 text-white"><HeartPulse size={19} /></span>
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate text-sm font-bold text-pine-950">{p.name}</span>
+            <span className="block truncate text-[11px] text-ink/60">{tr(roleLabel)}{p.scope ? ` · ${p.scope}` : ""}</span>
+          </span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-0.5 rounded-full bg-pine-50 p-0.5" role="group" aria-label="Language">
+            <Languages size={14} className="ml-2 text-pine-700" aria-hidden="true" />
+            {[["en", "EN"], ["bn", "বাংলা"]].map(([code, label]) => (
+              <form key={code} action={setLang}>
+                <input type="hidden" name="lang" value={code} />
+                <button aria-pressed={lang === code} className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${lang === code ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-white"}`}>{label}</button>
+              </form>
+            ))}
+          </div>
           <form action={logoutAction}>
-            <button className="text-ink/60 hover:text-ink">Sign out</button>
+            <button className="inline-flex items-center gap-1.5 rounded-full border border-pine-100 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:bg-pine-50">
+              <LogOut size={14} /> <span className="hidden sm:inline">{tr("Sign out")}</span>
+            </button>
           </form>
-        </nav>
+        </div>
       </div>
+      <nav aria-label="Admin" className="border-t border-pine-50">
+        <ul className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-3 py-1.5 text-sm font-semibold [scrollbar-width:none]">
+          {links.map(([label, href]) => (
+            <li key={href} className="shrink-0">
+              <Link href={href} aria-current={current === href ? "page" : undefined}
+                className={`block rounded-lg px-3.5 py-2 ${current === href ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-pine-50"}`}>
+                {tr(label)}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </header>
   );
 }

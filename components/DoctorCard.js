@@ -1,7 +1,44 @@
 import Link from "next/link";
-import {Phone,MapPin,ArrowUpRight,Stethoscope} from "lucide-react";
-import {getT} from "@/lib/i18n";
-const TITLE=/^(dr|prof|professor|asst|assist|assis|assoc|asso|pro|col|md|m)\.?$/i;
-const initials=(name)=>name.replace(/\(.*?\)/g,"").split(/\s+/).filter(w=>w&&!TITLE.test(w)).slice(0,2).map(w=>w[0].toUpperCase()).join("");
-export {initials};
-export default async function DoctorCard({d}){const {t}=await getT();return <li className="group flex min-h-[250px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgba(15,45,35,.035)] transition duration-300 hover:-translate-y-1 hover:border-pine-200 hover:shadow-[0_18px_45px_rgba(15,75,55,.10)]"><Link href={`/doctors/${d.slug}`} className="flex items-start gap-3.5">{d.photo?<img src={d.photo} alt={d.name} className="size-[62px] shrink-0 rounded-2xl object-cover"/>:<span className="grid size-[62px] shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pine-100 to-[#e6f2ec] font-serif text-xl font-semibold text-pine-800">{initials(d.name)}</span>}<span className="min-w-0"><span className="block text-[15px] font-bold leading-snug text-slate-900 transition group-hover:text-pine-800">{d.name}</span><span className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-pine-700"><Stethoscope size={13}/>{d.department}</span></span></Link><p className="mt-5 flex items-start gap-2 text-xs leading-5 text-slate-500"><MapPin size={15} className="mt-0.5 shrink-0 text-pine-600"/>{d.unit.replace("Ibn Sina ","")}</p><div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4"><a href={`tel:${d.phone||"10615"}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-pine-800"><Phone size={13}/>{d.phone||"10615"}</a><Link href={`/appointment?doctor=${d.slug}`} className="inline-flex items-center gap-1 rounded-full bg-pine-50 px-3.5 py-2 text-xs font-bold text-pine-800 transition hover:bg-pine-800 hover:text-white">{t.bookShort}<ArrowUpRight size={14}/></Link></div></li>}
+import { Phone, MapPin, ArrowUpRight, Stethoscope } from "lucide-react";
+import { getT } from "@/lib/i18n";
+import { deptName, shortUnit, doctorName } from "@/lib/bnData";
+
+const TITLE = /^(dr|prof|professor|asst|assist|assis|assoc|asso|pro|col|md|m)\.?$/i;
+export const initials = (name) =>
+  name.replace(/\(.*?\)/g, "").split(/\s+/).filter((w) => w && !TITLE.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+
+export default async function DoctorCard({ d }) {
+  const { t, lang, n } = await getT();
+  const name = doctorName(d, lang);
+  const phone = d.phone || "10615";
+  return (
+    <li className="group flex min-h-[250px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgba(15,45,35,.035)] transition duration-300 hover:-translate-y-1 hover:border-pine-200 hover:shadow-[0_18px_45px_rgba(15,75,55,.10)]">
+      <Link href={`/doctors/${d.slug}`} className="flex items-start gap-3.5">
+        {d.photo ? (
+          <img src={d.photo} alt={name} loading="lazy" className="size-[62px] shrink-0 rounded-2xl object-cover" />
+        ) : (
+          <span aria-hidden="true" className="grid size-[62px] shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-pine-100 to-[#e6f2ec] font-serif text-xl font-semibold text-pine-800">
+            {initials(d.name)}
+          </span>
+        )}
+        <span className="min-w-0">
+          <span className="block text-[15px] font-bold leading-snug text-slate-900 transition group-hover:text-pine-800">{name}</span>
+          <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-semibold text-pine-700">
+            <Stethoscope size={13} /> {deptName(d.department, lang)}
+          </span>
+        </span>
+      </Link>
+      <p className="mt-5 flex items-start gap-2 text-xs leading-5 text-slate-500">
+        <MapPin size={15} className="mt-0.5 shrink-0 text-pine-600" /> {shortUnit(d.unit, lang)}
+      </p>
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-slate-100 pt-4">
+        <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-pine-800">
+          <Phone size={13} /> {n(phone)}
+        </a>
+        <Link href={`/appointment?doctor=${d.slug}`} className="inline-flex items-center gap-1 rounded-full bg-pine-800 px-4 py-2 text-xs font-bold text-white transition hover:bg-pine-700">
+          {t.bookShort} <ArrowUpRight size={14} />
+        </Link>
+      </div>
+    </li>
+  );
+}

@@ -101,3 +101,21 @@ Account status is stored on the `staff` document as `active`. Deactivation does 
 The Main Admin audit trail is at `/admin/audit`. It records branch creation/status changes and staff account creation/status changes in the MongoDB `audit_logs` collection. It currently shows the newest 200 events and supports an action-name filter. The audit log is an application-level activity trail, not a tamper-proof regulatory audit system; production deployment should restrict database write access and configure backups/retention.
 
 The public navigation now uses native anchor navigation for page links instead of client-side route transitions. This trades a small full-page navigation reload for predictable navigation, including on mobile menus and hash links such as Services.
+
+## What changed in the redesign
+
+- **Bengali first.** The site opens in Bengali by default (English via the EN / বাংলা switch). Departments, branch names, places and numbers show in Bengali. A doctor can have an optional Bengali name (`nameBn`).
+- **Trust content.** New homepage sections: emergency notice, quick-access card, live numbers computed from your data (years of service, locations, cities, specialties), a three-step booking guide, "why patients trust us" and an FAQ. Review all wording with the Trust before launch.
+- **Mobile action bar** (Call / Book / Track / Live) for phone users.
+- **SEO**: titles, Open Graph, structured data, `robots.txt`, `sitemap.xml`, custom 404 and error pages.
+- **Admin portal** has its own layout (no public header/footer), a mobile-friendly navigation bar and a Bengali/English switch on every screen.
+- **New admin modules**: `/admin/appointments` (search, cancel, CSV export, phone masking unless `patients.view`) and `/admin/doctors` (add, edit, feature on homepage, delete when unused). New permission: `doctors.manage`.
+- **Security**: sign-in rate limiting (5 wrong tries per person, 20 per address, 10 minutes), sign-in success/failure in the audit log, demo mode off in production unless `ENABLE_DEMO=true`.
+- **Bug fixes**: branch pages never listed their doctors; missing `.env.example`; a permission check used a key that did not exist.
+
+## Before going live
+
+1. Admin → Doctors → Import starter doctors, then replace the sample list with the real, verified roster.
+2. Publish real schedules in Admin → Schedules.
+3. Rate limiting is in memory. On several server instances, move it to MongoDB or Redis, and add MFA for the Main Admin.
+4. Add a privacy notice and confirm wording such as "hotline open every day" with the Trust.

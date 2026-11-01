@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import AdminNav from "@/components/AdminNav";
 import AutoRefresh from "@/components/AutoRefresh";
+import { getAdmin } from "@/lib/adminT";
 import { getSession, canDoctor, hasPermission } from "@/lib/auth";
 import { getConsole } from "@/lib/queue";
 import { getAllDoctors } from "@/lib/data";
@@ -41,6 +42,7 @@ const CHIP = {
 };
 
 export default async function QueueConsole({ searchParams }) {
+  const { tr } = await getAdmin();
   const p = await getSession();
   if (!p) redirect("/admin/login");
   if (!hasPermission(p, "queue.manage")) redirect("/admin/login");
@@ -78,10 +80,10 @@ export default async function QueueConsole({ searchParams }) {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-serif text-3xl text-pine-900">
-              {date === todayDhaka() ? "Today’s queue" : `Queue for ${date}`}
+              {date === todayDhaka() ? tr("Today’s queue") : `Queue for ${date}`}
             </h1>
             <p className="text-sm text-ink/70">
-              This page updates by itself every few seconds.
+              {tr("This page updates by itself every few seconds.")}
             </p>
           </div>
           <form className="flex gap-2">
@@ -89,15 +91,15 @@ export default async function QueueConsole({ searchParams }) {
               type="date"
               name="date"
               defaultValue={date}
-              aria-label="Date"
+              aria-label={tr("Date")}
               className={input}
             />
-            <Btn>Show</Btn>
+            <Btn>{tr("Show")}</Btn>
           </form>
         </div>
 
         {sessions.length > 1 && (
-          <nav className="mt-6 flex flex-wrap gap-2" aria-label="Doctors">
+          <nav className="mt-6 flex flex-wrap gap-2" aria-label={tr("Doctors")}>
             {sessions.map((x) => (
               <Link
                 key={x.key}
@@ -112,8 +114,7 @@ export default async function QueueConsole({ searchParams }) {
 
         {!s && (
           <p className="mt-8 rounded-2xl bg-pine-50 p-6">
-            No queue is open for this date yet. Start one below, or it opens by
-            itself when the first patient books.
+            {tr("No queue is open for this date yet. Start one below, or it opens by itself when the first patient books.")}
           </p>
         )}
 
@@ -126,7 +127,7 @@ export default async function QueueConsole({ searchParams }) {
 
             <div className="mt-5 grid items-center gap-6 md:grid-cols-[auto_1fr]">
               <div className="rounded-2xl bg-pine-900 px-10 py-6 text-center text-white">
-                <p className="text-sm text-pine-100">With the doctor now</p>
+                <p className="text-sm text-pine-100">{tr("With the doctor now")}</p>
                 <p className="font-serif text-7xl leading-none">
                   {serving?.serial || "–"}
                 </p>
@@ -136,7 +137,7 @@ export default async function QueueConsole({ searchParams }) {
               </div>
 
               {over ? (
-                <p className="text-lg">This queue has ended for the day.</p>
+                <p className="text-lg">{tr("This queue has ended for the day.")}</p>
               ) : (
                 <div>
                   <form action={A.callNext}>
@@ -144,9 +145,9 @@ export default async function QueueConsole({ searchParams }) {
                     <Btn t="go" big disabled={!serving && waiting === 0}>
                       {serving
                         ? waiting
-                          ? "Finish this patient and call next"
-                          : "Finish this patient"
-                        : "Call next patient"}
+                          ? tr("Finish this patient and call next")
+                          : tr("Finish this patient")
+                        : tr("Call next patient")}
                     </Btn>
                   </form>
                   <p className="mt-2 text-sm text-ink/70">
@@ -159,9 +160,9 @@ export default async function QueueConsole({ searchParams }) {
                         <Key k={s.key} />
                         <Btn
                           t="warn"
-                          title="Use this if the patient did not come when called"
+                          title={tr("Use this if the patient did not come when called")}
                         >
-                          Patient did not come
+                          {tr("Patient did not come")}
                         </Btn>
                       </form>
                     )}
@@ -169,7 +170,7 @@ export default async function QueueConsole({ searchParams }) {
                       <form action={A.setStatus}>
                         <Key k={s.key} />
                         <input type="hidden" name="status" value="break" />
-                        <Btn>Doctor is on a break</Btn>
+                        <Btn>{tr("Doctor is on a break")}</Btn>
                       </form>
                     )}
                     {s.status === "break" && (
@@ -180,7 +181,7 @@ export default async function QueueConsole({ searchParams }) {
                           name="status"
                           value="in_progress"
                         />
-                        <Btn t="go">Doctor is back</Btn>
+                        <Btn t="go">{tr("Doctor is back")}</Btn>
                       </form>
                     )}
                     {s.status === "scheduled" && (
@@ -191,7 +192,7 @@ export default async function QueueConsole({ searchParams }) {
                           name="status"
                           value="in_progress"
                         />
-                        <Btn t="go">Doctor has arrived</Btn>
+                        <Btn t="go">{tr("Doctor has arrived")}</Btn>
                       </form>
                     )}
                   </div>
@@ -202,10 +203,9 @@ export default async function QueueConsole({ searchParams }) {
             {!over && (
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl bg-pine-50 p-4">
-                  <h3 className="font-semibold">Is the doctor late?</h3>
+                  <h3 className="font-semibold">{tr("Is the doctor late?")}</h3>
                   <p className="text-sm text-ink/70">
-                    Tap one. Every waiting patient sees it and their time
-                    estimate updates.
+                    {tr("Tap one. Every waiting patient sees it and their time estimate updates.")}
                   </p>
                   <form action={A.setDelay} className="mt-3 space-y-3">
                     <Key k={s.key} />
@@ -213,13 +213,13 @@ export default async function QueueConsole({ searchParams }) {
                       name="notice"
                       maxLength={140}
                       defaultValue={s.notice}
-                      placeholder="Optional message, e.g. Doctor is in surgery"
-                      aria-label="Message for patients"
+                      placeholder={tr("Optional message, e.g. Doctor is in surgery")}
+                      aria-label={tr("Message for patients")}
                       className={`${input} w-full`}
                     />
                     <div className="flex flex-wrap gap-2">
                       {[
-                        [0, "On time"],
+                        [0, tr("On time")],
                         [15, "15 min late"],
                         [30, "30 min late"],
                         [60, "1 hour late"],
@@ -239,10 +239,10 @@ export default async function QueueConsole({ searchParams }) {
 
                 <div className="rounded-2xl bg-pine-50 p-4">
                   <h3 className="font-semibold">
-                    Patient came without booking?
+                    {tr("Patient came without booking?")}
                   </h3>
                   <p className="text-sm text-ink/70">
-                    Add them here and they get the next serial.
+                    {tr("Add them here and they get the next serial.")}
                   </p>
                   <form
                     action={A.addWalkIn}
@@ -257,17 +257,17 @@ export default async function QueueConsole({ searchParams }) {
                     <input
                       name="name"
                       required
-                      placeholder="Patient name"
-                      aria-label="Patient name"
+                      placeholder={tr("Patient name")}
+                      aria-label={tr("Patient name")}
                       className={`${input} flex-1 min-w-32`}
                     />
                     <input
                       name="phone"
-                      placeholder="Mobile (optional)"
-                      aria-label="Mobile"
+                      placeholder={tr("Mobile (optional)")}
+                      aria-label={tr("Mobile")}
                       className={`${input} w-40`}
                     />
-                    <Btn>Add</Btn>
+                    <Btn>{tr("Add")}</Btn>
                   </form>
                 </div>
               </div>
@@ -283,11 +283,11 @@ export default async function QueueConsole({ searchParams }) {
                 <input
                   name="find"
                   defaultValue={sp.find || ""}
-                  placeholder="Find by name, phone or code"
-                  aria-label="Find a patient"
+                  placeholder={tr("Find by name, phone or code")}
+                  aria-label={tr("Find a patient")}
                   className={input}
                 />
-                <Btn>Find</Btn>
+                <Btn>{tr("Find")}</Btn>
               </form>
             </div>
             <ul className="mt-3 divide-y divide-pine-100">
@@ -297,7 +297,7 @@ export default async function QueueConsole({ searchParams }) {
                   <span className="flex-1">
                     <strong>{x.name}</strong>
                     {x.walkIn && (
-                      <span className="ml-2 text-xs text-ink/60">walk-in</span>
+                      <span className="ml-2 text-xs text-ink/60">{tr("walk-in")}</span>
                     )}
                     <span className="block text-sm text-ink/60">
                       {x.phone || "no phone"} · {x.ref}
@@ -306,12 +306,12 @@ export default async function QueueConsole({ searchParams }) {
                   <span
                     className={`rounded-full px-3 py-1 text-sm ${CHIP[x.status]}`}
                   >
-                    {WORD[x.status]}
+                    {tr(WORD[x.status])}
                   </span>
                   {x.status === "skipped" && !over && (
                     <form action={A.recallPatient}>
                       <input type="hidden" name="ref" value={x.ref} />
-                      <Btn>Call again</Btn>
+                      <Btn>{tr("Call again")}</Btn>
                     </form>
                   )}
                 </li>
@@ -319,8 +319,8 @@ export default async function QueueConsole({ searchParams }) {
               {!patients.length && (
                 <li className="py-4 text-ink/70">
                   {find
-                    ? "No patient matches your search."
-                    : "No patients yet."}
+                    ? tr("No patient matches your search.")
+                    : tr("No patients yet.")}
                 </li>
               )}
             </ul>
@@ -328,7 +328,7 @@ export default async function QueueConsole({ searchParams }) {
             {!over && (
               <details className="mt-6 text-sm">
                 <summary className="cursor-pointer font-semibold text-pine-800">
-                  More options
+                  {tr("More options")}
                 </summary>
                 <div className="mt-3 flex flex-wrap items-end gap-6">
                   <form
@@ -337,7 +337,7 @@ export default async function QueueConsole({ searchParams }) {
                   >
                     <Key k={s.key} />
                     <label>
-                      Starts at
+                      {tr("Starts at")}
                       <input
                         name="startTime"
                         type="time"
@@ -346,7 +346,7 @@ export default async function QueueConsole({ searchParams }) {
                       />
                     </label>
                     <label>
-                      Seats
+                      {tr("Seats")}
                       <input
                         name="maxPatients"
                         type="number"
@@ -356,11 +356,11 @@ export default async function QueueConsole({ searchParams }) {
                         className={`${input} ml-2 w-24`}
                       />
                     </label>
-                    <Btn>Save</Btn>
+                    <Btn>{tr("Save")}</Btn>
                   </form>
                   <form action={A.finishSession}>
                     <Key k={s.key} />
-                    <Btn t="warn">End today’s queue</Btn>
+                    <Btn t="warn">{tr("End today’s queue")}</Btn>
                   </form>
                 </div>
               </details>
@@ -370,7 +370,7 @@ export default async function QueueConsole({ searchParams }) {
 
         {idle.length > 0 && (
           <section className="mt-8">
-            <h2 className="font-semibold">Start a queue for another doctor</h2>
+            <h2 className="font-semibold">{tr("Start a queue for another doctor")}</h2>
             <form
               action={A.openNew}
               className="mt-3 flex flex-wrap items-center gap-2"
@@ -379,7 +379,7 @@ export default async function QueueConsole({ searchParams }) {
               <select
                 name="doctorSlug"
                 required
-                aria-label="Doctor"
+                aria-label={tr("Doctor")}
                 className={input}
               >
                 {idle.map((d) => (
@@ -388,24 +388,23 @@ export default async function QueueConsole({ searchParams }) {
                   </option>
                 ))}
               </select>
-              <Btn t="go">Start queue</Btn>
+              <Btn t="go">{tr("Start queue")}</Btn>
             </form>
           </section>
         )}
 
         <details className="mt-10 text-sm">
           <summary className="cursor-pointer font-semibold text-pine-800">
-            How this works
+            {tr("How this works")}
           </summary>
           <ol className="mt-2 list-decimal space-y-1 pl-5 text-ink/80">
-            <li>Patients book online and get a serial number.</li>
+            <li>{tr("Patients book online and get a serial number.")}</li>
             <li>
-              When the doctor is ready, press <strong>Call next patient</strong>
+              {tr("When the doctor is ready, press")} <strong>{tr("Call next patient")}</strong>
               .
             </li>
             <li>
-              If the doctor is late, tap how late. Patients are told, so they
-              don’t wait at the hospital.
+              {tr("If the doctor is late, tap how late. Patients are told, so they don’t wait at the hospital.")}
             </li>
           </ol>
         </details>

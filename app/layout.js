@@ -1,23 +1,9 @@
-import {
-  Newsreader,
-  Hind_Siliguri,
-  Noto_Serif_Bengali,
-} from "next/font/google";
+import { Newsreader, Hind_Siliguri, Noto_Serif_Bengali } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { getLang } from "@/lib/i18n";
 
-const serif = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  display: "swap",
-});
-const serifBn = Noto_Serif_Bengali({
-  subsets: ["bengali"],
-  variable: "--font-serif-bn",
-  display: "swap",
-});
+const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", display: "swap" });
+const serifBn = Noto_Serif_Bengali({ subsets: ["bengali"], variable: "--font-serif-bn", display: "swap" });
 const sans = Hind_Siliguri({
   subsets: ["latin", "bengali"],
   weight: ["400", "500", "600", "700"],
@@ -25,24 +11,33 @@ const sans = Hind_Siliguri({
   display: "swap",
 });
 
-export const metadata = {
-  title: "Ibn Sina Trust | Hospitals, Doctors & Healthcare Services",
-  description:
-    "Explore Ibn Sina Trust hospitals, diagnostic centres and consultation services. Find a doctor, book an appointment and track your serial. Hotline 10615.",
-};
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.ibnsinatrust.com";
+
+export async function generateMetadata() {
+  const lang = await getLang();
+  const bn = lang === "bn";
+  const title = bn
+    ? "ইবনে সিনা ট্রাস্ট | হাসপাতাল, ডাক্তার ও ডায়াগনস্টিক সেবা"
+    : "Ibn Sina Trust | Hospitals, Doctors & Healthcare Services";
+  const description = bn
+    ? "ইবনে সিনা ট্রাস্টের হাসপাতাল ও ডায়াগনস্টিক সেন্টারে ডাক্তার খুঁজুন, অনলাইনে সিরিয়াল নিন এবং আপনার পালা লাইভ দেখুন। হটলাইন ১০৬১৫।"
+    : "Find a doctor, book a serial and track your turn live at Ibn Sina Trust hospitals and diagnostic centres. Hotline 10615.";
+  return {
+    metadataBase: new URL(SITE),
+    title: { default: title, template: "%s | " + (bn ? "ইবনে সিনা ট্রাস্ট" : "Ibn Sina Trust") },
+    description,
+    openGraph: { title, description, siteName: "Ibn Sina Trust", locale: bn ? "bn_BD" : "en_GB", type: "website" },
+    twitter: { card: "summary", title, description },
+  };
+}
+
+export const viewport = { themeColor: "#02281F", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }) {
   const lang = await getLang();
   return (
-    <html
-      lang={lang}
-      className={`${serif.variable} ${serifBn.variable} ${sans.variable}`}
-    >
-      <body>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
-      </body>
+    <html lang={lang} className={`${serif.variable} ${serifBn.variable} ${sans.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }

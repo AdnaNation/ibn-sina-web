@@ -3,7 +3,7 @@ import {useEffect,useRef,useState,useTransition} from "react";
 import Link from "next/link";
 import {BellRing,Clock,MapPin,Stethoscope,CalendarPlus,AlertCircle} from "lucide-react";
 import {fmtTime,fmtDate} from "@/lib/time";
-import {cancelAppointment} from "@/app/track/actions";
+import {cancelAppointment} from "@/app/(site)/track/actions";
 import QueueJourney from "./QueueJourney";
 import Ecg from "./Ecg";
 const stamp=ms=>new Date(ms).toISOString().replace(/[-:]|\.\d{3}/g,"");
