@@ -17,18 +17,6 @@ jobs:
   production-build:
     name: Unit tests and Next.js production build
     runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --replSet rs0
-          --bind_ip_all
-          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
     timeout-minutes: 15
     env:
       NEXT_TELEMETRY_DISABLED: "1"
@@ -52,11 +40,18 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Initialize MongoDB replica set
+      - name: Start MongoDB replica set
         run: |
-          mongosh "mongodb://127.0.0.1:27017" --quiet --eval 'rs.initiate({_id: "rs0", members: [{_id: 0, host: "127.0.0.1:27017"}]})'
+          docker run -d --name ibnsina-mongodb -p 27017:27017 mongo:7 mongod --replSet rs0 --bind_ip_all
           for attempt in {1..30}; do
-            if mongosh "mongodb://127.0.0.1:27017/?replicaSet=rs0" --quiet --eval 'db.hello().isWritablePrimary' | grep -q true; then
+            if docker exec ibnsina-mongodb mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok' >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+          docker exec ibnsina-mongodb mongosh --quiet --eval 'rs.initiate({_id: "rs0", members: [{_id: 0, host: "127.0.0.1:27017"}]})'
+          for attempt in {1..30}; do
+            if docker exec ibnsina-mongodb mongosh --quiet --eval 'db.hello().isWritablePrimary' | grep -q true; then
               exit 0
             fi
             sleep 2
