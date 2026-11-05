@@ -54,7 +54,7 @@ export default async function Login({ searchParams }) {
               <input name="username" required autoFocus autoCapitalize="none" autoComplete="username" className={field} />
             </label>
             <label className="block text-sm font-semibold text-pine-900">{tr("Password", "পাসওয়ার্ড")}
-              <input name="password" type="password" required autoComplete="current-password" className={field} />
+              <input name="password" type="password" required maxLength={128} autoComplete="current-password" className={field} />
             </label>
             {error && (
               <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
