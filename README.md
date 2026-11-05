@@ -155,3 +155,5 @@ The public live board announces changes to the current serial through a polite l
 Queue session creation now fails cleanly when MongoDB is unavailable and refuses to report an already finished or cancelled session as newly opened. Queue actions and public booking share the same strict calendar-date validator.
 
 Patient tracking pages and the admin portal also receive explicit private no-store cache headers so ticket details and staff screens are not retained by shared browser or intermediary caches.
+
+The shared rate limiter now catches database-connection exceptions and fails closed. Client fingerprints prefer the reverse-proxy-provided `x-real-ip`; if unavailable, the right-most `x-forwarded-for` hop is used rather than trusting the left-most client-supplied value. Correct client identification still depends on the hosting reverse proxy overwriting its forwarded-IP headers.
