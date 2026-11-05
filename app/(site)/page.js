@@ -18,27 +18,8 @@ export default async function Home() {
     getFeaturedDoctors(),
   ]);
 
-  // Structured data helps Google show the hospital's name, phone and address.
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "MedicalOrganization",
-    name: "The Ibn Sina Trust",
-    alternateName: "ইবনে সিনা ট্রাস্ট",
-    foundingDate: "1980-06",
-    telephone: "+88-09610010615",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.ibnsinatrust.com",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "House 48, Road 9/A, Dhanmondi",
-      addressLocality: "Dhaka",
-      postalCode: "1209",
-      addressCountry: "BD",
-    },
-  };
-
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <EmergencyStrip />
       <Hero units={units} departments={departments} />
       <Stats units={units} departments={departments} />
