@@ -23,7 +23,7 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongosh --quiet --eval \"db.adminCommand(\u0027ping\u0027).ok\""
+          --health-cmd "mongosh --quiet --eval db.adminCommand({ping:1}).ok"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
