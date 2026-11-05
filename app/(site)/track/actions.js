@@ -1,6 +1,19 @@
 "use server";
+import { headers } from "next/headers";
 import { cancelAppt } from "@/lib/queue";
+import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 
 export async function cancelAppointment(ref) {
-  await cancelAppt(ref);
+  const value = String(ref || "").trim().toUpperCase();
+  if (!/^IST-[A-Z0-9]{6}$/.test(value)) return { error: "Invalid tracking reference." };
+
+  const requestHeaders = await headers();
+  const ipLimit = await consumeRateLimit({ scope: "appointment-cancel-ip", key: requestFingerprint(requestHeaders), limit: 5 });
+  if (!ipLimit.allowed) return { error: "Cancellation is temporarily unavailable. Please try again later." };
+
+  const refLimit = await consumeRateLimit({ scope: "appointment-cancel-ref", key: value, limit: 3 });
+  if (!refLimit.allowed) return { error: "Too many cancellation attempts for this tracking reference." };
+
+  await cancelAppt(value);
+  return { success: true };
 }
