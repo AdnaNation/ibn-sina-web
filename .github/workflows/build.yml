@@ -20,10 +20,11 @@ jobs:
     services:
       mongodb:
         image: mongo:7
-        command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
         ports:
           - 27017:27017
         options: >-
+          --replSet rs0
+          --bind_ip_all
           --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
           --health-interval 10s
           --health-timeout 5s
