@@ -142,3 +142,5 @@ Staff session restoration rejects unsupported or malformed stored roles. Queue-c
 - A Content Security Policy and HSTS are intentionally not asserted here: CSP needs a tested nonce-compatible Next.js setup and HSTS should only be enabled after the production HTTPS/domain configuration is confirmed.
 
 The patient tracking screen polls the rate-limited tracking endpoint every 15 seconds (within its per-client request budget), and both the patient ticket and public live board display a clear stale-data notice if an update fails rather than silently implying that the displayed queue state is current.
+
+The public live board announces changes to the current serial through a polite live region, and the appointment form exposes its pending submission and availability-loading states to assistive technology.
