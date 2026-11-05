@@ -185,3 +185,10 @@ The Node.js unit suite also exercises the shared server-side authorization rules
 ## Queue settings validation tests
 
 Queue-session edits now use a shared pure validation function that is covered by Node.js unit tests. The suite checks permitted status transitions, immutable finished/cancelled sessions, delay and notice limits, valid 24-hour start times, capacity bounds, and protection against reducing capacity below issued serials. Database-level conditional writes and the per-session queue lock still require integration/load testing against MongoDB.
+
+
+## MongoDB queue concurrency integration tests
+
+The automated test workflow starts an isolated MongoDB service and runs integration tests against real database operations. The suite exercises concurrent serial allocation under capacity, duplicate active bookings for the same phone number, and simultaneous staff queue advances. Locally, set `MONGODB_TEST_URI` to a disposable MongoDB database before running `npm test`; the integration suite drops the configured test database before and after execution, so never point it at production or any database containing real records. Without `MONGODB_TEST_URI`, the integration tests are skipped while the dependency-free unit tests still run.
+
+Appointment serials are protected by both the atomic session counter and a unique MongoDB index on `{ sessionKey, serial }`. Existing databases must not contain duplicate serials within a session before the index can be created; review and resolve legacy duplicates before deploying this change.
