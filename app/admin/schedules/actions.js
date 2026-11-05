@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
 import { publishSchedule, removeEmptySchedule } from "@/lib/queue";
+import { writeAudit } from "@/lib/management";
 
 const val = (fd, key) => String(fd.get(key) || "").trim();
 
