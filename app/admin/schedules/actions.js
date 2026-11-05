@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
 import { publishSchedule, removeEmptySchedule } from "@/lib/queue";
+import { writeAudit } from "@/lib/management";
 
 const val = (fd, key) => String(fd.get(key) || "").trim();
 
@@ -26,6 +27,7 @@ export async function publishScheduleAction(fd) {
     });
   }
 
+  if (!error) await writeAudit({ actor: p, action: "schedule.published", targetType: "schedule", targetId: doctor.slug + "|" + val(fd, "date"), details: { doctor: doctor.name, unit: doctor.unit, date: val(fd, "date") } });
   revalidatePath("/admin/schedules");
   revalidatePath("/appointment");
   redirect(error
@@ -41,6 +43,7 @@ export async function removeScheduleAction(fd) {
   const target = await sessionDoc(key);
   if (!target || (p.role !== "owner" && target.unit !== p.unit)) redirect("/admin/schedules?err=Not%20allowed");
   const error = await removeEmptySchedule(key);
+  if (!error) await writeAudit({ actor: p, action: "schedule.removed", targetType: "schedule", targetId: key });
   revalidatePath("/admin/schedules");
   revalidatePath("/appointment");
   redirect(error

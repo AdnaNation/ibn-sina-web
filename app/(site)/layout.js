@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileActionBar from "@/components/MobileActionBar";
+import PrototypeNotice from "@/components/PrototypeNotice";
 
 // Public website shell. Staff/admin pages live outside this group so they
 // never show the public header, footer or patient action bar.
@@ -13,6 +14,7 @@ export default function SiteLayout({ children }) {
       >
         Skip to content
       </a>
+      <PrototypeNotice />
       <Navbar />
       <main id="main" className="pb-20 lg:pb-0">{children}</main>
       <Footer />

@@ -44,14 +44,14 @@ export default async function AppointmentsPage({ searchParams }) {
       <AdminNav p={p} current="/admin/appointments" />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="font-serif text-3xl font-semibold text-pine-950">{t("Appointments", "অ্যাপয়েন্টমেন্ট")}</h1>
-        <p className="mt-1 text-sm text-ink/65">{t("Find any booking by patient name, mobile number, tracking code or doctor.", "রোগীর নাম, মোবাইল নম্বর, ট্র্যাকিং কোড বা ডাক্তার দিয়ে যেকোনো বুকিং খুঁজুন।")}</p>
+        <p className="mt-1 text-sm text-ink/65">{canPhone ? t("Find any booking by patient name, mobile number, tracking code or doctor.", "রোগীর নাম, মোবাইল নম্বর, ট্র্যাকিং কোড বা ডাক্তার দিয়ে যেকোনো বুকিং খুঁজুন।") : t("Find bookings by tracking code or doctor. Patient identity and notes are restricted.", "ট্র্যাকিং কোড বা ডাক্তার দিয়ে বুকিং খুঁজুন। রোগীর পরিচয় ও নোট দেখার অনুমতি নেই।")}</p>
 
         {sp.err && <p role="alert" className="mt-5 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-800">{sp.err}</p>}
         {sp.ok === "cancelled" && <p role="status" className="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{t("Appointment cancelled.", "অ্যাপয়েন্টমেন্ট বাতিল করা হয়েছে।")}</p>}
 
         <form className="mt-6 grid gap-3 rounded-2xl border border-pine-100 bg-white p-4 shadow-sm sm:grid-cols-[auto_1fr_auto_auto]">
           <label className="text-xs font-bold text-pine-800">{t("Date", "তারিখ")}<input type="date" name="date" defaultValue={date} className={`${input} mt-1`} /></label>
-          <label className="text-xs font-bold text-pine-800">{t("Search", "খুঁজুন")}<input name="q" defaultValue={q} placeholder={t("Name, mobile, code or doctor", "নাম, মোবাইল, কোড বা ডাক্তার")} className={`${input} mt-1`} /></label>
+          <label className="text-xs font-bold text-pine-800">{t("Search", "খুঁজুন")}<input name="q" defaultValue={q} placeholder={canPhone ? t("Name, mobile, code or doctor", "নাম, মোবাইল, কোড বা ডাক্তার") : t("Tracking code or doctor", "ট্র্যাকিং কোড বা ডাক্তার")} className={`${input} mt-1`} /></label>
           <label className="text-xs font-bold text-pine-800">{t("Status", "অবস্থা")}
             <select name="status" defaultValue={status} className={`${input} mt-1`}>
               <option value="">{t("All", "সব")}</option>

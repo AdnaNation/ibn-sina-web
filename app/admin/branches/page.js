@@ -37,7 +37,7 @@ export default async function BranchManagement({ searchParams }) {
             <label className="block text-sm font-semibold">{tr("Area")}<input name="area" required placeholder="Dhanmondi" className={field}/></label>
             <label className="block text-sm font-semibold">{tr("City")}<input name="city" required placeholder="Dhaka" className={field}/></label>
             <label className="block text-sm font-semibold">{tr("Facility type")}<select name="type" className={field}><option>{tr("Hospital")}</option><option>{tr("Diagnostic")}</option><option>{tr("Medical College")}</option><option>{tr("Specialized Centre")}</option></select></label>
-            <label className="block text-sm font-semibold">{tr("Hotline")}<input name="hotline" placeholder="10615" className={field}/></label>
+            <label className="block text-sm font-semibold">{tr("Hotline")}<input name="hotline" placeholder="Verified branch contact only" className={field}/></label>
             <label className="block text-sm font-semibold">{tr("Address (optional)")}<textarea name="address" rows={2} className={field}/></label>
           </div>
           <button className="mt-5 w-full rounded-full bg-pine-900 px-5 py-3 text-sm font-bold text-white hover:bg-pine-700">{tr("Create branch")}</button>

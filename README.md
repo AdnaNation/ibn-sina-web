@@ -1,6 +1,6 @@
-# Ibn Sina Trust — bilingual healthcare website
+# Independent hospital website & queue-system prototype
 
-A Next.js App Router website concept for the official Ibn Sina Trust digital experience.
+A bilingual Next.js demonstration concept intended to explore a modern hospital website and patient queue experience. This is an independent, unauthorized prototype and is not the official Ibn Sina Trust website or booking service.
 
 ## Stack
 
@@ -51,9 +51,9 @@ npm run seed
 ## Appointment safety notes
 
 - Booking requires a published doctor session. The public availability API does not invent a schedule when a session is missing.
-- Serial allocation uses MongoDB's conditional atomic increment to avoid assigning the same serial to two concurrent patients.
+- Serial allocation uses MongoDB's conditional atomic increment to avoid assigning the same serial to two concurrent patients. Live queue transitions are serialized per doctor/day with an expiring database lock so two staff members cannot accidentally advance the same patient simultaneously. Schedule edits/removal also check that the session has not changed while the operation is in progress.
 - Duplicate waiting/serving appointments are checked by phone number and doctor session. A partial unique MongoDB index is created for active appointments by session and normalized phone number. Before enabling it on an existing production database, clean up any duplicate active records and normalize legacy phone numbers; blank-phone walk-ins are excluded from this index.
-- The public website must not be treated as an emergency-care channel. Emergency guidance and the official hotline should remain visible.
+- Walk-in entries in the staff queue validate patient-name length and optional Bangladesh mobile format before creating a record. The public website must not be treated as an emergency-care channel. Show only verified emergency guidance and contact details approved by the institution; never invent or carry over an unverified hotline.
 
 
 ## Doctor schedule management
@@ -85,11 +85,11 @@ Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. S
 - `reports.view` — view branch reports
 - `billing.view` / `billing.manage` — billing access levels
 
-The current project has live UI/server-side enforcement for queue and schedule access. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
+The current project has live UI/server-side enforcement for queue and schedule access. Queue operators without `patients.view` can see the patient name needed to call the queue, but phone numbers and private notes are withheld. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
 
-Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permission changes take effect after the user signs in again because the signed session contains a permission snapshot.
+Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permissions are reloaded from the active staff record during server-side session validation, so permission changes take effect on the next request. An explicitly empty permission array grants no doctor permissions; legacy doctor accounts without a stored permission array retain the limited queue/appointment defaults.
 
-For production, add an audited account-edit/deactivation workflow, enforce password reset on first login, add login rate limiting and MFA, and test cross-branch access using separate staging accounts before onboarding real staff.
+For production, add password reset on first login, privileged-account MFA, and test cross-branch access using separate staging accounts before onboarding real staff. Shared MongoDB-backed login rate limits are implemented, but must be exercised under load and monitored.
 
 
 ## Main Admin: branch management, accounts and audit trail
@@ -98,7 +98,7 @@ The Main Admin dashboard at `/admin` now shows organization-wide counts and a br
 
 Account status is stored on the `staff` document as `active`. Deactivation does not delete staff or patient data. Staff sessions are revalidated against the current account and branch status on each server request, so a deactivated account or a deactivated branch loses access without waiting for the signed cookie to expire. Branch admins can activate/deactivate their own branch's staff from `/admin/staff`; only the Main Admin can manage branch-admin accounts.
 
-The Main Admin audit trail is at `/admin/audit`. It records branch creation/status changes and staff account creation/status changes in the MongoDB `audit_logs` collection. It currently shows the newest 200 events and supports an action-name filter. The audit log is an application-level activity trail, not a tamper-proof regulatory audit system; production deployment should restrict database write access and configure backups/retention.
+The Main Admin audit trail is at `/admin/audit`. It records sign-in successes/failures, branch and staff account changes, schedule publication/removal, and live queue operations in the MongoDB `audit_logs` collection. It currently shows the newest 200 events and supports an action-name filter. Queue audit events deliberately avoid patient names, phone numbers and clinical notes. The audit log is an application-level activity trail, not a tamper-proof regulatory audit system; production deployment should restrict database write access and configure backups/retention.
 
 The public navigation now uses native anchor navigation for page links instead of client-side route transitions. This trades a small full-page navigation reload for predictable navigation, including on mobile menus and hash links such as Services.
 
@@ -106,16 +106,23 @@ The public navigation now uses native anchor navigation for page links instead o
 
 - **Bengali first.** The site opens in Bengali by default (English via the EN / বাংলা switch). Departments, branch names, places and numbers show in Bengali. A doctor can have an optional Bengali name (`nameBn`).
 - **Trust content.** New homepage sections: emergency notice, quick-access card, live numbers computed from your data (years of service, locations, cities, specialties), a three-step booking guide, "why patients trust us" and an FAQ. Review all wording with the Trust before launch.
-- **Mobile action bar** (Call / Book / Track / Live) for phone users.
+- **Mobile action bar** (Locations / Book / Track / Live) for phone users; no unverified hotline is displayed.
 - **SEO**: titles, Open Graph, structured data, `robots.txt`, `sitemap.xml`, custom 404 and error pages.
 - **Admin portal** has its own layout (no public header/footer), a mobile-friendly navigation bar and a Bengali/English switch on every screen.
-- **New admin modules**: `/admin/appointments` (search, cancel, CSV export, phone masking unless `patients.view`) and `/admin/doctors` (add, edit, feature on homepage, delete when unused). New permission: `doctors.manage`.
-- **Security**: sign-in rate limiting (5 wrong tries per person, 20 per address, 10 minutes), sign-in success/failure in the audit log, demo mode off in production unless `ENABLE_DEMO=true`.
+- **New admin modules**: `/admin/appointments` (search, cancel, date-scoped CSV export, phone masking unless `patients.view`) and `/admin/doctors` (add, edit, feature on homepage, delete when unused). New permission: `doctors.manage`.
+- **Security**: shared MongoDB-backed sign-in rate limiting (5 attempts per username/address fingerprint and 20 per address fingerprint in a 10-minute window), sign-in success/failure in the audit log, and demo mode off in production unless `ENABLE_DEMO=true`.
 - **Bug fixes**: branch pages never listed their doctors; missing `.env.example`; a permission check used a key that did not exist.
 
 ## Before going live
 
 1. Admin → Doctors → Import starter doctors, then replace the sample list with the real, verified roster.
 2. Publish real schedules in Admin → Schedules.
-3. Rate limiting is in memory. On several server instances, move it to MongoDB or Redis, and add MFA for the Main Admin.
-4. Add a privacy notice and confirm wording such as "hotline open every day" with the Trust.
+3. Shared MongoDB-backed rate limiting is used for staff sign-in and public tracking, availability, queue-board and cancellation endpoints. Monitor it under load and add privileged-account MFA before production.
+4. Add a reviewed privacy notice and publish only contact numbers and service-hour claims verified and approved by the Trust.
+
+
+## Independent prototype safety baseline
+
+This repository is an independent demonstration concept and is not affiliated with or authorized by Ibn Sina Trust or any other hospital. Public appointment submission is disabled unless ENABLE_PUBLIC_BOOKING=true is explicitly configured after written authorization, privacy review and production readiness checks. Do not set this flag for a public demo. The appointment UI warns against entering real patient details. Public tracking, availability, queue-board and cancellation actions use shared MongoDB-backed rate limits with TTL cleanup. Public endpoints fail closed if the rate-limit store is unavailable. Search indexing is disabled and the sitemap is empty pending authorization and verified content. Never use real patient records in demo data, screenshots or presentations. Tracking references are bearer secrets; implement OTP identity verification before enabling real booking and self-service cancellation. Staff sign-in and public endpoint limits use a shared MongoDB-backed counter with TTL cleanup and fail closed if the store is unavailable. The login limiter counts every submitted attempt in its fixed window, not only incorrect passwords.
+
+A Git push or hosting deployment does not establish clinical, legal, security or production readiness. Before any real-world use, obtain institutional authorization; verify every doctor, branch, service, schedule and contact detail; complete privacy, retention, consent, security, backup, monitoring and incident-response reviews; add privileged-account MFA; and test the full workflow against a staging database.

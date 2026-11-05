@@ -4,7 +4,11 @@ import { getTracking } from "@/lib/queue";
 import { getT } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Your queue status | Ibn Sina Trust" };
+export const metadata = {
+  title: "Queue Status Demo | Independent Healthcare Prototype",
+  description: "Private tracking view for the independent queue demonstration.",
+  robots: { index: false, follow: false },
+};
 
 export default async function TrackPage({ params, searchParams }) {
   const [{ ref }, sp, { lang }] = await Promise.all([params, searchParams, getT()]);

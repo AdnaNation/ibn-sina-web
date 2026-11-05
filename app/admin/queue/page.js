@@ -46,6 +46,7 @@ export default async function QueueConsole({ searchParams }) {
   const p = await getSession();
   if (!p) redirect("/admin/login");
   if (!hasPermission(p, "queue.manage")) redirect("/admin/login");
+  const canViewPatients = hasPermission(p, "patients.view");
   const sp = await searchParams;
   const date = /^\d{4}-\d{2}-\d{2}$/.test(sp.date || "")
     ? sp.date
@@ -63,7 +64,7 @@ export default async function QueueConsole({ searchParams }) {
   const patients = s
     ? s.patients.filter(
         (x) =>
-          !find || `${x.name} ${x.phone} ${x.ref}`.toLowerCase().includes(find),
+          !find || `${x.name} ${canViewPatients ? x.phone : ""} ${x.ref}`.toLowerCase().includes(find),
       )
     : [];
   const serving = s?.patients.find((x) => x.status === "serving");
@@ -97,6 +98,8 @@ export default async function QueueConsole({ searchParams }) {
             <Btn>{tr("Show")}</Btn>
           </form>
         </div>
+
+        {sp.err && <p role="alert" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{sp.err}</p>}
 
         {sessions.length > 1 && (
           <nav className="mt-6 flex flex-wrap gap-2" aria-label={tr("Doctors")}>
@@ -283,7 +286,7 @@ export default async function QueueConsole({ searchParams }) {
                 <input
                   name="find"
                   defaultValue={sp.find || ""}
-                  placeholder={tr("Find by name, phone or code")}
+                  placeholder={canViewPatients ? tr("Find by name, phone or code") : tr("Find by name or tracking code")}
                   aria-label={tr("Find a patient")}
                   className={input}
                 />
@@ -300,7 +303,7 @@ export default async function QueueConsole({ searchParams }) {
                       <span className="ml-2 text-xs text-ink/60">{tr("walk-in")}</span>
                     )}
                     <span className="block text-sm text-ink/60">
-                      {x.phone || "no phone"} · {x.ref}
+                      {canViewPatients ? (x.phone || tr("no phone")) : tr("contact details restricted")} · {x.ref}
                     </span>
                   </span>
                   <span
