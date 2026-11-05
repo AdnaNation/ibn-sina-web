@@ -14,7 +14,8 @@ export default async function ReportsPage({ searchParams }) {
   const p = await getSession();
   if (!p) redirect("/admin/login");
   if (!hasPermission(p, "reports.view")) redirect("/admin");
-  const { tr, bn } = await getAdmin();
+  const { bn } = await getAdmin();
+  const tr = (english, bangla) => bn ? bangla : english;
   const sp = await searchParams;
   const today = todayDhaka();
   const fallbackFrom = todayDhaka(-6);
