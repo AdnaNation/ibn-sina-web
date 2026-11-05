@@ -35,7 +35,7 @@ export default async function DoctorsAdmin({ searchParams }) {
           {d && !departments.some((x) => x.name === d.department) && <option value={d.department}>{d.department}</option>}
         </select>
       </label>
-      <label className="text-xs font-bold text-pine-800">{t("Phone (optional)", "ফোন (ঐচ্ছিক)")}<input name="phone" defaultValue={d?.phone} placeholder="10615" className={input} /></label>
+      <label className="text-xs font-bold text-pine-800">{t("Phone (optional)", "ফোন (ঐচ্ছিক)")}<input name="phone" defaultValue={d?.phone} placeholder="Verified doctor contact only" className={input} /></label>
       <label className="flex items-center gap-2 self-end pb-2 text-sm font-semibold text-pine-900"><input type="checkbox" name="featured" defaultChecked={d?.featured} className="size-4 accent-emerald-700" />{t("Show on homepage", "হোমপেজে দেখান")}</label>
     </>
   );
