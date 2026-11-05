@@ -33,12 +33,12 @@ export default async function BranchManagement({ searchParams }) {
           <h2 className="font-serif text-2xl text-pine-900">{tr("Create a branch")}</h2>
           <p className="mt-1 text-xs text-ink/60">{tr("New branches are immediately available for administrator assignment.")}</p>
           <div className="mt-4 space-y-3">
-            <label className="block text-sm font-semibold">{tr("Branch / facility name")}<input name="name" required minLength={3} placeholder="Ibn Sina Specialized Hospital" className={field}/></label>
-            <label className="block text-sm font-semibold">{tr("Area")}<input name="area" required placeholder="Dhanmondi" className={field}/></label>
-            <label className="block text-sm font-semibold">{tr("City")}<input name="city" required placeholder="Dhaka" className={field}/></label>
+            <label className="block text-sm font-semibold">{tr("Branch / facility name")}<input name="name" required minLength={3} maxLength={100} placeholder="Ibn Sina Specialized Hospital" className={field}/></label>
+            <label className="block text-sm font-semibold">{tr("Area")}<input name="area" required maxLength={80} placeholder="Dhanmondi" className={field}/></label>
+            <label className="block text-sm font-semibold">{tr("City")}<input name="city" required maxLength={80} placeholder="Dhaka" className={field}/></label>
             <label className="block text-sm font-semibold">{tr("Facility type")}<select name="type" className={field}><option>{tr("Hospital")}</option><option>{tr("Diagnostic")}</option><option>{tr("Medical College")}</option><option>{tr("Specialized Centre")}</option></select></label>
-            <label className="block text-sm font-semibold">{tr("Hotline")}<input name="hotline" placeholder="Verified branch contact only" className={field}/></label>
-            <label className="block text-sm font-semibold">{tr("Address (optional)")}<textarea name="address" rows={2} className={field}/></label>
+            <label className="block text-sm font-semibold">{tr("Hotline")}<input name="hotline" maxLength={24} inputMode="tel" placeholder="Verified branch contact only" className={field}/></label>
+            <label className="block text-sm font-semibold">{tr("Address (optional)")}<textarea name="address" rows={2} maxLength={240} className={field}/></label>
           </div>
           <button className="mt-5 w-full rounded-full bg-pine-900 px-5 py-3 text-sm font-bold text-white hover:bg-pine-700">{tr("Create branch")}</button>
         </form>
