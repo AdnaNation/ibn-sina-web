@@ -51,7 +51,7 @@ npm run seed
 ## Appointment safety notes
 
 - Booking requires a published doctor session. The public availability API does not invent a schedule when a session is missing.
-- Serial allocation uses MongoDB's conditional atomic increment to avoid assigning the same serial to two concurrent patients.
+- Serial allocation uses MongoDB's conditional atomic increment to avoid assigning the same serial to two concurrent patients. Live queue transitions are serialized per doctor/day with an expiring database lock so two staff members cannot accidentally advance the same patient simultaneously. Schedule edits/removal also check that the session has not changed while the operation is in progress.
 - Duplicate waiting/serving appointments are checked by phone number and doctor session. A partial unique MongoDB index is created for active appointments by session and normalized phone number. Before enabling it on an existing production database, clean up any duplicate active records and normalize legacy phone numbers; blank-phone walk-ins are excluded from this index.
 - The public website must not be treated as an emergency-care channel. Show only verified emergency guidance and contact details approved by the institution; never invent or carry over an unverified hotline.
 
