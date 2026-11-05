@@ -119,3 +119,10 @@ The public navigation now uses native anchor navigation for page links instead o
 2. Publish real schedules in Admin → Schedules.
 3. Rate limiting is in memory. On several server instances, move it to MongoDB or Redis, and add MFA for the Main Admin.
 4. Add a privacy notice and confirm wording such as "hotline open every day" with the Trust.
+
+
+## Independent prototype safety baseline
+
+This repository is an independent demonstration concept and is not affiliated with or authorized by Ibn Sina Trust or any other hospital. Public appointment submission is disabled unless ENABLE_PUBLIC_BOOKING=true is explicitly configured after written authorization, privacy review and production readiness checks. Do not set this flag for a public demo. The appointment UI warns against entering real patient details. Public tracking, availability, queue-board and cancellation actions use shared MongoDB-backed rate limits with TTL cleanup. Public endpoints fail closed if the rate-limit store is unavailable. Search indexing is disabled and the sitemap is empty pending authorization and verified content. Never use real patient records in demo data, screenshots or presentations. Tracking references are bearer secrets; implement OTP identity verification before enabling real booking and self-service cancellation. The staff sign-in limiter remains in-memory and must be migrated to a shared store before multi-instance production use.
+
+A Git push or hosting deployment does not establish clinical, legal, security or production readiness. Before any real-world use, obtain institutional authorization; verify every doctor, branch, service, schedule and contact detail; complete privacy, retention, consent, security, backup, monitoring and incident-response reviews; add privileged-account MFA; and test the full workflow against a staging database.
