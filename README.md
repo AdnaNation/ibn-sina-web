@@ -1,6 +1,6 @@
-# Ibn Sina Trust — bilingual healthcare website
+# Independent hospital website & queue-system prototype
 
-A Next.js App Router website concept for the official Ibn Sina Trust digital experience.
+A bilingual Next.js demonstration concept intended to explore a modern hospital website and patient queue experience. This is an independent, unauthorized prototype and is not the official Ibn Sina Trust website or booking service.
 
 ## Stack
 
