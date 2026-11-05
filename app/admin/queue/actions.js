@@ -41,7 +41,7 @@ export async function skipCurrent(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await advance(k, { skip: true });
-  if (result?.error) throw new Error(result.error);
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.patient_skipped", k);
   done();
 }
@@ -49,7 +49,7 @@ export async function finishSession(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await advance(k, { stop: true });
-  if (result?.error) throw new Error(result.error);
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.session_finished", k);
   done();
 }
@@ -95,7 +95,7 @@ export async function addWalkIn(fd) {
       phone: get(fd, "phone"),
       walkIn: true,
     });
-    if (result?.error) throw new Error(result.error);
+    if (result?.error) failQueue(k, result.error);
     await record(p, "queue.walk_in_added", doctor.slug);
   }
   done();
