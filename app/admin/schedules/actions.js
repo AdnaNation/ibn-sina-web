@@ -43,6 +43,7 @@ export async function removeScheduleAction(fd) {
   const target = await sessionDoc(key);
   if (!target || (p.role !== "owner" && target.unit !== p.unit)) redirect("/admin/schedules?err=Not%20allowed");
   const error = await removeEmptySchedule(key);
+  if (!error) await writeAudit({ actor: p, action: "schedule.removed", targetType: "schedule", targetId: key });
   revalidatePath("/admin/schedules");
   revalidatePath("/appointment");
   redirect(error
