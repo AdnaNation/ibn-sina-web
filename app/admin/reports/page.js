@@ -27,7 +27,7 @@ export default async function ReportsPage({ searchParams }) {
     to = today;
   }
   const report = await getOperationalReport(p, from, to);
-  const n = (value) => bn ? String(value).replace(/\\d/g, (digit) => "০১২৩৪৫৬৭৮৯"[Number(digit)]) : String(value);
+  const n = (value) => bn ? String(value).replace(/\d/g, (digit) => "০১২৩৪৫৬৭৮৯"[Number(digit)]) : String(value);
   const summary = report?.totals;
   const maxDaily = Math.max(1, ...(report?.daily || []).map((row) => row.total));
   const maxDoctor = Math.max(1, ...(report?.doctors || []).map((row) => row.total));
@@ -47,8 +47,8 @@ export default async function ReportsPage({ searchParams }) {
       <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/65">{tr("Review appointment activity by date and doctor. Reports contain aggregate counts only and never display patient names, phone numbers or clinical notes.", "তারিখ ও চিকিৎসক অনুযায়ী অ্যাপয়েন্টমেন্টের কার্যক্রম দেখুন। প্রতিবেদনে শুধু সামগ্রিক সংখ্যা থাকে; রোগীর নাম, ফোন নম্বর বা চিকিৎসা-সংক্রান্ত নোট দেখানো হয় না।")}</p>
       {invalidRange && <p role="alert" className="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">{tr("The requested range was invalid. Showing the most recent seven days.", "তারিখের পরিসর সঠিক নয়। সর্বশেষ সাত দিনের তথ্য দেখানো হচ্ছে।")}</p>}
       <form className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-pine-100 bg-white p-4">
-        <label className="grid gap-1 text-xs font-bold text-pine-800">{tr("From", "শুরু")}<input className={input} type="date" name="from" value={from} readOnly={false} /></label>
-        <label className="grid gap-1 text-xs font-bold text-pine-800">{tr("To", "শেষ")}<input className={input} type="date" name="to" value={to} readOnly={false} /></label>
+        <label className="grid gap-1 text-xs font-bold text-pine-800">{tr("From", "শুরু")}<input className={input} type="date" name="from" defaultValue={from} /></label>
+        <label className="grid gap-1 text-xs font-bold text-pine-800">{tr("To", "শেষ")}<input className={input} type="date" name="to" defaultValue={to} /></label>
         <button className="rounded-xl bg-pine-900 px-5 py-2.5 text-sm font-bold text-white">{tr("Apply range", "প্রয়োগ করুন")}</button>
         <span className="text-xs text-ink/50">{tr("Maximum range: 31 days.", "সর্বোচ্চ সময়সীমা: ৩১ দিন।")}</span>
       </form>
