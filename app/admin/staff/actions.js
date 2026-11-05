@@ -52,6 +52,7 @@ export async function removeStaff(fd) {
   const p = await getSession();
   if (!p || !(p.role === "owner" || isBranchAdmin(p))) return;
   const username = g(fd, "username");
+  if (username && username === p.u) return;
   const target = (await listStaff(p.role === "owner" ? {} : { unit: p.unit })).find((x) => x.username === username);
   if (!target || target.role === "owner" || (isBranchAdmin(p) && ["branch", "branch_admin"].includes(target.role))) return;
   const error = await setStaffActive(username, false, p.role === "owner" ? {} : { unit: p.unit });

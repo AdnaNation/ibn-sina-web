@@ -6,7 +6,7 @@ import { getAdmin } from "@/lib/adminT";
 import { getSession, canDoctor, hasPermission } from "@/lib/auth";
 import { getConsole } from "@/lib/queue";
 import { getAllDoctors } from "@/lib/data";
-import { todayDhaka } from "@/lib/time";
+import { todayDhaka, isValidISODate } from "@/lib/time";
 import * as A from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -48,9 +48,8 @@ export default async function QueueConsole({ searchParams }) {
   if (!hasPermission(p, "queue.manage")) redirect("/admin/login");
   const canViewPatients = hasPermission(p, "patients.view");
   const sp = await searchParams;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(sp.date || "")
-    ? sp.date
-    : todayDhaka();
+  const requestedDate = typeof sp.date === "string" ? sp.date : "";
+  const date = isValidISODate(requestedDate) ? requestedDate : todayDhaka();
   const [sessions, doctors] = await Promise.all([
     getConsole(date, p),
     getAllDoctors(),

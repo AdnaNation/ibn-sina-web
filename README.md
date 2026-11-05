@@ -133,3 +133,27 @@ Staff account creation validates names, normalized usernames, password length, r
 Queue console updates validate status transitions, delay values, notices, start times and daily capacity in the persistence layer. Finished or cancelled sessions cannot be reopened or edited through the queue settings actions, and updates use a status-conditional database write to detect concurrent changes.
 
 Staff session restoration rejects unsupported or malformed stored roles. Queue-console and schedule-list database queries also fail closed when a non-owner account has no valid branch or doctor scope, rather than falling back to organization-wide records.
+
+## Browser security and prototype identity
+
+- The staff portal and sign-in screen identify themselves as an independent prototype and explicitly warn against using real patient data or actual hospital staff credentials.
+- The public live queue page uses demonstration-only metadata and is excluded from search indexing, like the other prototype routes.
+- Application-wide response headers include MIME-sniffing protection, a strict-origin referrer policy, frame denial, a restrictive permissions policy for camera/microphone/location, and same-origin opener isolation.
+- A Content Security Policy and HSTS are intentionally not asserted here: CSP needs a tested nonce-compatible Next.js setup and HSTS should only be enabled after the production HTTPS/domain configuration is confirmed.
+
+The patient tracking screen polls the rate-limited tracking endpoint every 15 seconds (within its per-client request budget), and both the patient ticket and public live board display a clear stale-data notice if an update fails rather than silently implying that the displayed queue state is current.
+
+The public live board announces changes to the current serial through a polite live region, and the appointment form exposes its pending submission and availability-loading states to assistive technology.
+
+## Additional request and workflow safeguards
+
+- Public patient cancellation now reports success only when MongoDB confirms that the appointment was still waiting and its status was actually changed. Failed, stale or already-updated requests return an error to the patient instead of showing a false success. The tracking reference remains a bearer secret; do not enable real patient cancellation without an approved identity-verification step such as OTP.
+- Public booking, appointment search and queue-console date filters use strict calendar-date validation, rejecting impossible dates such as February 31 rather than accepting a date-shaped string.
+- Staff account controls prevent an administrator from deactivating their own account through the staff-management screen.
+- Audit-log action filters are length-bounded and escaped as literal search text; result limits are clamped to a safe integer range.
+
+Queue session creation now fails cleanly when MongoDB is unavailable and refuses to report an already finished or cancelled session as newly opened. Queue actions and public booking share the same strict calendar-date validator.
+
+Patient tracking pages and the admin portal also receive explicit private no-store cache headers so ticket details and staff screens are not retained by shared browser or intermediary caches.
+
+The shared rate limiter now catches database-connection exceptions and fails closed. Client fingerprints prefer the reverse-proxy-provided `x-real-ip`; if unavailable, the right-most `x-forwarded-for` hop is used rather than trusting the left-most client-supplied value. Correct client identification still depends on the hosting reverse proxy overwriting its forwarded-IP headers.

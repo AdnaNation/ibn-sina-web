@@ -14,6 +14,12 @@ export async function cancelAppointment(ref) {
   const refLimit = await consumeRateLimit({ scope: "appointment-cancel-ref", key: value, limit: 3 });
   if (!refLimit.allowed) return { error: "Too many cancellation attempts for this tracking reference." };
 
-  await cancelAppt(value);
-  return { success: true };
+  try {
+    const result = await cancelAppt(value);
+    if (!result?.ok) return { error: result?.error || "Cancellation could not be completed." };
+    return { success: true };
+  } catch (error) {
+    console.error("[appointment] cancellation failed:", error?.message);
+    return { error: "Cancellation could not be completed right now. Please try again later." };
+  }
 }

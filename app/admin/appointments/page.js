@@ -5,7 +5,7 @@ import AdminNav from "@/components/AdminNav";
 import { getSession, hasPermission } from "@/lib/auth";
 import { getAdmin } from "@/lib/adminT";
 import { searchAppointments, maskPhone } from "@/lib/appointments";
-import { todayDhaka } from "@/lib/time";
+import { todayDhaka, isValidISODate } from "@/lib/time";
 import { bnDigits } from "@/lib/bnData";
 import { cancelAppointmentAction } from "./actions";
 
@@ -29,7 +29,8 @@ export default async function AppointmentsPage({ searchParams }) {
   const t = (en, b) => (bn ? b : en);
   const d = (x) => (bn ? bnDigits(x) : String(x));
   const sp = await searchParams;
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(sp.date || "") ? sp.date : todayDhaka();
+  const requestedDate = typeof sp.date === "string" ? sp.date : "";
+  const date = isValidISODate(requestedDate) ? requestedDate : todayDhaka();
   const q = String(sp.q || "");
   const status = String(sp.status || "");
   const rows = await searchAppointments(p, { date, q, status });
