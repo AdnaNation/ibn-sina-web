@@ -27,6 +27,7 @@ export async function publishScheduleAction(fd) {
     });
   }
 
+  if (!error) await writeAudit({ actor: p, action: "schedule.published", targetType: "schedule", targetId: doctor.slug + "|" + val(fd, "date"), details: { doctor: doctor.name, unit: doctor.unit, date: val(fd, "date") } });
   revalidatePath("/admin/schedules");
   revalidatePath("/appointment");
   redirect(error
