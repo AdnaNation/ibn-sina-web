@@ -166,3 +166,7 @@ Branch creation validates the required name, area and city, limits the size of o
 ## Operational reports
 
 The Reports module is available to accounts with reports.view. Main Admin sees organization-wide aggregates; branch accounts are restricted to their assigned branch, and doctor accounts are restricted to their assigned doctor. Reports show totals by appointment status, daily appointment volume, published session counts and the 25 busiest doctors for a selected date range of up to 31 days. The aggregation never returns patient names, phone numbers, tracking references or clinical notes. These are operational prototype metrics, not audited financial or clinical outcome reports.
+
+## Automated build verification
+
+GitHub Actions runs npm ci and npm run build for pull requests targeting main and pushes to main. It uses Node.js 20, keeps public booking and demo mode disabled, does not connect to a database, and does not deploy the application. A successful build verifies compilation only; it does not replace role-scope, queue-concurrency, privacy, accessibility or staging acceptance tests.
