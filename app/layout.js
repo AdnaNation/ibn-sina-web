@@ -11,7 +11,7 @@ const sans = Hind_Siliguri({
   display: "swap",
 });
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.ibnsinatrust.com";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
 export async function generateMetadata() {
   const lang = await getLang();
@@ -24,10 +24,11 @@ export async function generateMetadata() {
     : "Find a doctor, book a serial and track your turn live at Ibn Sina Trust hospitals and diagnostic centres. Hotline 10615.";
   return {
     metadataBase: new URL(SITE),
-    title: { default: title, template: "%s | " + (bn ? "ইবনে সিনা ট্রাস্ট" : "Ibn Sina Trust") },
+    title,
     description,
-    openGraph: { title, description, siteName: "Ibn Sina Trust", locale: bn ? "bn_BD" : "en_GB", type: "website" },
+    openGraph: { title, description, siteName: bn ? "স্বাধীন স্বাস্থ্যসেবা প্রোটোটাইপ" : "Independent Healthcare Prototype", locale: bn ? "bn_BD" : "en_GB", type: "website" },
     twitter: { card: "summary", title, description },
+    robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
   };
 }
 
