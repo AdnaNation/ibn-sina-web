@@ -49,7 +49,7 @@ test("CSV escapes quotes and neutralizes spreadsheet formulas", () => {
   }], { withPhone: true });
 
   assert.ok(csv.startsWith("\ufeff"));
-  assert.ok(csv.includes("'=HYPERLINK(""https://bad.example"",""Open"")"));
+  assert.ok(csv.includes(`'=HYPERLINK(""https://bad.example"",""Open"")`));
   assert.ok(csv.includes("'+8801700000000"));
   assert.ok(csv.includes("'@SUM(1,2)"));
   assert.ok(csv.includes('"Main, Dhaka"'));
