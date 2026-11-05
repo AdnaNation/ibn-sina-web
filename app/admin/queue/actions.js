@@ -1,5 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getSession, canSee, canDoctor, hasPermission } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
 import { writeAudit } from "@/lib/management";
@@ -7,6 +8,10 @@ import { advance, apptKey, book, openSession, patchSession, recall, sessionDoc }
 
 const get = (fd, k) => String(fd.get(k) || "");
 const done = () => revalidatePath("/admin/queue");
+const failQueue = (key, message) => {
+  const [doc, date] = String(key).split("|");
+  redirect(`/admin/queue?date=${encodeURIComponent(date || "")}&doc=${encodeURIComponent(doc || "")}&err=${encodeURIComponent(message)}`);
+};
 
 async function guard(key) {
   const p = await getSession();
@@ -28,7 +33,7 @@ export async function callNext(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await advance(k);
-  if (result?.error) throw new Error(result.error);
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.call_next", k);
   done();
 }
