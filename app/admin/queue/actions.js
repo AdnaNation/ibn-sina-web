@@ -94,10 +94,10 @@ export async function addWalkIn(fd) {
   if (name.length < 2 || name.length > 80) {
     failQueue(key, "Enter a patient name between 2 and 80 characters.");
   }
-  if (phone && !/^(?:\\+?88)?01[3-9]\\d{8}$/.test(phone.replace(/[\\s-]/g, ""))) {
+  if (phone && !/^(?:\+?88)?01[3-9]\d{8}$/.test(phone.replace(/[\s-]/g, ""))) {
     failQueue(key, "Enter a valid Bangladesh mobile number or leave it blank.");
   }
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     failQueue(key, "Choose a valid queue date.");
   }
 
