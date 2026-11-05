@@ -51,7 +51,7 @@ export default async function AppointmentsPage({ searchParams }) {
 
         <form className="mt-6 grid gap-3 rounded-2xl border border-pine-100 bg-white p-4 shadow-sm sm:grid-cols-[auto_1fr_auto_auto]">
           <label className="text-xs font-bold text-pine-800">{t("Date", "তারিখ")}<input type="date" name="date" defaultValue={date} className={`${input} mt-1`} /></label>
-          <label className="text-xs font-bold text-pine-800">{t("Search", "খুঁজুন")}<input name="q" defaultValue={q} placeholder={t("Name, mobile, code or doctor", "নাম, মোবাইল, কোড বা ডাক্তার")} className={`${input} mt-1`} /></label>
+          <label className="text-xs font-bold text-pine-800">{t("Search", "খুঁজুন")}<input name="q" defaultValue={q} placeholder={canPhone ? t("Name, mobile, code or doctor", "নাম, মোবাইল, কোড বা ডাক্তার") : t("Tracking code or doctor", "ট্র্যাকিং কোড বা ডাক্তার")} className={`${input} mt-1`} /></label>
           <label className="text-xs font-bold text-pine-800">{t("Status", "অবস্থা")}
             <select name="status" defaultValue={status} className={`${input} mt-1`}>
               <option value="">{t("All", "সব")}</option>
