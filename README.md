@@ -85,9 +85,9 @@ Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. S
 - `reports.view` — view branch reports
 - `billing.view` / `billing.manage` — billing access levels
 
-The current project has live UI/server-side enforcement for queue and schedule access. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
+The current project has live UI/server-side enforcement for queue and schedule access. Queue operators without `patients.view` can see the patient name needed to call the queue, but phone numbers and private notes are withheld. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
 
-Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permission changes take effect after the user signs in again because the signed session contains a permission snapshot.
+Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permissions are reloaded from the active staff record during server-side session validation, so permission changes take effect on the next request.
 
 For production, add password reset on first login, privileged-account MFA, and test cross-branch access using separate staging accounts before onboarding real staff. Shared MongoDB-backed login rate limits are implemented, but must be exercised under load and monitored.
 
@@ -106,7 +106,7 @@ The public navigation now uses native anchor navigation for page links instead o
 
 - **Bengali first.** The site opens in Bengali by default (English via the EN / বাংলা switch). Departments, branch names, places and numbers show in Bengali. A doctor can have an optional Bengali name (`nameBn`).
 - **Trust content.** New homepage sections: emergency notice, quick-access card, live numbers computed from your data (years of service, locations, cities, specialties), a three-step booking guide, "why patients trust us" and an FAQ. Review all wording with the Trust before launch.
-- **Mobile action bar** (Call / Book / Track / Live) for phone users.
+- **Mobile action bar** (Locations / Book / Track / Live) for phone users; no unverified hotline is displayed.
 - **SEO**: titles, Open Graph, structured data, `robots.txt`, `sitemap.xml`, custom 404 and error pages.
 - **Admin portal** has its own layout (no public header/footer), a mobile-friendly navigation bar and a Bengali/English switch on every screen.
 - **New admin modules**: `/admin/appointments` (search, cancel, CSV export, phone masking unless `patients.view`) and `/admin/doctors` (add, edit, feature on homepage, delete when unused). New permission: `doctors.manage`.
@@ -117,8 +117,8 @@ The public navigation now uses native anchor navigation for page links instead o
 
 1. Admin → Doctors → Import starter doctors, then replace the sample list with the real, verified roster.
 2. Publish real schedules in Admin → Schedules.
-3. Rate limiting is in memory. On several server instances, move it to MongoDB or Redis, and add MFA for the Main Admin.
-4. Add a privacy notice and confirm wording such as "hotline open every day" with the Trust.
+3. Shared MongoDB-backed rate limiting is used for staff sign-in and public tracking, availability, queue-board and cancellation endpoints. Monitor it under load and add privileged-account MFA before production.
+4. Add a reviewed privacy notice and publish only contact numbers and service-hour claims verified and approved by the Trust.
 
 
 ## Independent prototype safety baseline
