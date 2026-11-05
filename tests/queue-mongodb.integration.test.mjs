@@ -128,6 +128,8 @@ test("concurrent active bookings for the same phone create only one appointment"
 
   assert.equal(active.length, 1);
   assert.ok(results.every((result) => result.ref === active[0].ref));
+  const session = await db.collection("sessions").findOne({ key });
+  assert.equal(session.lastSerial, 1, "duplicate submissions must not consume extra serials");
 });
 
 test("simultaneous queue advances cannot call two patients at once", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
