@@ -175,3 +175,8 @@ GitHub Actions runs npm ci and npm run build for pull requests targeting main an
 ## Automated unit tests
 
 Run `npm test` to execute the dependency-free Node.js test suite. It currently covers strict calendar-date validation (including leap years and impossible dates), literal regex escaping for appointment search, and CSV export protections against spreadsheet formula injection and unauthorized phone-column output. GitHub Actions runs these tests before the production build on pull requests and pushes to `main`. These focused unit tests complement, but do not replace, MongoDB integration tests and end-to-end role/queue acceptance testing.
+
+
+## Authorization and branch-isolation unit tests
+
+The Node.js unit suite also exercises the shared server-side authorization rules: owner, branch-admin, doctor and staff permission behavior; exact-branch staff-management boundaries; and fail-closed branch/doctor query scopes. Queue console, appointment search/cancellation and operational reports use the same pure scope helpers, reducing the risk that those modules drift apart. These tests validate policy helpers, not MongoDB query execution or full HTTP/server-action authorization; those still require staging integration tests.
