@@ -170,3 +170,8 @@ The Reports module is available to accounts with reports.view. Main Admin sees o
 ## Automated build verification
 
 GitHub Actions runs npm ci and npm run build for pull requests targeting main and pushes to main. It uses Node.js 20, keeps public booking and demo mode disabled, does not connect to a database, and does not deploy the application. A successful build verifies compilation only; it does not replace role-scope, queue-concurrency, privacy, accessibility or staging acceptance tests.
+
+
+## Automated unit tests
+
+Run `npm test` to execute the dependency-free Node.js test suite. It currently covers strict calendar-date validation (including leap years and impossible dates), literal regex escaping for appointment search, and CSV export protections against spreadsheet formula injection and unauthorized phone-column output. GitHub Actions runs these tests before the production build on pull requests and pushes to `main`. These focused unit tests complement, but do not replace, MongoDB integration tests and end-to-end role/queue acceptance testing.
