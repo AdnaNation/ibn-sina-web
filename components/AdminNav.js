@@ -13,6 +13,7 @@ export default async function AdminNav({ p, current }) {
     owner && ["Overview", "/admin"],
     (admin || hasPermission(p, "queue.manage")) && ["Queue", "/admin/queue"],
     (admin || hasPermission(p, "appointments.view")) && ["Appointments", "/admin/appointments"],
+    hasPermission(p, "reports.view") && ["Reports", "/admin/reports"],
     (admin || hasPermission(p, "schedules.manage")) && ["Schedules", "/admin/schedules"],
     (admin || hasPermission(p, "doctors.view")) && ["Doctors", "/admin/doctors"],
     owner && ["Branches", "/admin/branches"],
