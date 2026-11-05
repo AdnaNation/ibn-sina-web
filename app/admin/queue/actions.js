@@ -126,7 +126,8 @@ export async function openNew(fd) {
   const { p, doctor } = await guardDoctor(get(fd, "doctorSlug"));
   const date = get(fd, "date");
   if (!validDate(date)) failQueue(doctor.slug + "|" + date, "Choose a valid queue date.");
-  await openSession(doctor, date);
+  const opened = await openSession(doctor, date);
+  if (opened?.error) failQueue(doctor.slug + "|" + date, opened.error);
   await record(p, "queue.session_opened", doctor.slug, { date });
   done();
 }
