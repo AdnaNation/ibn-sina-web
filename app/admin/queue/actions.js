@@ -27,21 +27,24 @@ async function record(p, action, targetId, details = {}) {
 export async function callNext(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
-  await advance(k);
+  const result = await advance(k);
+  if (result?.error) throw new Error(result.error);
   await record(p, "queue.call_next", k);
   done();
 }
 export async function skipCurrent(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
-  await advance(k, { skip: true });
+  const result = await advance(k, { skip: true });
+  if (result?.error) throw new Error(result.error);
   await record(p, "queue.patient_skipped", k);
   done();
 }
 export async function finishSession(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
-  await advance(k, { stop: true });
+  const result = await advance(k, { stop: true });
+  if (result?.error) throw new Error(result.error);
   await record(p, "queue.session_finished", k);
   done();
 }
