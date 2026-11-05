@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getDoctor } from "@/lib/data";
 import { book } from "@/lib/queue";
-import { todayDhaka } from "@/lib/time";
+import { todayDhaka, isValidISODate } from "@/lib/time";
 import { getLang } from "@/lib/i18n";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 
@@ -42,7 +42,7 @@ export async function bookAppointment(_prev, formData) {
   const doctor = f.doctor ? await getDoctor(String(f.doctor)) : null;
   if (!doctor) return fail(bn ? "একজন চিকিৎসক নির্বাচন করুন।" : "Choose a doctor.");
   if (
-    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    !isValidISODate(date) ||
     date < todayDhaka() ||
     date > todayDhaka(14)
   ) {
