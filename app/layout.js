@@ -17,11 +17,11 @@ export async function generateMetadata() {
   const lang = await getLang();
   const bn = lang === "bn";
   const title = bn
-    ? "ইবনে সিনা ট্রাস্ট | হাসপাতাল, ডাক্তার ও ডায়াগনস্টিক সেবা"
-    : "Ibn Sina Trust | Hospitals, Doctors & Healthcare Services";
+    ? "স্বাস্থ্যসেবা ও লাইভ সিরিয়াল | স্বাধীন প্রোটোটাইপ"
+    : "Healthcare Website & Live Queue | Independent Prototype";
   const description = bn
-    ? "ইবনে সিনা ট্রাস্টের হাসপাতাল ও ডায়াগনস্টিক সেন্টারে ডাক্তার খুঁজুন, অনলাইনে সিরিয়াল নিন এবং আপনার পালা লাইভ দেখুন। হটলাইন ১০৬১৫।"
-    : "Find a doctor, book a serial and track your turn live at Ibn Sina Trust hospitals and diagnostic centres. Hotline 10615.";
+    ? "হাসপাতালের ওয়েবসাইট ও লাইভ সিরিয়াল ব্যবস্থার একটি স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ। এটি কোনো হাসপাতালের আনুষ্ঠানিক ওয়েবসাইট বা অনুমোদিত বুকিং সেবা নয়।"
+    : "An independent demonstration prototype of a hospital website and live queue experience. This is not an official hospital website or an authorized booking service.";
   return {
     metadataBase: new URL(SITE),
     title,
