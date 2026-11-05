@@ -15,6 +15,8 @@ before(async () => {
   client = await getClient();
   db = client.db(dbName);
   await db.dropDatabase();
+  // Simulate the pre-existing non-unique index so the migration path is exercised.
+  await db.collection("appointments").createIndex({ sessionKey: 1, serial: 1 });
   queue = await import("../lib/queue.js");
 });
 
@@ -74,6 +76,10 @@ test("concurrent bookings never allocate the same serial or exceed capacity", { 
   assert.deepEqual(stored.map((item) => item.serial), [1, 2, 3, 4, 5]);
   assert.equal(new Set(stored.map((item) => item.serial)).size, stored.length);
   assert.equal(session.lastSerial, 5);
+  const indexes = await db.collection("appointments").listIndexes().toArray();
+  const serialIndex = indexes.find((index) => index.name === "unique_session_serial");
+  assert.equal(serialIndex?.unique, true);
+  assert.equal(indexes.some((index) => index.name === "sessionKey_1_serial_1"), false);
 });
 
 test("concurrent active bookings for the same phone create only one appointment", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
