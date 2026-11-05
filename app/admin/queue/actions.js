@@ -89,7 +89,8 @@ export async function recallPatient(fd) {
   const ref = get(fd, "ref");
   const key = await apptKey(ref);
   const p = await guard(key);
-  await recall(ref);
+  const result = await recall(ref);
+  if (result?.error) failQueue(key, result.error);
   await record(p, "queue.patient_recalled", key);
   done();
 }
