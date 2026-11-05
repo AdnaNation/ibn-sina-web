@@ -131,3 +131,5 @@ A Git push or hosting deployment does not establish clinical, legal, security or
 Staff account creation validates names, normalized usernames, password length, role allowlists, branch assignment and doctor-role assignment both in the server action and in the persistence helper. Permission values are allowlisted before storage; branch-admin accounts receive only the predefined permission set. Inactive branches are excluded from new account assignments.
 
 Queue console updates validate status transitions, delay values, notices, start times and daily capacity in the persistence layer. Finished or cancelled sessions cannot be reopened or edited through the queue settings actions, and updates use a status-conditional database write to detect concurrent changes.
+
+Staff session restoration rejects unsupported or malformed stored roles. Queue-console and schedule-list database queries also fail closed when a non-owner account has no valid branch or doctor scope, rather than falling back to organization-wide records.
