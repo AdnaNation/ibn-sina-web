@@ -133,3 +133,10 @@ Staff account creation validates names, normalized usernames, password length, r
 Queue console updates validate status transitions, delay values, notices, start times and daily capacity in the persistence layer. Finished or cancelled sessions cannot be reopened or edited through the queue settings actions, and updates use a status-conditional database write to detect concurrent changes.
 
 Staff session restoration rejects unsupported or malformed stored roles. Queue-console and schedule-list database queries also fail closed when a non-owner account has no valid branch or doctor scope, rather than falling back to organization-wide records.
+
+## Browser security and prototype identity
+
+- The staff portal and sign-in screen identify themselves as an independent prototype and explicitly warn against using real patient data or actual hospital staff credentials.
+- The public live queue page uses demonstration-only metadata and is excluded from search indexing, like the other prototype routes.
+- Application-wide response headers include MIME-sniffing protection, a strict-origin referrer policy, frame denial, a restrictive permissions policy for camera/microphone/location, and same-origin opener isolation.
+- A Content Security Policy and HSTS are intentionally not asserted here: CSP needs a tested nonce-compatible Next.js setup and HSTS should only be enabled after the production HTTPS/domain configuration is confirmed.
