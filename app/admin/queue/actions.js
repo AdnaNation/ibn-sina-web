@@ -3,16 +3,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSession, canSee, canDoctor, hasPermission } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
+import { isValidISODate } from "@/lib/time";
 import { writeAudit } from "@/lib/management";
 import { advance, apptKey, book, openSession, patchSession, recall, sessionDoc } from "@/lib/queue";
 
 const get = (fd, k) => String(fd.get(k) || "");
-const validDate = (value) => {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return false;
-  const parts = value.split("-").map(Number);
-  const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-  return date.getUTCFullYear() === parts[0] && date.getUTCMonth() === parts[1] - 1 && date.getUTCDate() === parts[2];
-};
+const validDate = isValidISODate;
 const done = () => revalidatePath("/admin/queue");
 const failQueue = (key, message) => {
   const [doc, date] = String(key).split("|");
