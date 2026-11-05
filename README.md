@@ -141,4 +141,4 @@ Staff session restoration rejects unsupported or malformed stored roles. Queue-c
 - Application-wide response headers include MIME-sniffing protection, a strict-origin referrer policy, frame denial, a restrictive permissions policy for camera/microphone/location, and same-origin opener isolation.
 - A Content Security Policy and HSTS are intentionally not asserted here: CSP needs a tested nonce-compatible Next.js setup and HSTS should only be enabled after the production HTTPS/domain configuration is confirmed.
 
-The patient tracking screen polls the rate-limited tracking endpoint every 15 seconds (within its per-client request budget) and displays a clear stale-data notice if an update fails, rather than silently implying that the displayed queue state is current.
+The patient tracking screen polls the rate-limited tracking endpoint every 15 seconds (within its per-client request budget), and both the patient ticket and public live board display a clear stale-data notice if an update fails rather than silently implying that the displayed queue state is current.
