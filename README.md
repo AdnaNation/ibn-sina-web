@@ -53,7 +53,7 @@ npm run seed
 - Booking requires a published doctor session. The public availability API does not invent a schedule when a session is missing.
 - Serial allocation uses MongoDB's conditional atomic increment to avoid assigning the same serial to two concurrent patients. Live queue transitions are serialized per doctor/day with an expiring database lock so two staff members cannot accidentally advance the same patient simultaneously. Schedule edits/removal also check that the session has not changed while the operation is in progress.
 - Duplicate waiting/serving appointments are checked by phone number and doctor session. A partial unique MongoDB index is created for active appointments by session and normalized phone number. Before enabling it on an existing production database, clean up any duplicate active records and normalize legacy phone numbers; blank-phone walk-ins are excluded from this index.
-- The public website must not be treated as an emergency-care channel. Show only verified emergency guidance and contact details approved by the institution; never invent or carry over an unverified hotline.
+- Walk-in entries in the staff queue validate patient-name length and optional Bangladesh mobile format before creating a record. The public website must not be treated as an emergency-care channel. Show only verified emergency guidance and contact details approved by the institution; never invent or carry over an unverified hotline.
 
 
 ## Doctor schedule management
@@ -87,7 +87,7 @@ Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. S
 
 The current project has live UI/server-side enforcement for queue and schedule access. Queue operators without `patients.view` can see the patient name needed to call the queue, but phone numbers and private notes are withheld. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
 
-Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permissions are reloaded from the active staff record during server-side session validation, so permission changes take effect on the next request.
+Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permissions are reloaded from the active staff record during server-side session validation, so permission changes take effect on the next request. An explicitly empty permission array grants no doctor permissions; legacy doctor accounts without a stored permission array retain the limited queue/appointment defaults.
 
 For production, add password reset on first login, privileged-account MFA, and test cross-branch access using separate staging accounts before onboarding real staff. Shared MongoDB-backed login rate limits are implemented, but must be exercised under load and monitored.
 
@@ -109,7 +109,7 @@ The public navigation now uses native anchor navigation for page links instead o
 - **Mobile action bar** (Locations / Book / Track / Live) for phone users; no unverified hotline is displayed.
 - **SEO**: titles, Open Graph, structured data, `robots.txt`, `sitemap.xml`, custom 404 and error pages.
 - **Admin portal** has its own layout (no public header/footer), a mobile-friendly navigation bar and a Bengali/English switch on every screen.
-- **New admin modules**: `/admin/appointments` (search, cancel, CSV export, phone masking unless `patients.view`) and `/admin/doctors` (add, edit, feature on homepage, delete when unused). New permission: `doctors.manage`.
+- **New admin modules**: `/admin/appointments` (search, cancel, date-scoped CSV export, phone masking unless `patients.view`) and `/admin/doctors` (add, edit, feature on homepage, delete when unused). New permission: `doctors.manage`.
 - **Security**: shared MongoDB-backed sign-in rate limiting (5 attempts per username/address fingerprint and 20 per address fingerprint in a 10-minute window), sign-in success/failure in the audit log, and demo mode off in production unless `ENABLE_DEMO=true`.
 - **Bug fixes**: branch pages never listed their doctors; missing `.env.example`; a permission check used a key that did not exist.
 
