@@ -86,18 +86,30 @@ export async function recallPatient(fd) {
 }
 export async function addWalkIn(fd) {
   const { p, doctor } = await guardDoctor(get(fd, "doctorSlug"));
+  const date = get(fd, "date");
+  const key = `${doctor.slug}|${date}`;
   const name = get(fd, "name").trim();
-  if (name) {
-    const result = await book({
-      doctor,
-      date: get(fd, "date"),
-      name,
-      phone: get(fd, "phone"),
-      walkIn: true,
-    });
-    if (result?.error) failQueue(k, result.error);
-    await record(p, "queue.walk_in_added", doctor.slug);
+  const phone = get(fd, "phone").trim();
+
+  if (name.length < 2 || name.length > 80) {
+    failQueue(key, "Enter a patient name between 2 and 80 characters.");
   }
+  if (phone && !/^(?:\\+?88)?01[3-9]\\d{8}$/.test(phone.replace(/[\\s-]/g, ""))) {
+    failQueue(key, "Enter a valid Bangladesh mobile number or leave it blank.");
+  }
+  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)) {
+    failQueue(key, "Choose a valid queue date.");
+  }
+
+  const result = await book({
+    doctor,
+    date,
+    name,
+    phone,
+    walkIn: true,
+  });
+  if (result?.error) failQueue(key, result.error);
+  await record(p, "queue.walk_in_added", key, { doctor: doctor.name, date });
   done();
 }
 export async function openNew(fd) {
