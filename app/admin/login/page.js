@@ -60,7 +60,7 @@ export default async function Login({ searchParams }) {
               <p role="alert" className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">
                 {error === "locked"
                   ? tr(`Too many attempts. Try again in ${wait || 10} minutes.`, `অনেকবার ভুল চেষ্টা হয়েছে। ${wait || 10} মিনিট পরে আবার চেষ্টা করুন।`)
-                  : tr("Wrong username or password. Try again.", "ইউজারনেম বা পাসওয়ার্ড ভুল। আবার চেষ্টা করুন।")}
+                  : error === "unavailable" ? tr("Sign-in is temporarily unavailable. Please try again shortly.", "সাইন ইন সাময়িকভাবে বন্ধ আছে। কিছুক্ষণ পর আবার চেষ্টা করুন।") : tr("Wrong username or password. Try again.", "ইউজারনেম বা পাসওয়ার্ড ভুল। আবার চেষ্টা করুন.")}
               </p>
             )}
             <button className="w-full rounded-xl bg-pine-900 px-6 py-3.5 text-base font-bold text-white transition hover:bg-pine-800">{tr("Sign in", "সাইন ইন")}</button>
