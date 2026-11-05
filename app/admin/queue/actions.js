@@ -7,6 +7,12 @@ import { writeAudit } from "@/lib/management";
 import { advance, apptKey, book, openSession, patchSession, recall, sessionDoc } from "@/lib/queue";
 
 const get = (fd, k) => String(fd.get(k) || "");
+const validDate = (value) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return false;
+  const parts = value.split("-").map(Number);
+  const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  return date.getUTCFullYear() === parts[0] && date.getUTCMonth() === parts[1] - 1 && date.getUTCDate() === parts[2];
+};
 const done = () => revalidatePath("/admin/queue");
 const failQueue = (key, message) => {
   const [doc, date] = String(key).split("|");
@@ -57,7 +63,8 @@ export async function setStatus(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const status = get(fd, "status");
-  await patchSession(k, { status });
+  const result = await patchSession(k, { status });
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.status_changed", k, { status });
   done();
 }
@@ -65,14 +72,16 @@ export async function setDelay(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const delayMin = get(fd, "delayMin");
-  await patchSession(k, { delayMin, notice: get(fd, "notice") });
+  const result = await patchSession(k, { delayMin, notice: get(fd, "notice") });
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.delay_updated", k, { delayMin });
   done();
 }
 export async function saveSettings(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
-  await patchSession(k, { startTime: get(fd, "startTime"), maxPatients: get(fd, "maxPatients") });
+  const result = await patchSession(k, { startTime: get(fd, "startTime"), maxPatients: get(fd, "maxPatients") });
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.settings_updated", k);
   done();
 }
@@ -80,7 +89,8 @@ export async function recallPatient(fd) {
   const ref = get(fd, "ref");
   const key = await apptKey(ref);
   const p = await guard(key);
-  await recall(ref);
+  const result = await recall(ref);
+  if (result?.error) failQueue(key, result.error);
   await record(p, "queue.patient_recalled", key);
   done();
 }
@@ -97,7 +107,7 @@ export async function addWalkIn(fd) {
   if (phone && !/^(?:\+?88)?01[3-9]\d{8}$/.test(phone.replace(/[\s-]/g, ""))) {
     failQueue(key, "Enter a valid Bangladesh mobile number or leave it blank.");
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  if (!validDate(date)) {
     failQueue(key, "Choose a valid queue date.");
   }
 
@@ -115,6 +125,7 @@ export async function addWalkIn(fd) {
 export async function openNew(fd) {
   const { p, doctor } = await guardDoctor(get(fd, "doctorSlug"));
   const date = get(fd, "date");
+  if (!validDate(date)) failQueue(doctor.slug + "|" + date, "Choose a valid queue date.");
   await openSession(doctor, date);
   await record(p, "queue.session_opened", doctor.slug, { date });
   done();

@@ -14,7 +14,7 @@ const validDate = (value) => {
 
 export async function GET(req) {
   const p = await getSession();
-  if (!p || !hasPermission(p, "reports.view")) {
+  if (!p || !hasPermission(p, "appointments.view") || !hasPermission(p, "reports.view")) {
     return new NextResponse("Not allowed", {
       status: 403,
       headers: { "Cache-Control": "no-store, private" },
