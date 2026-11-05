@@ -151,3 +151,5 @@ The public live board announces changes to the current serial through a polite l
 - Public booking, appointment search and queue-console date filters use strict calendar-date validation, rejecting impossible dates such as February 31 rather than accepting a date-shaped string.
 - Staff account controls prevent an administrator from deactivating their own account through the staff-management screen.
 - Audit-log action filters are length-bounded and escaped as literal search text; result limits are clamped to a safe integer range.
+
+Queue session creation now fails cleanly when MongoDB is unavailable and refuses to report an already finished or cancelled session as newly opened. Queue actions and public booking share the same strict calendar-date validator.
