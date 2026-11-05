@@ -16,7 +16,7 @@ export async function cancelAppointment(ref) {
 
   try {
     const result = await cancelAppt(value);
-    if (result?.error) return { error: result.error };
+    if (!result?.ok) return { error: result?.error || "Cancellation could not be completed." };
     return { success: true };
   } catch (error) {
     console.error("[appointment] cancellation failed:", error?.message);
