@@ -63,7 +63,8 @@ export async function setStatus(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const status = get(fd, "status");
-  await patchSession(k, { status });
+  const result = await patchSession(k, { status });
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.status_changed", k, { status });
   done();
 }
@@ -71,14 +72,16 @@ export async function setDelay(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const delayMin = get(fd, "delayMin");
-  await patchSession(k, { delayMin, notice: get(fd, "notice") });
+  const result = await patchSession(k, { delayMin, notice: get(fd, "notice") });
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.delay_updated", k, { delayMin });
   done();
 }
 export async function saveSettings(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
-  await patchSession(k, { startTime: get(fd, "startTime"), maxPatients: get(fd, "maxPatients") });
+  const result = await patchSession(k, { startTime: get(fd, "startTime"), maxPatients: get(fd, "maxPatients") });
+  if (result?.error) failQueue(k, result.error);
   await record(p, "queue.settings_updated", k);
   done();
 }
