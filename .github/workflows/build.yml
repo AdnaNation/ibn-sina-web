@@ -1,0 +1,41 @@
+name: Build verification
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  production-build:
+    name: Next.js production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      ADMIN_SECRET: "ci-only-secret-not-for-real-use-0000000000000000"
+      ADMIN_PASSWORD: "ci-only-password-not-for-real-use"
+      ENABLE_PUBLIC_BOOKING: "false"
+      ENABLE_DEMO: "false"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Build production application
+        run: npm run build
