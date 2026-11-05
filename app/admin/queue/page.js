@@ -99,6 +99,8 @@ export default async function QueueConsole({ searchParams }) {
           </form>
         </div>
 
+        {sp.err && <p role="alert" className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{sp.err}</p>}
+
         {sessions.length > 1 && (
           <nav className="mt-6 flex flex-wrap gap-2" aria-label={tr("Doctors")}>
             {sessions.map((x) => (
