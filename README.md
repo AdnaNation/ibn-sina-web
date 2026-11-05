@@ -47,6 +47,7 @@ npm run seed
 - `/admin/schedules` — publish and manage doctor sessions (Main Admin across all branches; authorized branch users within their branch)
 - `/admin/queue` — live patient queue console
 - `/admin/staff` — Main Admin creates branch admins/staff; Branch Admin creates staff for their own branch
+- `/admin/reports` — scoped operational reports with date, doctor and queue-status aggregates (maximum 31-day range)
 
 ## Appointment safety notes
 
@@ -85,7 +86,7 @@ Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. S
 - `reports.view` — view branch reports
 - `billing.view` / `billing.manage` — billing access levels
 
-The current project has live UI/server-side enforcement for queue and schedule access. Appointment CSV export requires both `appointments.view` and `reports.view`; patient contact fields remain excluded unless `patients.view` is also granted. Queue operators without `patients.view` can see the patient name needed to call the queue, but phone numbers and private notes are withheld. The appointment, patient, reports and billing permission keys are stored and shown in the staff permission profile as groundwork for those management modules; those modules still need to be built before those permissions grant access to new screens. Do not interpret a saved permission as a completed feature.
+The current project has live UI/server-side enforcement for queue and schedule access. Appointment CSV export requires both `appointments.view` and `reports.view`; patient contact fields remain excluded unless `patients.view` is also granted. Queue operators without `patients.view` can see the patient name needed to call the queue, but phone numbers and private notes are withheld. The reports permission now opens /admin/reports, which aggregates appointment volume by date, doctor and queue status for the user’s authorized branch or doctor scope. It displays aggregate counts only and caps each query at 31 days. Billing permissions remain groundwork only; do not interpret a saved billing permission as a completed feature.
 
 Authorization is checked on the server for admin pages and server actions; hiding a link in the navigation is not the security boundary. Existing legacy accounts with role `branch` are read as `branch_admin` for compatibility. Staff permissions are reloaded from the active staff record during server-side session validation, so permission changes take effect on the next request. An explicitly empty permission array grants no doctor permissions; legacy doctor accounts without a stored permission array retain the limited queue/appointment defaults.
 
@@ -161,3 +162,7 @@ The shared rate limiter now catches database-connection exceptions and fails clo
 ## Branch administration input safeguards
 
 Branch creation validates the required name, area and city, limits the size of optional facility details, strips control characters, and validates an optional contact number before storing the record. The form also applies matching browser-side length limits. Only add branch contact numbers after they have been verified by the institution; the prototype does not verify ownership of a phone number.
+
+## Operational reports
+
+The Reports module is available to accounts with reports.view. Main Admin sees organization-wide aggregates; branch accounts are restricted to their assigned branch, and doctor accounts are restricted to their assigned doctor. Reports show totals by appointment status, daily appointment volume, published session counts and the 25 busiest doctors for a selected date range of up to 31 days. The aggregation never returns patient names, phone numbers, tracking references or clinical notes. These are operational prototype metrics, not audited financial or clinical outcome reports.
