@@ -144,3 +144,10 @@ Staff session restoration rejects unsupported or malformed stored roles. Queue-c
 The patient tracking screen polls the rate-limited tracking endpoint every 15 seconds (within its per-client request budget), and both the patient ticket and public live board display a clear stale-data notice if an update fails rather than silently implying that the displayed queue state is current.
 
 The public live board announces changes to the current serial through a polite live region, and the appointment form exposes its pending submission and availability-loading states to assistive technology.
+
+## Additional request and workflow safeguards
+
+- Public patient cancellation now reports success only when MongoDB confirms that the appointment was still waiting and its status was actually changed. Failed, stale or already-updated requests return an error to the patient instead of showing a false success. The tracking reference remains a bearer secret; do not enable real patient cancellation without an approved identity-verification step such as OTP.
+- Public booking, appointment search and queue-console date filters use strict calendar-date validation, rejecting impossible dates such as February 31 rather than accepting a date-shaped string.
+- Staff account controls prevent an administrator from deactivating their own account through the staff-management screen.
+- Audit-log action filters are length-bounded and escaped as literal search text; result limits are clamped to a safe integer range.
