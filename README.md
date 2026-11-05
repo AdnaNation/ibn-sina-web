@@ -157,3 +157,7 @@ Queue session creation now fails cleanly when MongoDB is unavailable and refuses
 Patient tracking pages and the admin portal also receive explicit private no-store cache headers so ticket details and staff screens are not retained by shared browser or intermediary caches.
 
 The shared rate limiter now catches database-connection exceptions and fails closed. Client fingerprints prefer the reverse-proxy-provided `x-real-ip`; if unavailable, the right-most `x-forwarded-for` hop is used rather than trusting the left-most client-supplied value. Correct client identification still depends on the hosting reverse proxy overwriting its forwarded-IP headers.
+
+## Branch administration input safeguards
+
+Branch creation validates the required name, area and city, limits the size of optional facility details, strips control characters, and validates an optional contact number before storing the record. The form also applies matching browser-side length limits. Only add branch contact numbers after they have been verified by the institution; the prototype does not verify ownership of a phone number.
