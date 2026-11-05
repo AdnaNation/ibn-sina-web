@@ -180,3 +180,8 @@ Run `npm test` to execute the dependency-free Node.js test suite. It currently c
 ## Authorization and branch-isolation unit tests
 
 The Node.js unit suite also exercises the shared server-side authorization rules: owner, branch-admin, doctor and staff permission behavior; exact-branch staff-management boundaries; and fail-closed branch/doctor query scopes. Queue console, appointment search/cancellation and operational reports use the same pure scope helpers, reducing the risk that those modules drift apart. These tests validate policy helpers, not MongoDB query execution or full HTTP/server-action authorization; those still require staging integration tests.
+
+
+## Queue settings validation tests
+
+Queue-session edits now use a shared pure validation function that is covered by Node.js unit tests. The suite checks permitted status transitions, immutable finished/cancelled sessions, delay and notice limits, valid 24-hour start times, capacity bounds, and protection against reducing capacity below issued serials. Database-level conditional writes and the per-session queue lock still require integration/load testing against MongoDB.
