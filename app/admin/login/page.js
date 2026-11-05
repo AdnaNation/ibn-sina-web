@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { HeartPulse, LockKeyhole, ShieldCheck } from "lucide-react";
 import { login } from "@/lib/auth";
 import { getLang } from "@/lib/i18n";
-import { checkLimit, recordFailure, clearFailures } from "@/lib/rateLimit";
+import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 import { writeAudit } from "@/lib/management";
 
 const field = "mt-1.5 w-full rounded-xl border border-pine-100 bg-white px-4 py-3 text-base outline-none transition focus:border-pine-500 focus:ring-4 focus:ring-pine-100";
@@ -18,21 +18,23 @@ export default async function Login({ searchParams }) {
   async function go(fd) {
     "use server";
     const h = await headers();
-    const ip = (h.get("x-forwarded-for") || "").split(",")[0].trim() || "local";
+    const fingerprint = requestFingerprint(h);
     const username = String(fd.get("username") || "").trim().toLowerCase().slice(0, 40);
-    // Limit per person+address AND per address, so one attacker cannot try many usernames.
-    const keys = [`u:${ip}:${username}`, `ip:${ip}`];
-    const blocked = keys.map((k) => checkLimit(k, k.startsWith("ip:") ? { max: 20 } : { max: 5 })).find((r) => !r.ok);
-    if (blocked) redirect(`/admin/login?error=locked&wait=${blocked.retryAfterMin || 10}`);
+    const userLimit = await consumeRateLimit({ scope: "admin-login-user", key: fingerprint + ":" + (username || "unknown"), limit: 5, windowMs: 600000 });
+    const addressLimit = await consumeRateLimit({ scope: "admin-login-address", key: fingerprint, limit: 20, windowMs: 600000 });
+    if (userLimit.unavailable || addressLimit.unavailable) redirect("/admin/login?error=unavailable");
+    const blocked = [userLimit, addressLimit].find((item) => !item.allowed);
+    if (blocked) {
+      const wait = Math.max(1, Math.ceil(((blocked.resetAt || Date.now() + 600000) - Date.now()) / 60000));
+      redirect("/admin/login?error=locked&wait=" + wait);
+    }
 
     const ok = await login(username, String(fd.get("password") || ""));
     if (!ok) {
-      keys.forEach((k) => recordFailure(k));
-      await writeAudit({ actor: { u: username || "unknown", name: username || "unknown" }, action: "login.failed", targetType: "session", targetId: ip });
+      await writeAudit({ actor: { u: username || "unknown", name: username || "unknown" }, action: "login.failed", targetType: "session", targetId: fingerprint });
       redirect("/admin/login?error=1");
     }
-    keys.forEach(clearFailures);
-    await writeAudit({ actor: { u: username, name: username }, action: "login.success", targetType: "session", targetId: ip });
+    await writeAudit({ actor: { u: username, name: username }, action: "login.success", targetType: "session", targetId: fingerprint });
     redirect("/admin");
   }
 
