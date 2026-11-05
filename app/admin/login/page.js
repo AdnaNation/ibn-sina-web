@@ -43,12 +43,12 @@ export default async function Login({ searchParams }) {
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-3">
           <span className="grid size-12 place-items-center rounded-2xl bg-pine-900 text-white"><HeartPulse size={26} /></span>
-          <span className="font-serif text-2xl font-semibold text-pine-950">{tr("Ibn Sina Trust", "ইবনে সিনা ট্রাস্ট")}</span>
+          <span className="font-serif text-2xl font-semibold text-pine-950">{tr("Independent Prototype", "স্বাধীন প্রোটোটাইপ")}</span>
         </div>
         <div className="rounded-3xl border border-pine-100 bg-white p-7 shadow-xl shadow-pine-900/5 sm:p-9">
           <span className="grid size-11 place-items-center rounded-xl bg-pine-50 text-pine-800"><LockKeyhole size={20} /></span>
           <h1 className="mt-4 font-serif text-3xl font-semibold text-pine-950">{tr("Staff sign in", "কর্মী সাইন ইন")}</h1>
-          <p className="mt-2 text-sm leading-6 text-ink/70">{tr("Use the username and password given to you by the hospital.", "হাসপাতাল থেকে পাওয়া ইউজারনেম ও পাসওয়ার্ড ব্যবহার করুন।")}</p>
+          <p className="mt-2 text-sm leading-6 text-ink/70">{tr("Use the demo account credentials configured for this independent prototype. Do not use actual hospital staff credentials.", "এই স্বাধীন প্রোটোটাইপের জন্য নির্ধারিত ডেমো অ্যাকাউন্ট ব্যবহার করুন। হাসপাতালের প্রকৃত কর্মী পরিচয়পত্র ব্যবহার করবেন না।")}</p>
           <form action={go} className="mt-6 space-y-4">
             <label className="block text-sm font-semibold text-pine-900">{tr("Username", "ইউজারনেম")}
               <input name="username" required autoFocus autoCapitalize="none" autoComplete="username" className={field} />
