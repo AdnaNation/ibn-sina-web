@@ -153,3 +153,5 @@ The public live board announces changes to the current serial through a polite l
 - Audit-log action filters are length-bounded and escaped as literal search text; result limits are clamped to a safe integer range.
 
 Queue session creation now fails cleanly when MongoDB is unavailable and refuses to report an already finished or cancelled session as newly opened. Queue actions and public booking share the same strict calendar-date validator.
+
+Patient tracking pages and the admin portal also receive explicit private no-store cache headers so ticket details and staff screens are not retained by shared browser or intermediary caches.
