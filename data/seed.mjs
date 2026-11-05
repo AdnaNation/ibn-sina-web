@@ -33,7 +33,7 @@ const U = [
 
 export const units = U.map(([name, area, city, type], i) => ({
   slug: slug(`${name}-${area}-${type === 'Hospital' && area === 'Bogura' ? 'hospital' : ''}`),
-  name, area, city, type, order: i, hotline: '10615',
+  name, area, city, type, order: i, hotline: '',
 }));
 
 export const departments = [
@@ -57,7 +57,7 @@ const D = [
   ['Dr. Tanjina Anowar', 'Radiology & Imaging', 'Ibn Sina Diagnostic & Consultation Center, Chattogram'],
 ];
 export const doctors = D.map(([name, department, unit], i) => ({
-  slug: slug(name), name, department, unit, phone: '10615', photo: null, featured: i < 8,
+  slug: slug(name), name, department, unit, phone: '', photo: null, featured: i < 8,
 }));
 
 export const services = [
