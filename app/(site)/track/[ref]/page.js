@@ -16,7 +16,7 @@ export default async function TrackPage({ params, searchParams }) {
   if (!ticket) notFound();
   return (
     <div className="mx-auto max-w-xl px-4 py-10">
-      <LiveTicket initial={ticket} isNew={sp.new === "1"} lang={lang} />
+      <LiveTicket initial={ticket} isNew={sp.new === "1"} lang={lang} allowCancel={process.env.ENABLE_PUBLIC_CANCELLATION === "true"} />
     </div>
   );
 }
