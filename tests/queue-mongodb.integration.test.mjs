@@ -26,6 +26,46 @@ after(async () => {
   await client.close();
 });
 
+test("availability automatically opens a rolling five-day window and preserves cancelled sessions", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
+  const doctor = {
+    slug: "auto-window-doctor",
+    name: "Automatic Window Doctor",
+    department: "Testing",
+    unit: "Integration Test Unit",
+  };
+  const days = await queue.getAvailability(doctor);
+  assert.equal(days.length, 5);
+  assert.deepEqual(days.map((day) => day.date), Array.from({ length: 5 }, (_, index) => {
+    const date = new Date(Date.now() + index * 86400000);
+    return date.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  }));
+  assert.ok(days.every((day) => !day.closed && !day.unscheduled && day.left === 40));
+  const sessions = await db.collection("sessions")
+    .find({ doctorSlug: doctor.slug })
+    .sort({ date: 1 })
+    .toArray();
+  assert.equal(sessions.length, 5);
+  assert.ok(sessions.every((session) =>
+    session.autoOpened === true &&
+    session.status === "scheduled" &&
+    session.startTime === "17:00" &&
+    session.maxPatients === 40
+  ));
+
+  const cancelledDate = days[1].date;
+  await db.collection("sessions").updateOne(
+    { key: queue.sessionKey(doctor.slug, cancelledDate) },
+    { $set: { status: "cancelled", cancelledAt: new Date() } },
+  );
+  const refreshed = await queue.getAvailability(doctor);
+  assert.equal(refreshed[1].closed, true);
+  assert.equal(refreshed[1].closedReason, "closed");
+  const cancelled = await db.collection("sessions").findOne({
+    key: queue.sessionKey(doctor.slug, cancelledDate),
+  });
+  assert.equal(cancelled.status, "cancelled");
+});
+
 test("concurrent bookings never allocate the same serial or exceed capacity", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
   const doctor = {
     slug: "integration-doctor",
