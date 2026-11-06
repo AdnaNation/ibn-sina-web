@@ -44,9 +44,9 @@ export async function bookAppointment(_prev, formData) {
   if (
     !isValidISODate(date) ||
     date < todayDhaka() ||
-    date > todayDhaka(14)
+    date > todayDhaka(4)
   ) {
-    return fail(bn ? "আগামী ১৪ দিনের মধ্যে একটি তারিখ নির্বাচন করুন।" : "Choose a date within the next 14 days.");
+    return fail(bn ? "আগামী ৫ দিনের মধ্যে একটি তারিখ নির্বাচন করুন।" : "Choose a date within the next 5 days.");
   }
 
   let r;
