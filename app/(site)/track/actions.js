@@ -1,11 +1,12 @@
 "use server";
 import { headers } from "next/headers";
 import { cancelAppt } from "@/lib/queue";
+import { isValidTrackingReference } from "@/lib/tracking-reference.mjs";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 
 export async function cancelAppointment(ref) {
   const value = String(ref || "").trim().toUpperCase();
-  if (!/^IST-[A-Z0-9]{6}$/.test(value)) return { error: "Invalid tracking reference." };
+  if (!isValidTrackingReference(value)) return { error: "Invalid tracking reference." };
 
   const requestHeaders = await headers();
   const ipLimit = await consumeRateLimit({ scope: "appointment-cancel-ip", key: requestFingerprint(requestHeaders), limit: 5 });
