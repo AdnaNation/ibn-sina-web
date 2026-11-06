@@ -4,7 +4,7 @@ import { generateTrackingReference, isValidTrackingReference } from "../lib/trac
 
 test("new tracking references use twelve unambiguous characters", () => {
   const ref = generateTrackingReference();
-  assert.match(ref, /^IST-[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{12}$/);
+  assert.match(ref, /^IST-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{12}$/);
   assert.equal(isValidTrackingReference(ref), true);
 });
 
