@@ -221,3 +221,26 @@ test("simultaneous queue advances cannot call two patients at once", { skip: !en
   assert.equal(statuses.filter((item) => item.status === "serving").length, 1);
   assert.equal(session.current, 2);
 });
+
+
+test("concurrent availability requests safely create one five-day window", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
+  const doctor = {
+    slug: "concurrent-window-doctor",
+    name: "Concurrent Window Doctor",
+    department: "Testing",
+    unit: "Integration Test Unit",
+  };
+
+  const results = await Promise.all(
+    Array.from({ length: 12 }, () => queue.getAvailability(doctor)),
+  );
+
+  assert.ok(results.every((days) => Array.isArray(days) && days.length === 5));
+  assert.ok(results.every((days) => days.every((day) => !day.unscheduled)));
+  const sessions = await db.collection("sessions")
+    .find({ doctorSlug: doctor.slug })
+    .toArray();
+  assert.equal(sessions.length, 5);
+  assert.equal(new Set(sessions.map((session) => session.key)).size, 5);
+  assert.ok(sessions.every((session) => session.status === "scheduled"));
+});
