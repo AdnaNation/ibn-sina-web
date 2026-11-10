@@ -1,10 +1,9 @@
-import { Newsreader, Hind_Siliguri, Noto_Serif_Bengali } from "next/font/google";
+import { Newsreader, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { getLang } from "@/lib/i18n";
 
 const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", display: "swap" });
-const serifBn = Noto_Serif_Bengali({ subsets: ["bengali"], variable: "--font-serif-bn", display: "swap" });
-const sans = Hind_Siliguri({
+const sans = Noto_Sans_Bengali({
   subsets: ["latin", "bengali"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
@@ -37,7 +36,7 @@ export const viewport = { themeColor: "#02281F", width: "device-width", initialS
 export default async function RootLayout({ children }) {
   const lang = await getLang();
   return (
-    <html lang={lang} className={`${serif.variable} ${serifBn.variable} ${sans.variable}`}>
+    <html lang={lang} className={`${serif.variable} ${sans.variable}`}>
       <body>{children}</body>
     </html>
   );
