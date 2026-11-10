@@ -8,8 +8,8 @@
   :focus-visible { @apply outline-2 outline-offset-2 outline-brass; outline-style: solid; }
 }
 
-/* Bangla needs its own serif: Newsreader has no Bengali glyphs */
-:lang(bn) .font-serif { font-family: var(--font-serif-bn), serif; line-height: 1.25; }
+/* Use the same clean sans-serif Bengali typeface for body copy and headings. */
+:lang(bn) .font-serif { font-family: var(--font-sans), sans-serif; line-height: 1.35; }
 :lang(bn) body { line-height: 1.7; }
 
 /* Alpona (floral floor-art) pattern */
