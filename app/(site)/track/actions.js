@@ -1,9 +1,13 @@
 "use server";
+import { isPublicCancellationEnabled } from "@/lib/publicFeatures.mjs";
 import { headers } from "next/headers";
 import { cancelAppt } from "@/lib/queue";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 
 export async function cancelAppointment(ref) {
+  if (!isPublicCancellationEnabled()) {
+    return { error: "Self-service cancellation is disabled for this prototype." };
+  }
   const value = String(ref || "").trim().toUpperCase();
   if (!/^IST-[A-Z0-9]{6}$/.test(value)) return { error: "Invalid tracking reference." };
 

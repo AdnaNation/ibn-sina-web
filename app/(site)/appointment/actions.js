@@ -6,6 +6,7 @@ import { book } from "@/lib/queue";
 import { todayDhaka, isValidISODate } from "@/lib/time";
 import { getLang } from "@/lib/i18n";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
+import { isPublicBookingEnabled } from "@/lib/publicFeatures.mjs";
 
 export async function bookAppointment(_prev, formData) {
   const f = Object.fromEntries(formData);
@@ -14,12 +15,11 @@ export async function bookAppointment(_prev, formData) {
   if (f.website) return {}; // honeypot: bots fill this hidden field
 
   const fail = (error) => ({ error, values: f });
-  // A demonstration prototype must never collect real patient details by accident.
-  // Enable only after written authorization, privacy review and production readiness.
-  if (process.env.ENABLE_PUBLIC_BOOKING !== "true") {
+  // Demo mode accepts fictional test details only. Real public booking requires separate authorization.
+  if (!isPublicBookingEnabled()) {
     return fail(bn
       ? "এটি প্রদর্শনীমূলক প্রোটোটাইপ। বাস্তব রোগীর তথ্য বা বুকিং গ্রহণের জন্য অনুমোদিত নয়।"
-      : "This is a demonstration prototype and is not authorized to accept real patient details or bookings.");
+      : "Demo booking is currently disabled. Please use the prototype with fictional data only when demo mode is enabled.");
   }
 
   const requestHeaders = await headers();
