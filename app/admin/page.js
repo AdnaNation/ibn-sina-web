@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { Building2, CalendarClock, ClipboardList, Stethoscope, Users, TriangleAlert, CheckCircle2 } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
 import AutoRefresh from "@/components/AutoRefresh";
 import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getAdmin } from "@/lib/adminT";
-import { getStats, loadDemo } from "@/lib/queue";
+import { getStats } from "@/lib/queue";
 import { todayDhaka } from "@/lib/time";
 import { getOrganizationStats } from "@/lib/management";
 import { bnDigits } from "@/lib/bnData";
@@ -52,12 +51,7 @@ export default async function Overview() {
   const today = todayDhaka();
   const [st, org] = await Promise.all([getStats(today), getOrganizationStats(today)]);
 
-  async function demo() {
-    "use server";
-    if (!DEMO_ON || (await getSession())?.role !== "owner") return;
-    await loadDemo();
-    revalidatePath("/admin");
-  }
+
 
   // Things the Main Admin should act on today.
   const alerts = [];
@@ -203,16 +197,14 @@ export default async function Overview() {
           <section className="mt-8 rounded-2xl bg-pine-900 p-6 text-white">
             <h2 className="font-serif text-2xl font-semibold">{t("Presentation mode", "প্রেজেন্টেশন মোড")}</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-pine-100">
-              {t("Creates a fictional demo clinic with 14 sample patients and a doctor running 20 minutes late. Open the patient ticket on a phone, press “Call next patient” in the queue console, and watch the phone update. Demo data is marked and only for presentations.",
-                 "১৪ জন রোগী ও ২০ মিনিট দেরিতে থাকা একজন ডাক্তারসহ একটি ডেমো চেম্বার তৈরি করে। ফোনে রোগীর টিকিট খুলুন, সিরিয়াল কনসোলে “পরবর্তী রোগীকে ডাকুন” চাপুন, আর ফোনে হালনাগাদ হতে দেখুন। ডেমো তথ্য আলাদাভাবে চিহ্নিত ও শুধু প্রেজেন্টেশনের জন্য।")}
+              {t("This presentation uses the existing MongoDB records. No sample clinic, patient, appointment, or staff account is created or reset. Review the current data before sharing the prototype.", "এই প্রদর্শনীতে MongoDB-তে থাকা বর্তমান তথ্য ব্যবহার করা হচ্ছে। নতুন কোনো নমুনা ক্লিনিক, রোগী, অ্যাপয়েন্টমেন্ট বা কর্মী অ্যাকাউন্ট তৈরি বা রিসেট করা হয় না। প্রোটোটাইপ শেয়ার করার আগে বর্তমান তথ্য যাচাই করুন।")}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <form action={demo}><button className="rounded-full bg-brass px-6 py-3 font-bold text-pine-950 hover:bg-brass-light">{t("Load demo clinic", "ডেমো চেম্বার চালু করুন")}</button></form>
-              <Link href="/track/IST-DEMO11" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Patient ticket (serial 11)", "রোগীর টিকিট (সিরিয়াল ১১)")}</Link>
-              <Link href="/admin/queue?doc=demo-doctor" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Staff console", "স্টাফ কনসোল")}</Link>
-              <Link href="/live" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Lobby board", "লবি বোর্ড")}</Link>
+              <Link href="/live" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Live queue board", "লাইভ সিরিয়াল বোর্ড")}</Link>
+              <Link href="/admin/appointments" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Appointments", "অ্যাপয়েন্টমেন্ট")}</Link>
+              <Link href="/admin/reports" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Operational reports", "কার্যক্রমের রিপোর্ট")}</Link>
+              <Link href="/admin/audit" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Audit history", "অডিট ইতিহাস")}</Link>
             </div>
-            {process.env.NODE_ENV === "production" && <p className="mt-4 text-xs text-brass-light">{t("Warning: ENABLE_DEMO is on in production. Turn it off before real patients use the site.", "সতর্কতা: প্রোডাকশনে ENABLE_DEMO চালু আছে। আসল রোগীরা সাইট ব্যবহার করার আগে এটি বন্ধ করুন।")}</p>}
           </section>
         )}
       </div>
