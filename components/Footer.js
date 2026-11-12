@@ -37,6 +37,17 @@ export default async function Footer() {
             : "Doctors, locations, schedules and other displayed information must be verified against institution-approved sources before real-world use. Do not rely on online queue information in an emergency."}
         </p>
         <p className="mt-2 text-center text-[11px] text-pine-100/50">© {new Date().getFullYear()} {bn ? "স্বাধীন প্রোটোটাইপ" : "Independent prototype"}</p>
+        <p className="mt-2 text-center text-xs text-pine-100/65">
+          Developed by{" "}
+          <a
+            href="https://azizul-islam-adnan.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-white underline-offset-4 transition hover:text-pine-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          >
+            ADNAN
+          </a>
+        </p>
       </div>
     </footer>
   );
