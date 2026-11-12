@@ -11,7 +11,7 @@ const cards = [
   { href: "/doctors", icon: Stethoscope, en: "Doctors", bn: "ডাক্তার", desc: "Browse doctor profiles and specialties.", descBn: "ডাক্তারের প্রোফাইল ও বিশেষত্ব দেখুন।" },
   { href: "/units", icon: MapPin, en: "Branches", bn: "শাখা", desc: "Explore locations and branch information.", descBn: "শাখা ও অবস্থানের তথ্য দেখুন।" },
   { href: "/#services", icon: HeartPulse, en: "Services", bn: "সেবাসমূহ", desc: "See the services presented on the homepage.", descBn: "হোমপেজে দেখানো সেবাগুলো দেখুন।" },
-  { href: "/appointment", icon: CalendarDays, en: "Appointments", bn: "অ্যাপয়েন্টমেন্ট", desc: "View the appointment flow. Demo appointments can be booked when a published doctor session is available.", descBn: "অ্যাপয়েন্টমেন্ট প্রক্রিয়া দেখুন। বুকিং চালু থাকা ডেমো সেটআপের ওপর নির্ভর করে।" },
+  { href: "/appointment", icon: CalendarDays, en: "Appointments", bn: "অ্যাপয়েন্টমেন্ট", desc: "View the appointment flow. Demo appointments can be booked when a published doctor session is available.", descBn: "অ্যাপয়েন্টমেন্ট প্রক্রিয়া দেখুন। প্রকাশিত চিকিৎসক সেশন থাকলে ডেমো অ্যাপয়েন্টমেন্ট বুক করা যাবে।" },
   { href: "/live", icon: ClipboardList, en: "Live Queue", bn: "লাইভ সিরিয়াল", desc: "See the public queue display when demo data is loaded.", descBn: "ডেমো তথ্য লোড থাকলে লাইভ সিরিয়াল দেখুন।" },
   { href: "/track", icon: Users, en: "Track a Ticket", bn: "টিকিট ট্র্যাক", desc: "Check a demo appointment using its sample reference.", descBn: "নমুনা রেফারেন্স দিয়ে ডেমো অ্যাপয়েন্টমেন্ট দেখুন।" },
 ];
