@@ -26,9 +26,14 @@ const accounts = [
     permissions: ["appointments.view", "patients.view", "queue.manage", "reports.view"],
   },
 ];
+const usernames = accounts.map((account) => String(account.username || "").trim().toLowerCase());
+if (new Set(usernames).size !== accounts.length || usernames.includes("admin")) {
+  console.error("Demo Branch Admin and Staff usernames must be different and must not use the reserved admin username.");
+  process.exit(1);
+}
 for (const account of accounts) {
   if (!/^[a-z0-9._-]{3,20}$/.test(String(account.username || "").toLowerCase()) ||
-      !account.password || account.password.length < 16 || account.password.length > 128) {
+      typeof account.password !== "string" || account.password.length < 16 || account.password.length > 128) {
     console.error("Provide valid DEMO_BRANCH_ADMIN_USERNAME/PASSWORD and DEMO_STAFF_USERNAME/PASSWORD. Passwords must be 16–128 characters.");
     process.exit(1);
   }
@@ -50,6 +55,10 @@ try {
     demoData: true,
   };
   const unitLabel = `${unit.name}, ${unit.area}`;
+  const existingUnit = await db.collection("units").findOne({ slug: unit.slug });
+  if (existingUnit && existingUnit.demoData !== true) throw new Error("Refusing to overwrite a non-demo branch with the demo slug.");
+  const existingDoctor = await db.collection("doctors").findOne({ slug: "demo-doctor" });
+  if (existingDoctor && existingDoctor.demoData !== true) throw new Error("Refusing to overwrite a non-demo doctor with the demo slug.");
   await db.collection("units").updateOne({ slug: unit.slug }, { $set: unit }, { upsert: true });
   await db.collection("doctors").updateOne(
     { slug: "demo-doctor" },
@@ -70,6 +79,8 @@ try {
   await staff.createIndex({ username: 1 }, { unique: true });
   for (const account of accounts) {
     const username = account.username.toLowerCase();
+    const existingAccount = await staff.findOne({ username });
+    if (existingAccount && existingAccount.demoAccount !== true) throw new Error(`Refusing to overwrite non-demo staff account "${username}".`);
     const salt = randomBytes(16).toString("hex");
     const hash = scryptSync(account.password, salt, 32).toString("hex");
     await staff.updateOne(
