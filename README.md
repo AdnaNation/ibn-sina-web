@@ -197,3 +197,26 @@ Appointment serials are protected by both the atomic session counter and a uniqu
 
 
 Appointment creation commits the session serial increment and appointment insert in one MongoDB transaction. The database must run as a replica set or sharded cluster (as with MongoDB Atlas); standalone MongoDB servers cannot provide this atomic booking guarantee. CI runs a single-node replica set and verifies concurrent duplicate submissions consume exactly one serial.
+
+
+## Authority demonstration setup (isolated demo database only)
+
+The authority demo has a dedicated fictional clinic and role-based demo accounts. Never point this setup at a database containing real patient, doctor or staff records.
+
+1. Create a separate disposable MongoDB database named with `demo` (for example, `ibnsina_demo`).
+2. In the demo environment only, set `MONGODB_DB=ibnsina_demo`, `DEMO_DATABASE_NAME=ibnsina_demo`, `ENABLE_DEMO=true`, `ENABLE_PUBLIC_BOOKING=false`, and `ENABLE_PUBLIC_CANCELLATION=false`.
+3. Set strong, unique `DEMO_BRANCH_ADMIN_USERNAME`, `DEMO_BRANCH_ADMIN_PASSWORD`, `DEMO_STAFF_USERNAME` and `DEMO_STAFF_PASSWORD` values. Passwords must be at least 16 characters. Do not put these values in source control or the public demo guide.
+4. Run `npm run demo:seed` from a trusted local environment with the demo environment variables. It creates a clearly fictional clinic, one fictional doctor, and two demo accounts.
+5. Sign in privately as Main Admin, open `/admin`, and use **Load demo clinic** to create 14 clearly labeled fictional queue records. Share the Branch Admin and Staff credentials separately and privately.
+6. After the presentation, run `RESET_DEMO_ACTIVITY=true npm run demo:reset` to remove only documents marked `demo: true` from the demo appointments and sessions collections. The demo branch, doctor and accounts are preserved. Set `ENABLE_DEMO=false` when the demo is not in use.
+
+The demo seed/reset scripts refuse to run unless the exact database name is confirmed through `DEMO_DATABASE_NAME` and contains the word `demo`. Demo booking is enabled only under that same check. The Main Admin dashboard's sample queue action is also disabled outside that confirmed demo environment.
+
+### Authority handover checklist
+
+- Verify every hospital name, branch, doctor, specialty, service, schedule and contact detail with the institution; the starter directory is not a verified official roster.
+- Give authorities a read-only public demo link and privately share only the role credentials they need.
+- Walk through Main Admin, Branch Admin and Staff separately. Test a branch account against a different branch to confirm it is denied.
+- Confirm the demo has fictional records only, and that public booking and self-service cancellation are disabled outside the isolated demo.
+- Review the report and audit pages, but describe them as operational prototype features, not certified clinical or financial reporting.
+- Obtain institutional authorization, privacy/legal review, security assessment, backup/retention plan and formal acceptance before any real patient data or live booking is considered.
