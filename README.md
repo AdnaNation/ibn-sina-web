@@ -51,7 +51,7 @@ npm run seed
 
 ## Appointment safety notes
 
-- For a presentation demo, set `ENABLE_DEMO=true` on the demo instance and point it to a separate, disposable MongoDB database containing only synthetic data. This allows the appointment form to create demo serials while keeping `ENABLE_PUBLIC_BOOKING=false`. Return `ENABLE_DEMO=false` after the presentation. Never use real patient names, phone numbers or medical details.
+- For a presentation demo, set `ENABLE_DEMO=true`, `MONGODB_DB=ibnsina_demo` and `DEMO_DATABASE_NAME=ibnsina_demo` on a dedicated demo instance. Demo mode refuses to run unless the two database names match exactly and include `demo`. Use only a disposable database with fictional data. Keep `ENABLE_PUBLIC_BOOKING=false`. Return `ENABLE_DEMO=false` after the presentation. Never use real patient names, phone numbers or medical details.
 - Real public booking remains separately gated by `ENABLE_PUBLIC_BOOKING=true` and requires written institutional authorization, privacy review and production readiness.
 - Booking requires a published doctor session. The public availability API does not invent a schedule when a session is missing.
 - Serial allocation uses MongoDB's conditional atomic increment to avoid assigning the same serial to two concurrent patients. Live queue transitions are serialized per doctor/day with an expiring database lock so two staff members cannot accidentally advance the same patient simultaneously. Schedule edits/removal also check that the session has not changed while the operation is in progress.
