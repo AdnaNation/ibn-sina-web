@@ -1,33 +1,27 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  isPublicBookingEnabled,
-  isPublicCancellationEnabled,
-} from "../lib/publicFeatures.mjs";
+import { isDemoEnvironment, isPublicBookingEnabled, isPublicCancellationEnabled } from "../lib/publicFeatures.mjs";
 
-test("public self-service cancellation is disabled when unset", () => {
+test("public self-service cancellation is disabled unless explicitly enabled", () => {
   assert.equal(isPublicCancellationEnabled({}), false);
-});
-
-test("public self-service cancellation stays disabled for false-like values", () => {
   for (const value of ["false", "1", "TRUE", "", undefined, null]) {
     assert.equal(isPublicCancellationEnabled({ ENABLE_PUBLIC_CANCELLATION: value }), false);
   }
-});
-
-test("public self-service cancellation requires the exact explicit true value", () => {
   assert.equal(isPublicCancellationEnabled({ ENABLE_PUBLIC_CANCELLATION: "true" }), true);
 });
 
-test("public booking is disabled when both booking switches are unset or false", () => {
+test("demo mode requires an exact disposable demo database confirmation", () => {
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina", DEMO_DATABASE_NAME: "ibnsina" }), false);
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina" }), false);
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina_demo" }), true);
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "false", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina_demo" }), false);
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina", DEMO_DATABASE_NAME: "ibnsina" }), false);
+});
+
+test("public booking is disabled unless real booking is explicitly authorized or demo DB is isolated", () => {
   assert.equal(isPublicBookingEnabled({}), false);
   assert.equal(isPublicBookingEnabled({ ENABLE_PUBLIC_BOOKING: "false", ENABLE_DEMO: "false" }), false);
-});
-
-test("demo mode explicitly enables prototype bookings", () => {
-  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true" }), true);
-});
-
-test("authorized public booking can be enabled independently of demo mode", () => {
+  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true" }), false);
+  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina_demo" }), true);
   assert.equal(isPublicBookingEnabled({ ENABLE_PUBLIC_BOOKING: "true", ENABLE_DEMO: "false" }), true);
 });
