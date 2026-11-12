@@ -10,18 +10,15 @@ test("public self-service cancellation is disabled unless explicitly enabled", (
   assert.equal(isPublicCancellationEnabled({ ENABLE_PUBLIC_CANCELLATION: "true" }), true);
 });
 
-test("demo mode requires an exact disposable demo database confirmation", () => {
-  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina", DEMO_DATABASE_NAME: "ibnsina" }), false);
-  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina" }), false);
-  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina_demo" }), true);
-  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "false", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina_demo" }), false);
-  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina", DEMO_DATABASE_NAME: "ibnsina" }), false);
+test("demo presentation mode uses an explicit flag and does not require a separate database", () => {
+  assert.equal(isDemoEnvironment({}), false);
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "false", MONGODB_DB: "ibnsina" }), false);
+  assert.equal(isDemoEnvironment({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina" }), true);
 });
 
-test("public booking is disabled unless real booking is explicitly authorized or demo DB is isolated", () => {
+test("public booking requires its own explicit authorization flag, even in demo mode", () => {
   assert.equal(isPublicBookingEnabled({}), false);
-  assert.equal(isPublicBookingEnabled({ ENABLE_PUBLIC_BOOKING: "false", ENABLE_DEMO: "false" }), false);
-  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true" }), false);
-  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina_demo", DEMO_DATABASE_NAME: "ibnsina_demo" }), true);
+  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true", MONGODB_DB: "ibnsina" }), false);
+  assert.equal(isPublicBookingEnabled({ ENABLE_DEMO: "true", ENABLE_PUBLIC_BOOKING: "false" }), false);
   assert.equal(isPublicBookingEnabled({ ENABLE_PUBLIC_BOOKING: "true", ENABLE_DEMO: "false" }), true);
 });
