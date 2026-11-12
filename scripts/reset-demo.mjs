@@ -6,8 +6,8 @@ if (process.env.ENABLE_DEMO !== "true" || !database || database !== confirmation
   console.error("Refusing to reset: this command requires the explicitly confirmed disposable demo database.");
   process.exit(1);
 }
-if (process.env.RESET_DEMO_ACTIVITY !== "true") {
-  console.error("Set RESET_DEMO_ACTIVITY=true to confirm removal of demo queue sessions and demo appointments.");
+if (!process.argv.includes("--confirm")) {
+  console.error("Confirmation required. Run: npm run demo:reset -- --confirm");
   process.exit(1);
 }
 if (!process.env.MONGODB_URI) { console.error("Set MONGODB_URI."); process.exit(1); }
