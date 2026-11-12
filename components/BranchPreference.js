@@ -68,8 +68,8 @@ export default function BranchPreference({
       >
         <option value="">{anyBranch}</option>
         {branches.map((item) => (
-          <option key={item} value={item}>
-            {item}
+          <option key={item.value} value={item.value}>
+            {item.label}
           </option>
         ))}
       </select>
