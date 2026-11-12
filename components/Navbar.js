@@ -15,6 +15,7 @@ export default async function Navbar() {
     [t.nav[1], "/#services"],
     [t.nav[2], "/units"],
     [t.nav[5], "/live"],
+    [bn ? "ডেমো গাইড" : "Demo guide", "/demo"],
   ];
 
   return (
