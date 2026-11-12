@@ -112,7 +112,7 @@ export default async function Overview() {
               { label: t("Create role-based demo accounts", "ভূমিকাভিত্তিক ডেমো অ্যাকাউন্ট তৈরি"), done: Boolean(org?.totals.activeStaff), href: "/admin/staff" },
               { label: t("Publish a sample consultation schedule", "নমুনা সময়সূচি প্রকাশ"), done: Boolean(org?.branches?.some((b) => b.sessions > 0)), href: "/admin/schedules" },
               { label: t("Inspect queue and patient tracking", "সিরিয়াল ও রোগী ট্র্যাকিং যাচাই"), done: Boolean(st?.booked), href: "/live" },
-              { label: t("Review reports and audit history", "রিপোর্ট ও অডিট ইতিহাস যাচাই"), done: true, href: "/admin/reports" },
+              { label: t("Review reports and audit history", "রিপোর্ট ও অডিট ইতিহাস যাচাই"), done: Boolean(org), href: "/admin/reports" },
             ].map((item) => (
               <li key={item.href} className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white p-3">
                 <span aria-label={item.done ? t("Complete", "সম্পন্ন") : t("Needs review", "যাচাই বাকি")} className={item.done ? "grid size-7 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-800" : "grid size-7 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-800"}>{item.done ? "✓" : "!"}</span>
