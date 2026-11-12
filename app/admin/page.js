@@ -10,13 +10,13 @@ import { getStats, loadDemo } from "@/lib/queue";
 import { todayDhaka } from "@/lib/time";
 import { getOrganizationStats } from "@/lib/management";
 import { bnDigits } from "@/lib/bnData";
+import { isDemoEnvironment } from "@/lib/publicFeatures.mjs";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard" };
 
-// The demo clinic writes fake patients into the real database, so it is OFF in production
-// unless ENABLE_DEMO=true is set on purpose.
-const DEMO_ON = process.env.ENABLE_DEMO === "true" || process.env.NODE_ENV !== "production";
+// Demo actions are available only when the environment explicitly names a disposable demo database.
+const DEMO_ON = isDemoEnvironment();
 
 const Kpi = ({ n, label, tone = "text-pine-900" }) => (
   <div className="rounded-2xl border border-pine-100 bg-white p-4 shadow-sm">
@@ -95,6 +95,34 @@ export default async function Overview() {
             </Link>
           ))}
         </div>
+
+        <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5" aria-labelledby="setup-checklist">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[.16em] text-emerald-800">{t("Authority preparation", "কর্তৃপক্ষের প্রদর্শনী প্রস্তুতি")}</p>
+              <h2 id="setup-checklist" className="mt-1 font-serif text-2xl font-semibold text-pine-950">{t("Admin quick-start checklist", "অ্যাডমিন দ্রুত প্রস্তুতি তালিকা")}</h2>
+              <p className="mt-1 text-sm text-ink/65">{t("Complete these steps before inviting someone to explore the prototype.", "প্রোটোটাইপ দেখার আমন্ত্রণ জানানোর আগে ধাপগুলো সম্পন্ন করুন।")}</p>
+            </div>
+            <Link href="/demo" className="rounded-full border border-emerald-300 bg-white px-4 py-2 text-sm font-bold text-emerald-900">{t("Open demo guide", "ডেমো নির্দেশিকা")} ↗</Link>
+          </div>
+          <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { label: t("Review branch directory", "শাখার তালিকা যাচাই"), done: Boolean(org?.totals.branches), href: "/admin/branches" },
+              { label: t("Review doctor directory", "ডাক্তারের তালিকা যাচাই"), done: Boolean(org?.totals.doctors), href: "/admin/doctors" },
+              { label: t("Create role-based demo accounts", "ভূমিকাভিত্তিক ডেমো অ্যাকাউন্ট তৈরি"), done: Boolean(org?.totals.activeStaff), href: "/admin/staff" },
+              { label: t("Publish a sample consultation schedule", "নমুনা সময়সূচি প্রকাশ"), done: Boolean(org?.branches?.some((b) => b.sessions > 0)), href: "/admin/schedules" },
+              { label: t("Inspect queue and patient tracking", "সিরিয়াল ও রোগী ট্র্যাকিং যাচাই"), done: Boolean(st?.booked), href: "/live" },
+              { label: t("Review reports and audit history", "রিপোর্ট ও অডিট ইতিহাস যাচাই"), done: true, href: "/admin/reports" },
+            ].map((item) => (
+              <li key={item.href} className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white p-3">
+                <span aria-label={item.done ? t("Complete", "সম্পন্ন") : t("Needs review", "যাচাই বাকি")} className={item.done ? "grid size-7 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-800" : "grid size-7 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-800"}>{item.done ? "✓" : "!"}</span>
+                <Link href={item.href} className="min-w-0 flex-1 text-sm font-semibold text-pine-950 underline-offset-4 hover:underline">{item.label}</Link>
+                <span className="text-xs text-ink/50">{item.done ? t("Ready", "প্রস্তুত") : t("Review", "যাচাই")}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3 text-xs leading-5 text-ink/60">{t("These indicators are setup hints based on available records, not a formal readiness certification. Verify all sample information before presenting.", "এই চিহ্নগুলো বিদ্যমান তথ্যের ভিত্তিতে প্রস্তুতির ইঙ্গিত, আনুষ্ঠানিক অনুমোদন নয়। প্রদর্শনের আগে সব নমুনা তথ্য যাচাই করুন।")}</p>
+        </section>
 
         {!st && <p className="mt-5 rounded-xl bg-rose-50 p-4 text-sm font-medium text-rose-800">{t("The database is not connected. Set MONGODB_URI to see live data.", "ডাটাবেস সংযুক্ত নেই। লাইভ তথ্য দেখতে MONGODB_URI সেট করুন।")}</p>}
 
@@ -175,7 +203,7 @@ export default async function Overview() {
           <section className="mt-8 rounded-2xl bg-pine-900 p-6 text-white">
             <h2 className="font-serif text-2xl font-semibold">{t("Presentation mode", "প্রেজেন্টেশন মোড")}</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-pine-100">
-              {t("Creates a busy demo clinic with 14 patients and a doctor running 20 minutes late. Open the patient ticket on a phone, press “Call next patient” in the queue console, and watch the phone update. Demo data is marked and only for presentations.",
+              {t("Creates a fictional demo clinic with 14 sample patients and a doctor running 20 minutes late. Open the patient ticket on a phone, press “Call next patient” in the queue console, and watch the phone update. Demo data is marked and only for presentations.",
                  "১৪ জন রোগী ও ২০ মিনিট দেরিতে থাকা একজন ডাক্তারসহ একটি ডেমো চেম্বার তৈরি করে। ফোনে রোগীর টিকিট খুলুন, সিরিয়াল কনসোলে “পরবর্তী রোগীকে ডাকুন” চাপুন, আর ফোনে হালনাগাদ হতে দেখুন। ডেমো তথ্য আলাদাভাবে চিহ্নিত ও শুধু প্রেজেন্টেশনের জন্য।")}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
