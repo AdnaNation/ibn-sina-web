@@ -208,7 +208,7 @@ The authority demo has a dedicated fictional clinic and role-based demo accounts
 3. Set strong, unique `DEMO_BRANCH_ADMIN_USERNAME`, `DEMO_BRANCH_ADMIN_PASSWORD`, `DEMO_STAFF_USERNAME` and `DEMO_STAFF_PASSWORD` values. Passwords must be at least 16 characters. Do not put these values in source control or the public demo guide.
 4. Run `npm run demo:seed` from a trusted local environment with the demo environment variables. It creates a clearly fictional clinic, one fictional doctor, and two demo accounts.
 5. Sign in privately as Main Admin, open `/admin`, and use **Load demo clinic** to create 14 clearly labeled fictional queue records. Share the Branch Admin and Staff credentials separately and privately.
-6. After the presentation, run `RESET_DEMO_ACTIVITY=true npm run demo:reset` to remove only documents marked `demo: true` from the demo appointments and sessions collections. The demo branch, doctor and accounts are preserved. Set `ENABLE_DEMO=false` when the demo is not in use.
+6. After the presentation, run `npm run demo:reset -- --confirm` to remove only documents marked `demo: true` from the demo appointments and sessions collections. The demo branch, doctor and accounts are preserved. Set `ENABLE_DEMO=false` when the demo is not in use.
 
 The demo seed/reset scripts refuse to run unless the exact database name is confirmed through `DEMO_DATABASE_NAME` and contains the word `demo`. Demo booking is enabled only under that same check. The Main Admin dashboard's sample queue action is also disabled outside that confirmed demo environment.
 
