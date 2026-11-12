@@ -11,7 +11,7 @@ const cards = [
   { href: "/doctors", icon: Stethoscope, en: "Doctors", bn: "ডাক্তার", desc: "Browse doctor profiles and specialties.", descBn: "ডাক্তারের প্রোফাইল ও বিশেষত্ব দেখুন।" },
   { href: "/units", icon: MapPin, en: "Branches", bn: "শাখা", desc: "Explore locations and branch information.", descBn: "শাখা ও অবস্থানের তথ্য দেখুন।" },
   { href: "/#services", icon: HeartPulse, en: "Services", bn: "সেবাসমূহ", desc: "See the services presented on the homepage.", descBn: "হোমপেজে দেখানো সেবাগুলো দেখুন।" },
-  { href: "/appointment", icon: CalendarDays, en: "Appointments", bn: "অ্যাপয়েন্টমেন্ট", desc: "View the appointment flow. Demo booking depends on demo setup.", descBn: "অ্যাপয়েন্টমেন্ট প্রক্রিয়া দেখুন। বুকিং চালু থাকা ডেমো সেটআপের ওপর নির্ভর করে।" },
+  { href: "/appointment", icon: CalendarDays, en: "Appointments", bn: "অ্যাপয়েন্টমেন্ট", desc: "View the appointment flow. Demo appointments can be booked when a published doctor session is available.", descBn: "অ্যাপয়েন্টমেন্ট প্রক্রিয়া দেখুন। প্রকাশিত চিকিৎসক সেশন থাকলে ডেমো অ্যাপয়েন্টমেন্ট বুক করা যাবে।" },
   { href: "/live", icon: ClipboardList, en: "Live Queue", bn: "লাইভ সিরিয়াল", desc: "See the public queue display when demo data is loaded.", descBn: "ডেমো তথ্য লোড থাকলে লাইভ সিরিয়াল দেখুন।" },
   { href: "/track", icon: Users, en: "Track a Ticket", bn: "টিকিট ট্র্যাক", desc: "Check a demo appointment using its sample reference.", descBn: "নমুনা রেফারেন্স দিয়ে ডেমো অ্যাপয়েন্টমেন্ট দেখুন।" },
 ];
@@ -55,7 +55,7 @@ export default async function DemoGuidePage() {
           </div>
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
             <h2 className="text-lg font-bold text-amber-950">{t("Please note", "দয়া করে মনে রাখুন")}</h2>
-            <p className="mt-2 text-sm leading-6 text-amber-900">{t("This is an independent demonstration prototype, not an official hospital website or booking service. All sample records are for demonstration only. Do not enter real patient information. Public booking remains disabled unless separately authorized and configured.", "এটি একটি স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ; কোনো হাসপাতালের আনুষ্ঠানিক ওয়েবসাইট বা বুকিং সেবা নয়। নমুনা তথ্য শুধু প্রদর্শনের জন্য। প্রকৃত রোগীর তথ্য দেবেন না। আলাদা অনুমোদন ও সেটআপ ছাড়া পাবলিক বুকিং বন্ধ থাকবে।")}</p>
+            <p className="mt-2 text-sm leading-6 text-amber-900">{t("This is an independent demonstration prototype, not an official hospital website or booking service. All sample records are for demonstration only. Do not enter real patient information. Public demo booking is enabled by default. Bookings are stored only in the prototype database and do not reach a real hospital.", "এটি একটি স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ; কোনো হাসপাতালের আনুষ্ঠানিক ওয়েবসাইট বা বুকিং সেবা নয়। নমুনা তথ্য শুধু প্রদর্শনের জন্য। প্রকৃত রোগীর তথ্য দেবেন না। ডেমো বুকিং চালু থাকলেও তথ্য শুধু প্রোটোটাইপের ডেটাবেজে সংরক্ষিত হয়; কোনো বাস্তব হাসপাতালে বুকিং যায় না।")}</p>
           </div>
         </div>
       </section>
