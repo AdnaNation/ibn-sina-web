@@ -14,7 +14,7 @@ import { isDemoEnvironment } from "@/lib/publicFeatures.mjs";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard" };
 
-// Demo actions are available only when the environment explicitly names a disposable demo database.
+// Presentation shortcuts use existing MongoDB records only.
 const DEMO_ON = isDemoEnvironment();
 
 const Kpi = ({ n, label, tone = "text-pine-900" }) => (
@@ -50,8 +50,6 @@ export default async function Overview() {
 
   const today = todayDhaka();
   const [st, org] = await Promise.all([getStats(today), getOrganizationStats(today)]);
-
-
 
   // Things the Main Admin should act on today.
   const alerts = [];
