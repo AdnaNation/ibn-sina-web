@@ -21,7 +21,7 @@ export default function BranchPreference({
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (!branch && saved && branches.includes(saved)) {
+      if (!branch && saved && branches.some((item) => item.value === saved)) {
         setSelected(saved);
         const params = new URLSearchParams();
         if (q) params.set("q", q);
@@ -29,7 +29,7 @@ export default function BranchPreference({
         params.set("branch", saved);
         params.set("page", "1");
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-      } else if (branch && branches.includes(branch)) {
+      } else if (branch && branches.some((item) => item.value === branch)) {
         window.localStorage.setItem(STORAGE_KEY, branch);
       }
     } catch {
