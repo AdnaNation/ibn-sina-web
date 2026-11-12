@@ -55,7 +55,7 @@ export default async function DemoGuidePage() {
           </div>
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
             <h2 className="text-lg font-bold text-amber-950">{t("Please note", "দয়া করে মনে রাখুন")}</h2>
-            <p className="mt-2 text-sm leading-6 text-amber-900">{t("This is an independent demonstration prototype, not an official hospital website or booking service. All sample records are for demonstration only. Do not enter real patient information. Public demo booking is enabled by default. Bookings are stored only in the prototype database and do not reach a real hospital.", "এটি একটি স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ; কোনো হাসপাতালের আনুষ্ঠানিক ওয়েবসাইট বা বুকিং সেবা নয়। নমুনা তথ্য শুধু প্রদর্শনের জন্য। প্রকৃত রোগীর তথ্য দেবেন না। আলাদা অনুমোদন ও সেটআপ ছাড়া পাবলিক বুকিং বন্ধ থাকবে।")}</p>
+            <p className="mt-2 text-sm leading-6 text-amber-900">{t("This is an independent demonstration prototype, not an official hospital website or booking service. All sample records are for demonstration only. Do not enter real patient information. Public demo booking is enabled by default. Bookings are stored only in the prototype database and do not reach a real hospital.", "এটি একটি স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ; কোনো হাসপাতালের আনুষ্ঠানিক ওয়েবসাইট বা বুকিং সেবা নয়। নমুনা তথ্য শুধু প্রদর্শনের জন্য। প্রকৃত রোগীর তথ্য দেবেন না। ডেমো বুকিং চালু থাকলেও তথ্য শুধু প্রোটোটাইপের ডেটাবেজে সংরক্ষিত হয়; কোনো বাস্তব হাসপাতালে বুকিং যায় না।")}</p>
           </div>
         </div>
       </section>
