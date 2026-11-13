@@ -6,8 +6,8 @@ export default async function Footer() {
   const lang = await getLang();
   const bn = lang === "bn";
   const links = bn
-    ? [["ডাক্তার খুঁজুন", "/doctors"], ["সেবাসমূহ", "/#services"], ["শাখাসমূহ", "/units"], ["অ্যাপয়েন্টমেন্ট", "/appointment"], ["সিরিয়াল ট্র্যাক", "/track"], ["ব্যবহার নির্দেশিকা", "/user-manual"]]
-    : [["Find a doctor", "/doctors"], ["Services", "/#services"], ["Locations", "/units"], ["Appointment", "/appointment"], ["Track queue", "/track"], ["User manual", "/user-manual"]];
+    ? [["ডাক্তার খুঁজুন", "/doctors"], ["সেবাসমূহ", "/#services"], ["শাখাসমূহ", "/units"], ["অ্যাপয়েন্টমেন্ট", "/appointment"], ["সিরিয়াল ট্র্যাক", "/track"], ["ব্যবহার নির্দেশিকা", "/user-manual"], ["মেডিকেল রিপোর্ট", "/medical-reports"]]
+    : [["Find a doctor", "/doctors"], ["Services", "/#services"], ["Locations", "/units"], ["Appointment", "/appointment"], ["Track queue", "/track"], ["User manual", "/user-manual"], ["Medical reports", "/medical-reports"]];
 
   return (
     <footer className="bg-[#062d23] text-pine-100">

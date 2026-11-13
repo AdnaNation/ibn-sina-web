@@ -220,3 +220,10 @@ The former demo seed/reset scripts and one-click sample queue generator have bee
 - Confirm the demo has fictional records only, and that public booking and self-service cancellation are disabled outside the isolated demo.
 - Review the report and audit pages, but describe them as operational prototype features, not certified clinical or financial reporting.
 - Obtain institutional authorization, privacy/legal review, security assessment, backup/retention plan and formal acceptance before any real patient data or live booking is considered.
+
+
+## Private medical report publishing (prototype)
+
+The private medical report module is separate from operational reports. Staff with the `reports.upload` permission can upload a PDF, PNG, JPG or WEBP file (maximum 8 MB) and associate it with an existing appointment inside their authorized branch/doctor scope. Main Admin and Branch Admin can manage reports in their authorized scope. Uploaded files are stored in a private MongoDB GridFS bucket; there are no public file URLs. The patient portal at `/medical-reports` requires both a random report ID and a staff-created passcode (10–64 characters). Passcodes are stored as salted scrypt hashes, and download attempts are rate-limited. Staff can revoke a report, which removes its metadata and stored file. The admin screen shows the latest 100 reports in the account's authorized scope.
+
+This is a demonstration access mechanism only. A passcode is not proof of patient identity and is not an OTP. Use fictional data and files only. Before real use, the hospital must approve the patient identity-verification and consent process, secure delivery of access credentials, encryption and key management, access auditing, retention/deletion rules, backup controls, incident response, and applicable legal/privacy requirements. Do not upload real patient medical records to this independent prototype.

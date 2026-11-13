@@ -1,10 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: { serverActions: { bodySizeLimit: "10mb" } },
   images: { remotePatterns: [{ protocol: "https", hostname: "www.ibnsinatrust.com" }] },
   async headers() {
     return [
       {
         source: "/track/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/medical-reports/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
+        ],
+      },
+      {
+        source: "/api/medical-reports/:path*",
         headers: [
           { key: "Cache-Control", value: "private, no-store, max-age=0, must-revalidate" },
         ],
