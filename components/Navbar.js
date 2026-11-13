@@ -8,7 +8,6 @@ export default async function Navbar() {
   const { lang, t } = await getT();
   const bn = lang === "bn";
   const prototypeName = bn ? "স্বাস্থ্যসেবা প্রোটোটাইপ" : "Healthcare Prototype";
-  const prototypeTagline = bn ? "স্বাধীন প্রদর্শনীমূলক ধারণা" : "Independent demonstration concept";
 
   const links = [
     [t.nav[0], "/doctors"],
@@ -22,37 +21,6 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 shadow-[0_8px_30px_rgba(9,54,40,.045)] backdrop-blur-xl">
-      <div className="bg-pine-950 text-white">
-        <div className="mx-auto flex h-8 max-w-7xl items-center justify-between gap-2 px-3 text-[11px] sm:h-9 sm:gap-3 sm:px-4 sm:text-sm">
-          <span className="font-medium text-pine-100/90">
-            <span className="sm:hidden">{bn ? "ডেমো • আনুষ্ঠানিক সেবা নয়" : "DEMO • Not official"}</span>
-            <span className="hidden sm:inline">
-              {bn ? "স্বাধীন প্রদর্শনী — কোনো হাসপাতালের আনুষ্ঠানিক সেবা নয়" : "Independent demonstration — not an official hospital service"}
-            </span>
-          </span>
-          <div className="flex shrink-0 items-center gap-1 rounded-full bg-white/10 p-0.5">
-            {[
-              ["en", "EN"],
-              ["bn", "বাংলা"],
-            ].map(([code, label]) => (
-              <form key={code} action={setLang}>
-                <input type="hidden" name="lang" value={code} />
-                <button
-                  type="submit"
-                  aria-label={`Change language to ${label}`}
-                  aria-pressed={lang === code}
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition ${
-                    lang === code ? "bg-white text-pine-950" : "text-white/80 hover:bg-white/10"
-                  }`}
-                >
-                  {label}
-                </button>
-              </form>
-            ))}
-          </div>
-        </div>
-      </div>
-
       <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-4">
         <Link href="/" prefetch={true} className="group flex min-w-0 items-center gap-3" aria-label={prototypeName + " home"}>
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-pine-900 text-white shadow-lg shadow-pine-900/15 transition group-hover:-rotate-3">
@@ -60,7 +28,6 @@ export default async function Navbar() {
           </span>
           <span className="min-w-0">
             <span className="block truncate font-serif text-[19px] font-semibold leading-tight text-pine-950 sm:text-[21px]">{prototypeName}</span>
-            <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[.15em] text-pine-600">{prototypeTagline}</span>
           </span>
         </Link>
 
@@ -77,6 +44,20 @@ export default async function Navbar() {
           </Link>
         </div>
 
+        <div className="flex shrink-0 items-center gap-1 rounded-full border border-pine-100 bg-pine-50 p-0.5">
+          {[
+            ["en", "EN"],
+            ["bn", "বাংলা"],
+          ].map(([code, label]) => (
+            <form key={code} action={setLang}>
+              <input type="hidden" name="lang" value={code} />
+              <button type="submit" aria-label={`Change language to ${label}`} aria-pressed={lang === code}
+                className={`rounded-full px-2 py-1.5 text-[10px] font-bold transition ${lang === code ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-pine-100"}`}>
+                {label}
+              </button>
+            </form>
+          ))}
+        </div>
         <MobileNavMenu links={links} trackLabel={t.track} bookLabel={t.book} bn={bn} />
       </nav>
     </header>
