@@ -3,7 +3,7 @@ import {useActionState,useEffect,useMemo,useState} from "react";
 import {Search,CheckCircle2,CalendarDays,UserRound,Stethoscope,MapPin,Clock3,AlertCircle,RefreshCw,ArrowRight,ShieldCheck} from "lucide-react";
 import {bookAppointment} from "./actions";
 import {fmtTime} from "@/lib/time";
-import {deptName,doctorName,unitName} from "@/lib/bnData";
+import {deptName,doctorName,unitName,normalizeBangladeshMobile} from "@/lib/bnData";
 
 const field="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-pine-500 focus:ring-4 focus:ring-pine-100";
 function Panel({number,title,icon,done,children,lang="en",completeLabel="Complete",stepLabel="STEP"}){const Icon=icon;return <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,45,35,.035)]"><div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6"><span className={`grid size-9 place-items-center rounded-xl ${done?"bg-pine-800 text-white":"bg-pine-50 text-pine-800"}`}>{done?<CheckCircle2 size={18}/>:<Icon size={18}/>}</span><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">{stepLabel} {number}</p><h2 className="text-sm font-bold text-slate-900 sm:text-base">{title}</h2></div>{done&&<span className="ml-auto text-[11px] font-bold text-pine-700">{completeLabel}</span>}</div><div className="p-5 sm:p-6">{children}</div></section>}
