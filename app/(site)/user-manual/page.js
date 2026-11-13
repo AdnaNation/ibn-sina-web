@@ -88,6 +88,18 @@ export default async function UserManualPage() {
             </section>
           ))}
         </div>
+        <section id="medical-reports" className="mt-6 scroll-mt-28 rounded-2xl border border-pine-100 bg-white p-5 shadow-sm sm:p-7">
+          <div className="flex items-center gap-3 border-b border-pine-100 pb-4">
+            <span className="grid size-11 place-items-center rounded-xl bg-emerald-50 text-pine-800"><FileText size={21}/></span>
+            <div><h2 className="text-xl font-bold text-pine-950">{t("Private medical reports", "রোগীর ব্যক্তিগত মেডিকেল রিপোর্ট")}</h2><p className="text-xs text-slate-500">Patient report access</p></div>
+          </div>
+          <div className="mt-5 space-y-3 text-sm leading-7 text-slate-600">
+            <p>{t("Authorized staff with the medical-report upload permission can attach a PDF or image to an existing appointment from Admin → Medical reports. They must enter the appointment tracking reference, report details, and a unique patient passcode.", "মেডিকেল রিপোর্ট আপলোডের অনুমতি থাকা কর্মীরা Admin → Medical reports থেকে বিদ্যমান অ্যাপয়েন্টমেন্টের সঙ্গে PDF বা ছবি যুক্ত করতে পারবেন। অ্যাপয়েন্টমেন্টের ট্র্যাকিং রেফারেন্স, রিপোর্টের তথ্য এবং আলাদা রোগী পাসকোড দিতে হবে।")}</p>
+            <p>{t("The staff member gives the patient the generated report ID and the passcode privately. The patient opens the Medical reports link in the public menu and enters both values to download the file. Staff can revoke a report from the admin list.", "কর্মী রোগীকে রিপোর্ট আইডি ও পাসকোড ব্যক্তিগতভাবে দেবেন। রোগী পাবলিক মেনুর Medical reports লিংকে গিয়ে দুটো তথ্য দিয়ে ফাইল ডাউনলোড করবেন। অ্যাডমিন তালিকা থেকে কর্মীরা রিপোর্ট বাতিল করতে পারবেন।")}</p>
+            <p className="rounded-xl bg-amber-50 p-3 text-xs leading-6 text-amber-900">{t("Prototype only: use fictional reports. The passcode is not OTP or proof of identity. Never upload real medical records or use this flow for actual patient care.", "শুধু প্রোটোটাইপ: কাল্পনিক রিপোর্ট ব্যবহার করুন। পাসকোডটি OTP বা পরিচয় যাচাই নয়। বাস্তব মেডিকেল রিপোর্ট আপলোড করবেন না বা প্রকৃত রোগীসেবায় এই ব্যবস্থা ব্যবহার করবেন না।")}</p>
+            <Link href="/medical-reports" className="inline-flex font-bold text-pine-800 underline underline-offset-4">{t("Open patient report page", "রোগীর রিপোর্ট পেজ খুলুন")}</Link>
+          </div>
+        </section>
         <section className="mt-8 rounded-2xl bg-pine-950 p-6 text-white sm:p-8">
           <div className="flex items-center gap-2 font-bold"><FileText size={19}/>{t("Before presenting the prototype", "প্রোটোটাইপ দেখানোর আগে")}</div>
           <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-7 text-pine-100">

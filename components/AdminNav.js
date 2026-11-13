@@ -14,6 +14,7 @@ export default async function AdminNav({ p, current }) {
     (admin || hasPermission(p, "queue.manage")) && ["Queue", "/admin/queue"],
     (admin || hasPermission(p, "appointments.view")) && ["Appointments", "/admin/appointments"],
     hasPermission(p, "reports.view") && ["Reports", "/admin/reports"],
+    (hasPermission(p, "reports.view") || hasPermission(p, "reports.upload")) && ["Medical reports", "/admin/medical-reports"],
     (admin || hasPermission(p, "schedules.manage")) && ["Schedules", "/admin/schedules"],
     (admin || hasPermission(p, "doctors.view")) && ["Doctors", "/admin/doctors"],
     owner && ["Branches", "/admin/branches"],

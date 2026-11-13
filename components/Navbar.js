@@ -17,6 +17,7 @@ export default async function Navbar() {
     [t.nav[5], "/live"],
     [bn ? "ডেমো গাইড" : "Demo guide", "/demo"],
     [bn ? "ব্যবহার নির্দেশিকা" : "User manual", "/user-manual"],
+    [bn ? "মেডিকেল রিপোর্ট" : "Medical reports", "/medical-reports"],
   ];
 
   return (
