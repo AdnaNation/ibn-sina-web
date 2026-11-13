@@ -7,6 +7,7 @@ import { todayDhaka, isValidISODate } from "@/lib/time";
 import { getLang } from "@/lib/i18n";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 import { isPublicBookingEnabled } from "@/lib/publicFeatures.mjs";
+import { normalizeBangladeshMobile } from "@/lib/bnData";
 
 export async function bookAppointment(_prev, formData) {
   const f = Object.fromEntries(formData);
