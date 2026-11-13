@@ -1,4 +1,5 @@
 import MedicalReportAccess from "@/components/MedicalReportAccess";
+import { getLang } from "@/lib/i18n";
 
 export const metadata = {
   title: "Patient medical reports | Independent prototype",
@@ -6,6 +7,7 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function MedicalReportsPage() {
-  return <MedicalReportAccess />;
+export default async function MedicalReportsPage() {
+  const lang = await getLang();
+  return <MedicalReportAccess lang={lang} />;
 }
