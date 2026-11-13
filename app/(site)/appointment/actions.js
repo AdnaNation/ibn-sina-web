@@ -29,8 +29,7 @@ export async function bookAppointment(_prev, formData) {
   if (!ipLimit.allowed) return fail(bn ? "অনেকবার চেষ্টা করা হয়েছে। ১০ মিনিট পরে আবার চেষ্টা করুন।" : "Too many booking attempts. Please try again in about 10 minutes.");
 
   const name = String(f.name || "").trim();
-  const phoneInput = String(f.phone || "").replace(/[\s()-]/g, "");
-  const phone = phoneInput.replace(/^\+?88(?=01)/, "");
+  const phone = normalizeBangladeshMobile(f.phone || "");
   const date = String(f.date || "");
 
   if (name.length < 3 || name.length > 100) return fail(bn ? "রোগীর পূর্ণ নাম লিখুন।" : "Enter the patient’s full name.");
