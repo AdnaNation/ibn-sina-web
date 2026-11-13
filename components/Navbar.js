@@ -22,11 +22,14 @@ export default async function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 shadow-[0_8px_30px_rgba(9,54,40,.045)] backdrop-blur-xl">
       <div className="bg-pine-950 text-white">
-        <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-3 px-4 text-xs sm:text-sm">
+        <div className="mx-auto flex h-8 max-w-7xl items-center justify-between gap-2 px-3 text-[11px] sm:h-9 sm:gap-3 sm:px-4 sm:text-sm">
           <span className="font-medium text-pine-100/90">
-            {bn ? "স্বাধীন প্রদর্শনী — কোনো হাসপাতালের আনুষ্ঠানিক সেবা নয়" : "Independent demonstration — not an official hospital service"}
+            <span className="sm:hidden">{bn ? "ডেমো • আনুষ্ঠানিক সেবা নয়" : "DEMO • Not official"}</span>
+            <span className="hidden sm:inline">
+              {bn ? "স্বাধীন প্রদর্শনী — কোনো হাসপাতালের আনুষ্ঠানিক সেবা নয়" : "Independent demonstration — not an official hospital service"}
+            </span>
           </span>
-          <div className="flex items-center gap-1 rounded-full bg-white/10 p-0.5">
+          <div className="flex shrink-0 items-center gap-1 rounded-full bg-white/10 p-0.5">
             {[
               ["en", "EN"],
               ["bn", "বাংলা"],
