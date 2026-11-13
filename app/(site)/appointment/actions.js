@@ -28,14 +28,15 @@ export async function bookAppointment(_prev, formData) {
   if (!ipLimit.allowed) return fail(bn ? "অনেকবার চেষ্টা করা হয়েছে। ১০ মিনিট পরে আবার চেষ্টা করুন।" : "Too many booking attempts. Please try again in about 10 minutes.");
 
   const name = String(f.name || "").trim();
-  const phone = String(f.phone || "").replace(/[\s-]/g, "");
+  const phoneInput = String(f.phone || "").replace(/[\s()-]/g, "");
+  const phone = phoneInput.replace(/^\+?88(?=01)/, "");
   const date = String(f.date || "");
 
   if (name.length < 3 || name.length > 100) return fail(bn ? "রোগীর পূর্ণ নাম লিখুন।" : "Enter the patient’s full name.");
-  if (!/^(?:\+?88)?01[3-9]\d{8}$/.test(phone))
+  if (!/^01[3-9]\d{8}$/.test(phone))
     return fail(bn ? "সঠিক মোবাইল নম্বর লিখুন, যেমন 01712345678।" : "Enter a valid mobile number, for example 01712345678.");
 
-  const phoneLimit = await consumeRateLimit({ scope: "appointment-phone", key: phone.replace(/^\+?88(?=01)/, ""), limit: 3 });
+  const phoneLimit = await consumeRateLimit({ scope: "appointment-phone", key: phone, limit: 3 });
   if (phoneLimit.unavailable) return fail(bn ? "সেবাটি সাময়িকভাবে অনুপলব্ধ। পরে আবার চেষ্টা করুন।" : "Booking is temporarily unavailable. Please try again later.");
   if (!phoneLimit.allowed) return fail(bn ? "এই নম্বর থেকে সাময়িকভাবে বুকিং সীমা অতিক্রম হয়েছে। পরে আবার চেষ্টা করুন।" : "The booking attempt limit for this mobile number has been reached. Please try again later.");
 
