@@ -86,6 +86,7 @@ Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. S
 - `schedules.manage` — publish/remove schedules within the assigned branch
 - `doctors.view` — view branch doctor information
 - `reports.view` — view branch reports
+- `reports.upload` — upload and revoke private medical reports within the authorized branch/doctor scope
 - `billing.view` / `billing.manage` — billing access levels
 
 The current project has live UI/server-side enforcement for queue and schedule access. Appointment CSV export requires both `appointments.view` and `reports.view`; patient contact fields remain excluded unless `patients.view` is also granted. Queue operators without `patients.view` can see the patient name needed to call the queue, but phone numbers and private notes are withheld. The reports permission now opens /admin/reports, which aggregates appointment volume by date, doctor and queue status for the user’s authorized branch or doctor scope. It displays aggregate counts only and caps each query at 31 days. Billing permissions remain groundwork only; do not interpret a saved billing permission as a completed feature.
