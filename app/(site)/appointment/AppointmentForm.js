@@ -20,7 +20,7 @@ export default function AppointmentForm({doctors,selected,minDate,maxDate,lang="
  const matches=useMemo(()=>doctors.filter(d=>(!branch||d.unit===branch)&&`${d.name} ${d.nameBn||""} ${d.department} ${deptName(d.department,lang)} ${d.unit} ${unitName(d.unit,lang)}`.toLowerCase().includes(q.toLowerCase())).slice(0,40),[doctors,q,branch,lang]);
  useEffect(()=>{if(!doctor)return;let active=true;setDate("");setAvailability({status:"loading",days:[]});fetch(`/api/availability?doctor=${encodeURIComponent(doctor.slug)}`,{cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("availability");return r.json()}).then(days=>{if(active)setAvailability({status:"ready",days:Array.isArray(days)?days:[]})}).catch(()=>{if(active)setAvailability({status:"error",days:[]})});return()=>{active=false}},[doctor]);
  const day=availability.days.find(a=>a.date===date);
- const normalizedPhone=patient.phone.replace(/[\s()-]/g,"").replace(/^\+?88(?=01)/,"");
+ const normalizedPhone=normalizeBangladeshMobile(patient.phone);
  const canSubmit=!!doctor&&!!date&&patient.name.trim().length>=3&&/^01[3-9]\d{8}$/.test(normalizedPhone);
  const bn=lang==="bn";
  const digits=(value)=>new Intl.NumberFormat(bn?"bn-BD":"en-US",{useGrouping:false}).format(value);
