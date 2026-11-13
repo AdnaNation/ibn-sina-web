@@ -37,6 +37,17 @@ export async function POST(request) {
     return NextResponse.json({ error: "This report file is unavailable." }, { status: 410, headers: noStore });
   }
 
+  try {
+    await db.collection("medical_report_access_logs").insertOne({
+      reportId,
+      accessedAt: new Date(),
+      ipFingerprint: ip,
+    });
+  } catch (error) {
+    console.error("[medical-reports] access audit failed:", error?.message);
+    return NextResponse.json({ error: "The report service is temporarily unavailable." }, { status: 503, headers: noStore });
+  }
+
   const bucket = new GridFSBucket(db, { bucketName: "medical_report_files" });
   try {
     const chunks = [];
