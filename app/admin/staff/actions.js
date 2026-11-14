@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { getUnits, getDoctor } from "@/lib/data";
-import { createStaff, listStaff, setStaffActive } from "@/lib/staff";
+import { createStaff, listStaff, setStaffActive, setStaffDoctor } from "@/lib/staff";
 import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
 
@@ -47,6 +47,22 @@ export async function addStaff(fd) {
   revalidatePath("/admin/staff");
   revalidatePath("/admin/branches");
   return { success: true, value: username };
+}
+
+export async function assignStaffDoctor(fd) {
+  const p = await getSession();
+  if (!p || !isBranchAdmin(p)) return { error: "Only a Branch Admin can assign a doctor to staff." };
+  const username = g(fd, "username");
+  const doctorSlug = g(fd, "doctorSlug");
+  const target = (await listStaff({ username, unit: p.unit, role: "staff" }))[0];
+  const doctor = await getDoctor(doctorSlug);
+  if (!target || !doctor || doctor.unit !== p.unit) return { error: "Choose a staff account and doctor from your own branch." };
+  const error = await setStaffDoctor(username, { unit: p.unit, doctorSlug: doctor.slug, doctorName: doctor.name });
+  if (error) return { error };
+  await writeAudit({ actor: p, action: "staff.doctor_assigned", targetType: "staff", targetId: username, details: { doctorSlug: doctor.slug, doctorName: doctor.name, unit: p.unit } });
+  revalidatePath("/admin/staff");
+  revalidatePath("/admin/queue");
+  return { success: true };
 }
 
 export async function removeStaff(fd) {
