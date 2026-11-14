@@ -422,7 +422,7 @@ test("live board automatically opens today's weekly queue within one hour of its
   }).format(value);
   const startTime = time(start);
   const endTime = time(end);
-  const weekday = new Date(\`\${date}T12:00:00+06:00\`).getDay();
+  const weekday = new Date(date + "T12:00:00+06:00").getDay();
   const doctor = {
     slug: "auto-open-one-hour-doctor",
     name: "Auto Open One Hour Doctor",
