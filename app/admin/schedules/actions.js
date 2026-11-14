@@ -64,7 +64,7 @@ export async function saveWeeklyScheduleAction(fd) {
 
 export async function disableWeeklyScheduleAction(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired or you do not have permission." };
+  if (!p || !hasPermission(p, "schedules.manage")) return { error: "Your session expired or you do not have permission." };
   const doctorSlug = val(fd, "doctorSlug");
   const doctor = await getDoctor(doctorSlug);
   if (!doctor || doctor.unit !== p.unit) return { error: "Not allowed to change this doctor’s schedule." };
