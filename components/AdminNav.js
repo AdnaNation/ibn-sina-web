@@ -54,7 +54,7 @@ export default async function AdminNav({ p, current }) {
         <ul className="flex w-full gap-1 overflow-x-auto px-4 py-1.5 text-sm font-semibold [scrollbar-width:none] sm:px-6 lg:px-8">
           {links.map(([label, href]) => (
             <li key={href} className="shrink-0">
-              <Link href={href} prefetch={null} aria-current={current === href ? "page" : undefined}
+              <Link href={href} prefetch={true} aria-current={current === href ? "page" : undefined}
                 className={`block rounded-lg px-3.5 py-2 ${current === href ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-pine-50"}`}>
                 {tr(label)}
               </Link>
