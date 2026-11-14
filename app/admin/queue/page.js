@@ -52,7 +52,7 @@ export default async function QueueConsole({ searchParams }) {
   const requestedDate = typeof sp.date === "string" ? sp.date : "";
   const date = isValidISODate(requestedDate) ? requestedDate : todayDhaka();
   const [sessions, doctors] = await Promise.all([
-    getConsole(date, p),
+    getConsole(date, p, typeof sp.doc === "string" ? sp.doc : ""),
     getAllDoctors(),
   ]);
   const s = sessions.find((x) => x.doctorSlug === sp.doc) || sessions[0];
