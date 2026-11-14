@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
-import { getDoctor, getUnits } from "@/lib/data";
+import { getUnits } from "@/lib/data";
 import { createStaff, listStaff, setStaffActive } from "@/lib/staff";
 import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
@@ -15,7 +15,6 @@ export async function addStaff(fd) {
   const name = g(fd, "name").slice(0, 80), username = g(fd, "username").toLowerCase(), password = String(fd.get("password") || "");
   let role = g(fd, "role") || "staff";
   let unit = g(fd, "unit");
-  let doctorSlug = "", doctorName = "";
   const selected = fd.getAll("permissions").map(String);
   const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((x) => x.key));
   const permissions = [...new Set(selected)].filter((x) => allowed.has(x));
@@ -35,7 +34,7 @@ export async function addStaff(fd) {
   }
   if (!err) {
     const finalPermissions = role === "branch_admin" ? [] : permissions;
-    err = await createStaff({ name, username, password, role, unit, doctorSlug, doctorName, permissions: finalPermissions });
+    err = await createStaff({ name, username, password, role, unit, permissions: finalPermissions });
     if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, permissions: finalPermissions } });
   }
   if (err) return { error: err };
