@@ -16,7 +16,7 @@ const input = "mt-1 w-full rounded-xl border border-pine-100 bg-white px-3 py-2.
 export default async function DoctorsAdmin({ searchParams }) {
   const p = await getSession();
   if (!p) redirect("/admin/login");
-  if (!hasPermission(p, "doctors.view")) redirect("/admin");
+  if (!hasPermission(p, "doctors.view") && p.role !== "owner") redirect("/admin");
   const { bn } = await getAdmin();
   const t = (en, b) => (bn ? b : en);
   const sp = await searchParams;
