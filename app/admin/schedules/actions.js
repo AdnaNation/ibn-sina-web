@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
-import { publishSchedule, removeEmptySchedule } from "@/lib/queue";
+import { publishSchedule, saveWeeklySchedule, deactivateWeeklySchedule, removeEmptySchedule } from "@/lib/queue";
 import { writeAudit } from "@/lib/management";
 
 const val = (fd, key) => String(fd.get(key) || "").trim();
@@ -33,6 +33,49 @@ export async function publishScheduleAction(fd) {
   redirect(error
     ? `/admin/schedules?err=${encodeURIComponent(error)}`
     : `/admin/schedules?ok=published`);
+}
+
+export async function saveWeeklyScheduleAction(fd) {
+  const p = await getSession();
+  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) redirect("/admin/login");
+  const doctor = await getDoctor(val(fd, "doctorSlug"));
+  let error = "";
+  if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) error = "Choose a valid doctor from your branch.";
+  else {
+    error = await saveWeeklySchedule({
+      doctor,
+      weekdays: fd.getAll("weekdays"),
+      startTime: val(fd, "weeklyStartTime"),
+      endTime: val(fd, "weeklyEndTime"),
+      maxPatients: val(fd, "weeklyMaxPatients"),
+      avgMin: val(fd, "weeklyAvgMin"),
+      endsOn: val(fd, "endsOn"),
+      publishedBy: p.name || "Owner",
+    });
+  }
+  if (!error) await writeAudit({
+    actor: p, action: "schedule.weekly_saved", targetType: "weekly_schedule",
+    targetId: doctor.slug,
+    details: { doctor: doctor.name, unit: doctor.unit, weekdays: fd.getAll("weekdays") },
+  });
+  revalidatePath("/admin/schedules");
+  revalidatePath("/appointment");
+  redirect(error
+    ? `/admin/schedules?err=${encodeURIComponent(error)}`
+    : "/admin/schedules?ok=weekly");
+}
+
+export async function disableWeeklyScheduleAction(fd) {
+  const p = await getSession();
+  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) redirect("/admin/login");
+  const doctorSlug = val(fd, "doctorSlug");
+  const doctor = await getDoctor(doctorSlug);
+  if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) redirect("/admin/schedules?err=Not%20allowed");
+  const error = await deactivateWeeklySchedule(doctorSlug, p);
+  if (!error) await writeAudit({ actor: p, action: "schedule.weekly_disabled", targetType: "weekly_schedule", targetId: doctorSlug });
+  revalidatePath("/admin/schedules");
+  revalidatePath("/appointment");
+  redirect(error ? `/admin/schedules?err=${encodeURIComponent(error)}` : "/admin/schedules?ok=weekly-disabled");
 }
 
 export async function removeScheduleAction(fd) {

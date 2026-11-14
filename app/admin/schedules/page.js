@@ -4,9 +4,9 @@ import AdminNav from "@/components/AdminNav";
 import { getAdmin } from "@/lib/adminT";
 import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getAllDoctors } from "@/lib/data";
-import { getScheduleList } from "@/lib/queue";
+import { getScheduleList, getWeeklyScheduleList } from "@/lib/queue";
 import { todayDhaka, fmtDate } from "@/lib/time";
-import { publishScheduleAction, removeScheduleAction } from "./actions";
+import { publishScheduleAction, saveWeeklyScheduleAction, disableWeeklyScheduleAction, removeScheduleAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -33,9 +33,10 @@ export default async function ScheduleManager({ searchParams }) {
   const sp = await searchParams;
   const from = todayDhaka();
   const to = todayDhaka(14);
-  const [doctors, schedules] = await Promise.all([
+  const [doctors, schedules, weeklySchedules] = await Promise.all([
     getAllDoctors(),
     getScheduleList(from, to, p),
+    getWeeklyScheduleList(p),
   ]);
   const branchDoctors = doctors.filter((d) => p.role === "owner" || d.unit === p.unit);
   const grouped = (schedules || []).reduce((acc, item) => {
@@ -57,8 +58,79 @@ export default async function ScheduleManager({ searchParams }) {
         </div>
 
         {sp.err && <p role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{sp.err}</p>}
+        {sp.ok === "weekly-disabled" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Recurring availability disabled. Already published sessions and patient bookings are not changed.</p>}
+        {sp.ok === "weekly" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Weekly availability saved. Matching dates will become bookable in the rolling booking window.</p>}
         {sp.ok === "published" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{tr("Schedule published. Patients can now select this date when booking.")}</p>}
         {sp.ok === "removed" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{tr("Unused schedule removed.")}</p>}
+
+        <section className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50/60 p-5 shadow-sm md:p-7">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-800">Recurring availability</p>
+            <h2 className="mt-2 font-serif text-2xl text-pine-950">Set a doctor’s weekly schedule</h2>
+            <p className="mt-2 text-sm leading-6 text-ink/65">Choose the weekdays and consultation hours. The system will create bookable sessions only on those days within the patient booking window. The schedule repeats until changed or its optional end date.</p>
+          </div>
+          {!branchDoctors.length ? (
+            <p className="mt-5 text-sm text-ink/65">Add doctor records before configuring weekly availability.</p>
+          ) : (
+            <form action={saveWeeklyScheduleAction} className="mt-5 grid gap-4 md:grid-cols-2">
+              <label className="block text-sm font-semibold text-pine-900">Doctor
+                <select name="doctorSlug" required defaultValue="" className={field}>
+                  <option value="" disabled>Select a doctor</option>
+                  {branchDoctors.map((d) => <option key={d.slug} value={d.slug}>{d.name} · {d.department} · {d.unit}</option>)}
+                </select>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block text-sm font-semibold text-pine-900">Start time
+                  <input name="weeklyStartTime" type="time" defaultValue="14:00" required className={field}/>
+                </label>
+                <label className="block text-sm font-semibold text-pine-900">End time
+                  <input name="weeklyEndTime" type="time" defaultValue="20:00" required className={field}/>
+                </label>
+              </div>
+              <fieldset className="md:col-span-2">
+                <legend className="text-sm font-semibold text-pine-900">Available weekdays</legend>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map((day,index) => (
+                    <label key={day} className="flex cursor-pointer items-center gap-2 rounded-xl border border-pine-100 bg-white px-3 py-2 text-sm">
+                      <input type="checkbox" name="weekdays" value={index} className="accent-emerald-700"/>
+                      {day}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block text-sm font-semibold text-pine-900">Serial capacity per day
+                  <input name="weeklyMaxPatients" type="number" min="1" max="200" defaultValue="40" required className={field}/>
+                </label>
+                <label className="block text-sm font-semibold text-pine-900">Average minutes / patient
+                  <input name="weeklyAvgMin" type="number" min="3" max="45" defaultValue="8" required className={field}/>
+                </label>
+              </div>
+              <label className="block text-sm font-semibold text-pine-900">Optional schedule end date
+                <input name="endsOn" type="date" min={from} className={field}/>
+                <span className="mt-1 block text-xs font-normal text-ink/55">Leave empty to repeat until an administrator changes or disables it.</span>
+              </label>
+              <div className="flex items-end">
+                <button className="w-full rounded-full bg-emerald-800 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-700">Save weekly availability</button>
+              </div>
+            </form>
+          )}
+          {weeklySchedules?.length ? (
+            <div className="mt-6 border-t border-emerald-200 pt-4">
+              <h3 className="text-sm font-bold text-pine-900">Active weekly schedules</h3>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {weeklySchedules.map((item) => (
+                  <div key={item.doctorSlug} className="rounded-xl border border-emerald-100 bg-white p-3 text-sm">
+                    <p className="font-semibold text-pine-950">{item.doctorName}</p>
+                    <p className="mt-1 text-xs text-ink/65">{(item.weekdays || []).map((day) => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day]).join(", ")} · {item.startTime}–{item.endTime}</p>
+                    <p className="mt-1 text-xs text-ink/50">{item.maxPatients} serials/day · {item.endsOn ? `Until ${item.endsOn}` : "Repeats until changed"}</p>
+                    <form action={disableWeeklyScheduleAction} className="mt-2"><input type="hidden" name="doctorSlug" value={item.doctorSlug}/><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">Disable recurring schedule</button></form>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </section>
 
         <section className="mt-8 grid gap-6 lg:grid-cols-[.9fr_1.1fr]">
           <div className="h-fit rounded-3xl border border-pine-100 bg-white p-5 shadow-sm md:p-7">
