@@ -82,7 +82,7 @@ export default async function Overview() {
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {quick.map(([Icon, label, href]) => (
-            <Link key={href} href={href} className="flex items-center gap-3 rounded-2xl border border-pine-100 bg-white p-4 text-sm font-bold text-pine-900 shadow-sm transition hover:-translate-y-0.5 hover:border-pine-300">
+            <Link key={href} href={href} prefetch={true} className="flex items-center gap-3 rounded-2xl border border-pine-100 bg-white p-4 text-sm font-bold text-pine-900 shadow-sm transition hover:-translate-y-0.5 hover:border-pine-300">
               <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-pine-50 text-pine-800"><Icon size={18} /></span>{label}
             </Link>
           ))}
@@ -152,7 +152,7 @@ export default async function Overview() {
                 <h2 className="font-serif text-2xl font-semibold text-pine-950">{t("Branch-wise performance", "শাখাভিত্তিক কার্যক্রম")}</h2>
                 <p className="mt-1 text-xs text-ink/60">{t("Live counts for today", "আজকের লাইভ হিসাব")}</p>
               </div>
-              <Link href="/admin/branches" className="text-sm font-bold text-emerald-800 underline underline-offset-4">{t("Open branch workspace", "শাখা ব্যবস্থাপনা খুলুন")} ↗</Link>
+              <Link href="/admin/branches" prefetch={true} className="text-sm font-bold text-emerald-800 underline underline-offset-4">{t("Open branch workspace", "শাখা ব্যবস্থাপনা খুলুন")} ↗</Link>
             </div>
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-[720px] text-left text-sm">
@@ -199,9 +199,9 @@ export default async function Overview() {
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Link href="/live" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Live queue board", "লাইভ সিরিয়াল বোর্ড")}</Link>
-              <Link href="/admin/appointments" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Appointments", "অ্যাপয়েন্টমেন্ট")}</Link>
-              <Link href="/admin/reports" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Operational reports", "কার্যক্রমের রিপোর্ট")}</Link>
-              <Link href="/admin/audit" className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Audit history", "অডিট ইতিহাস")}</Link>
+              <Link href="/admin/appointments" prefetch={true} className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Appointments", "অ্যাপয়েন্টমেন্ট")}</Link>
+              <Link href="/admin/reports" prefetch={true} className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Operational reports", "কার্যক্রমের রিপোর্ট")}</Link>
+              <Link href="/admin/audit" prefetch={true} className="rounded-full border border-pine-100 px-5 py-3 text-sm font-semibold">{t("Audit history", "অডিট ইতিহাস")}</Link>
             </div>
           </section>
         )}
