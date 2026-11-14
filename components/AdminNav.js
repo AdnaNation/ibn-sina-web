@@ -26,7 +26,7 @@ export default async function AdminNav({ p, current }) {
   return (
     <header className="sticky top-0 z-40 border-b border-pine-100 bg-white/95 backdrop-blur">
       <div className="flex w-full items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
-        <Link href={owner ? "/admin" : "/admin/queue"} className="flex min-w-0 items-center gap-2.5">
+        <Link href={owner ? "/admin" : "/admin/queue"} prefetch={true} className="flex min-w-0 items-center gap-2.5">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-pine-900 text-white"><HeartPulse size={19} /></span>
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-sm font-bold text-pine-950">{p.name}</span>
