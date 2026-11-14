@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { getSession, hasPermission } from "@/lib/auth";
+import { writeAudit } from "@/lib/management";
 import { createDoctor, updateDoctor, deleteDoctor, importStarterDoctors } from "@/lib/doctors";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
@@ -24,7 +25,7 @@ export async function addDoctorAction(fd) { const p = await guard(); return done
 export async function saveDoctorAction(fd) { const p = await guard(); return done(await updateDoctor(p, g(fd, "slug"), fields(fd))); }
 export async function deleteDoctorAction(fd) { const p = await guard(); return done(await deleteDoctor(p, g(fd, "slug"))); }
 export async function importDoctorsAction() {
-  const p = await guard();
-  if (p.role !== "owner") return { error: "Only the Main Admin can import starter doctors." };
+  const p = await getSession();
+  if (!p || p.role !== "owner") return { error: "Only the Main Admin can import the initial starter directory." };
   return done(await importStarterDoctors(p));
 }
