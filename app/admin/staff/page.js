@@ -6,7 +6,6 @@ import { getSession, isBranchAdmin } from "@/lib/auth";
 import { listStaff } from "@/lib/staff";
 import { getUnits, getAllDoctors } from "@/lib/data";
 import { assignStaffDoctor, addStaff } from "./actions";
-/* actions imported together above */
 import { toggleAccountAction } from "@/app/admin/branches/actions";
 
 export const dynamic = "force-dynamic";
