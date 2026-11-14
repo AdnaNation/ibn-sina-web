@@ -386,15 +386,6 @@ test("saving a weekly schedule updates untouched upcoming sessions and exposes h
   assert.equal(active.startTime, "17:00", "sessions with issued serials must not be rewritten");
   assert.equal(active.endTime, "22:00");
 
-  const board = await queue.getBoard();
-  const live = board.sessions.find((session) => session.key === todayKey);
-  if (today === dateAt(0)) {
-    assert.equal(live?.startTime, "14:00");
-    assert.equal(live?.endTime, "20:00");
-    assert.ok(Number.isFinite(live?.sessionStartsAt));
-    assert.ok(Number.isFinite(live?.endsAt));
-  }
-
   assert.equal(await queue.deactivateWeeklySchedule(doctor.slug, { role: "owner", name: "Integration Test" }), "");
   const cancelledEmpty = await db.collection("sessions").findOne({ key: todayKey });
   const protectedBooked = await db.collection("sessions").findOne({ key: tomorrowKey });
@@ -474,7 +465,12 @@ test("live board automatically opens today's weekly queue within one hour of its
   assert.equal(opened.status, "in_progress");
   assert.equal(opened.autoOpenedEarly, true);
   assert.ok(opened.autoOpenedAt instanceof Date);
-  assert.equal(board.sessions.find((session) => session.key === key)?.phase, "open");
+  const live = board.sessions.find((session) => session.key === key);
+  assert.equal(live?.phase, "open");
+  assert.equal(live?.startTime, startTime);
+  assert.equal(live?.endTime, endTime);
+  assert.ok(Number.isFinite(live?.sessionStartsAt));
+  assert.ok(Number.isFinite(live?.endsAt));
 
   const notYet = await db.collection("sessions").findOne({ key: futureKey });
   assert.equal(notYet.status, "scheduled", "queues more than one hour away remain scheduled");
