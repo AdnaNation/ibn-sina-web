@@ -96,7 +96,7 @@ test("manually starting a queue uses the doctor's active weekly schedule", { ski
 
   const nextDateValue = new Date(`${date}T12:00:00+06:00`);
   nextDateValue.setUTCDate(nextDateValue.getUTCDate() + 1);
-  const offScheduleDate = nextDateValue.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const offScheduleDate = nextDateValue.toISOString().slice(0, 10);
   const offScheduleResult = await queue.openSession(doctor, offScheduleDate);
   assert.match(offScheduleResult.error, /does not have an active weekly schedule/);
   assert.equal(await db.collection("sessions").findOne({ key: queue.sessionKey(doctor.slug, offScheduleDate) }), null);
