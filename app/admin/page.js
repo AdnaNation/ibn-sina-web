@@ -108,7 +108,7 @@ export default async function Overview() {
             ].map((item) => (
               <li key={item.href} className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white p-3">
                 <span aria-label={item.done ? t("Complete", "সম্পন্ন") : t("Needs review", "যাচাই বাকি")} className={item.done ? "grid size-7 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-800" : "grid size-7 shrink-0 place-items-center rounded-full bg-amber-100 text-amber-800"}>{item.done ? "✓" : "!"}</span>
-                <Link href={item.href} className="min-w-0 flex-1 text-sm font-semibold text-pine-950 underline-offset-4 hover:underline">{item.label}</Link>
+                <Link href={item.href} prefetch={true} className="min-w-0 flex-1 text-sm font-semibold text-pine-950 underline-offset-4 hover:underline">{item.label}</Link>
                 <span className="text-xs text-ink/50">{item.done ? t("Ready", "প্রস্তুত") : t("Review", "যাচাই")}</span>
               </li>
             ))}
