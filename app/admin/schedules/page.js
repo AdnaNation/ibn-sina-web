@@ -56,7 +56,7 @@ export default async function ScheduleManager({ searchParams }) {
             <h1 className="mt-2 font-serif text-3xl text-pine-950 md:text-4xl">{p.role === "owner" ? tr("All branch doctor schedules") : tr("Branch doctor schedules")}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-ink/65">{tr("Publish consultation sessions before patients book. Only published dates appear as available on the public appointment page.")}</p>
           </div>
-          <Link href="/admin/queue" className="rounded-full border border-pine-200 px-5 py-3 text-sm font-semibold text-pine-800 transition hover:bg-pine-50">{tr("Open live queue")} <span aria-hidden="true">↗</span></Link>
+          <Link href="/admin/queue" prefetch={true} className="rounded-full border border-pine-200 px-5 py-3 text-sm font-semibold text-pine-800 transition hover:bg-pine-50">{tr("Open live queue")} <span aria-hidden="true">↗</span></Link>
         </div>
 
         {sp.err && <p role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{sp.err}</p>}
@@ -176,7 +176,7 @@ export default async function ScheduleManager({ searchParams }) {
                             <div><p className="font-serif text-xl text-pine-900">{s.lastSerial || 0}</p><p className="text-[11px] text-ink/60">{tr("Last issued")}</p></div>
                           </div>
                           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                            <Link href={`/admin/queue?date=${date}&doc=${s.doctorSlug}`} className="text-xs font-bold text-emerald-800 underline underline-offset-4">{tr("Open queue console ↗")}</Link>
+                            <Link href={`/admin/queue?date=${date}&doc=${s.doctorSlug}`} prefetch={true} className="text-xs font-bold text-emerald-800 underline underline-offset-4">{tr("Open queue console ↗")}</Link>
                             {s.canRemove && <AdminActionForm action={removeScheduleAction} successMessage={tr("Unused schedule removed.", "অব্যবহৃত সময়সূচি সরানো হয়েছে।")} pendingMessage={tr("Removing schedule…", "সময়সূচি সরানো হচ্ছে…")}><input type="hidden" name="key" value={s.key} /><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">{tr("Remove unused schedule")}</button></AdminActionForm>}
                           </div>
                         </article>
