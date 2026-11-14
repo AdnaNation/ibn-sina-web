@@ -6,7 +6,7 @@ import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getAllDoctors } from "@/lib/data";
 import { getScheduleList, getWeeklyScheduleList } from "@/lib/queue";
 import { todayDhaka, fmtDate } from "@/lib/time";
-import { publishScheduleAction, saveWeeklyScheduleAction, removeScheduleAction } from "./actions";
+import { publishScheduleAction, saveWeeklyScheduleAction, disableWeeklyScheduleAction, removeScheduleAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +57,7 @@ export default async function ScheduleManager({ searchParams }) {
         </div>
 
         {sp.err && <p role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{sp.err}</p>}
-        {sp.ok === "weekly" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Weekly availability saved. Matching dates will become bookable in the rolling booking window.</p>}\n        {sp.ok === "published" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{tr("Schedule published. Patients can now select this date when booking.")}</p>}
+        {sp.ok === "weekly-disabled" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Recurring availability disabled. Already published sessions and patient bookings are not changed.</p>}\n        {sp.ok === "weekly" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">Weekly availability saved. Matching dates will become bookable in the rolling booking window.</p>}\n        {sp.ok === "published" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{tr("Schedule published. Patients can now select this date when booking.")}</p>}
         {sp.ok === "removed" && <p role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{tr("Unused schedule removed.")}</p>}
 
         <section className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50/60 p-5 shadow-sm md:p-7">
@@ -120,7 +120,7 @@ export default async function ScheduleManager({ searchParams }) {
                   <div key={item.doctorSlug} className="rounded-xl border border-emerald-100 bg-white p-3 text-sm">
                     <p className="font-semibold text-pine-950">{item.doctorName}</p>
                     <p className="mt-1 text-xs text-ink/65">{(item.weekdays || []).map((day) => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day]).join(", ")} · {item.startTime}–{item.endTime}</p>
-                    <p className="mt-1 text-xs text-ink/50">{item.maxPatients} serials/day · {item.endsOn ? `Until ${item.endsOn}` : "Repeats until changed"}</p>
+                    <p className="mt-1 text-xs text-ink/50">{item.maxPatients} serials/day · {item.endsOn ? `Until ${item.endsOn}` : "Repeats until changed"}</p>\n                    <form action={disableWeeklyScheduleAction} className="mt-2"><input type="hidden" name="doctorSlug" value={item.doctorSlug}/><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">Disable recurring schedule</button></form>
                   </div>
                 ))}
               </div>
