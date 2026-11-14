@@ -26,7 +26,7 @@ after(async () => {
   await client.close();
 });
 
-test("availability automatically opens a rolling five-day window and preserves cancelled sessions", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
+test("availability stays closed without a configured weekly schedule", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
   const doctor = {
     slug: "auto-window-doctor",
     name: "Automatic Window Doctor",
@@ -39,31 +39,11 @@ test("availability automatically opens a rolling five-day window and preserves c
     const date = new Date(Date.now() + index * 86400000);
     return date.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
   }));
-  assert.ok(days.every((day) => !day.closed && !day.unscheduled && day.left === 40));
+  assert.ok(days.every((day) => day.closed && day.unscheduled && day.left === 0));
   const sessions = await db.collection("sessions")
     .find({ doctorSlug: doctor.slug })
-    .sort({ date: 1 })
     .toArray();
-  assert.equal(sessions.length, 5);
-  assert.ok(sessions.every((session) =>
-    session.autoOpened === true &&
-    session.status === "scheduled" &&
-    session.startTime === "17:00" &&
-    session.maxPatients === 40
-  ));
-
-  const cancelledDate = days[1].date;
-  await db.collection("sessions").updateOne(
-    { key: queue.sessionKey(doctor.slug, cancelledDate) },
-    { $set: { status: "cancelled", cancelledAt: new Date() } },
-  );
-  const refreshed = await queue.getAvailability(doctor);
-  assert.equal(refreshed[1].closed, true);
-  assert.equal(refreshed[1].closedReason, "closed");
-  const cancelled = await db.collection("sessions").findOne({
-    key: queue.sessionKey(doctor.slug, cancelledDate),
-  });
-  assert.equal(cancelled.status, "cancelled");
+  assert.equal(sessions.length, 0);
 });
 
 test("concurrent bookings never allocate the same serial or exceed capacity", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
@@ -230,6 +210,19 @@ test("concurrent availability requests safely create one five-day window", { ski
     department: "Testing",
     unit: "Integration Test Unit",
   };
+
+  await db.collection("weekly_schedules").insertOne({
+    doctorSlug: doctor.slug,
+    doctorName: doctor.name,
+    department: doctor.department,
+    unit: doctor.unit,
+    weekdays: [0, 1, 2, 3, 4, 5, 6],
+    startTime: "09:00",
+    endTime: "17:00",
+    maxPatients: 40,
+    avgMin: 8,
+    active: true,
+  });
 
   const results = await Promise.all(
     Array.from({ length: 12 }, () => queue.getAvailability(doctor)),
