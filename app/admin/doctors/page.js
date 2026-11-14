@@ -55,14 +55,14 @@ export default async function DoctorsAdmin({ searchParams }) {
           <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
             <h2 className="font-bold text-amber-950">{t("The public site is showing the built-in starter list", "পাবলিক সাইটে এখন ডিফল্ট প্রাথমিক তালিকা দেখানো হচ্ছে")}</h2>
             <p className="mt-1 text-sm leading-6 text-amber-900">{t("The starter list is only a sample. Import it once, then correct every name, department and branch here before launch.", "প্রাথমিক তালিকাটি শুধু নমুনা। একবার আমদানি করুন, তারপর চালুর আগে এখান থেকে প্রতিটি নাম, বিভাগ ও শাখা ঠিক করুন।")}</p>
-            {p.role === "owner" ? <AdminActionForm action={importDoctorsAction} className="mt-3" successMessage="Starter doctors imported." pendingMessage="Importing doctors…"><button className="rounded-full bg-amber-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-800">{t("Import starter doctors", "প্রাথমিক ডাক্তার আমদানি করুন")}</button></AdminActionForm> : <p className="mt-2 text-xs text-amber-900">{t("Ask the Main Admin to import it.", "মূল অ্যাডমিনকে এটি আমদানি করতে বলুন।")}</p>}
+            {p.role === "owner" ? <AdminActionForm action={importDoctorsAction} className="mt-3" successMessage={t("Starter doctors imported.", "প্রাথমিক ডাক্তার তালিকা আমদানি হয়েছে।")} pendingMessage={t("Importing doctors…", "ডাক্তার তালিকা আমদানি হচ্ছে…")}><button className="rounded-full bg-amber-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-800">{t("Import starter doctors", "প্রাথমিক ডাক্তার আমদানি করুন")}</button></AdminActionForm> : <p className="mt-2 text-xs text-amber-900">{t("Ask the Main Admin to import it.", "মূল অ্যাডমিনকে এটি আমদানি করতে বলুন।")}</p>}
           </section>
         )}
 
         {connected && seeded && canManage && (
           <section className="mt-6 rounded-2xl border border-pine-100 bg-white p-5 shadow-sm">
             <h2 className="font-serif text-2xl font-semibold text-pine-950">{t("Add a doctor", "নতুন ডাক্তার যোগ করুন")}</h2>
-            <AdminActionForm action={addDoctorAction} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" successMessage="Doctor added." pendingMessage="Adding doctor…" resetOnSuccess>
+            <AdminActionForm action={addDoctorAction} className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3" successMessage={t("Doctor added.", "ডাক্তার যোগ করা হয়েছে।")} pendingMessage={t("Adding doctor…", "ডাক্তার যোগ হচ্ছে…")} resetOnSuccess>
               <Fields />
               <label className="text-xs font-bold text-pine-800 sm:col-span-2 lg:col-span-1">{t("Branch", "শাখা")}
                 <select name="unit" required defaultValue={p.role === "owner" ? "" : p.unit} className={input}>
@@ -88,12 +88,12 @@ export default async function DoctorsAdmin({ searchParams }) {
                     </summary>
                     {canManage && (
                       <div className="mt-4 border-t border-pine-50 pt-4">
-                        <AdminActionForm action={saveDoctorAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" successMessage="Doctor changes saved." pendingMessage="Saving doctor…">
+                        <AdminActionForm action={saveDoctorAction} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" successMessage={t("Doctor changes saved.", "ডাক্তারের তথ্য সংরক্ষিত হয়েছে।")} pendingMessage={t("Saving doctor…", "ডাক্তারের তথ্য সংরক্ষণ হচ্ছে…")}>
                           <input type="hidden" name="slug" value={d.slug} />
                           <Fields d={d} />
                           <button className="self-end rounded-xl bg-pine-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-pine-800">{t("Save", "সংরক্ষণ")}</button>
                         </AdminActionForm>
-                        <AdminActionForm action={deleteDoctorAction} className="mt-3" successMessage="Doctor deleted." pendingMessage="Deleting doctor…">
+                        <AdminActionForm action={deleteDoctorAction} className="mt-3" successMessage={t("Doctor deleted.", "ডাক্তার মুছে ফেলা হয়েছে।")} pendingMessage={t("Deleting doctor…", "ডাক্তার মুছে ফেলা হচ্ছে…")}>
                           <input type="hidden" name="slug" value={d.slug} />
                           <button className="text-xs font-bold text-rose-700 underline underline-offset-4">{t("Delete doctor", "ডাক্তার মুছুন")}</button>
                           <span className="ml-2 text-xs text-ink/50">{t("Only possible if the doctor has no schedules or patients.", "শুধু তখনই সম্ভব যখন ডাক্তারের কোনো সময়সূচি বা রোগী নেই।")}</span>
