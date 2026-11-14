@@ -46,6 +46,62 @@ test("availability stays closed without a configured weekly schedule", { skip: !
   assert.equal(sessions.length, 0);
 });
 
+test("manually starting a queue uses the doctor's active weekly schedule", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
+  const doctor = {
+    slug: "weekly-start-time-doctor",
+    name: "Weekly Start Time Doctor",
+    department: "Testing",
+    unit: "Integration Test Unit",
+  };
+  const date = "2099-04-17";
+  const weekday = new Date(`${date}T12:00:00+06:00`).getDay();
+  const key = queue.sessionKey(doctor.slug, date);
+
+  await db.collection("weekly_schedules").insertOne({
+    doctorSlug: doctor.slug,
+    doctorName: doctor.name,
+    department: doctor.department,
+    unit: doctor.unit,
+    weekdays: [weekday],
+    startTime: "14:00",
+    endTime: "20:00",
+    maxPatients: 25,
+    avgMin: 12,
+    active: true,
+  });
+
+  // Simulate an empty placeholder created by the previous hard-coded default.
+  await db.collection("sessions").insertOne({
+    key,
+    date,
+    doctorSlug: doctor.slug,
+    doctorName: doctor.name,
+    department: doctor.department,
+    unit: doctor.unit,
+    status: "scheduled",
+    startTime: "17:00",
+    maxPatients: 40,
+    avgMin: 8,
+    current: 0,
+    lastSerial: 0,
+  });
+
+  assert.equal(await queue.openSession(doctor, date), key);
+  const session = await db.collection("sessions").findOne({ key });
+  assert.equal(session.startTime, "14:00");
+  assert.equal(session.endTime, "20:00");
+  assert.equal(session.maxPatients, 25);
+  assert.equal(session.avgMin, 12);
+  assert.ok(session.weeklyScheduleId);
+
+  const nextDateValue = new Date(`${date}T12:00:00+06:00`);
+  nextDateValue.setUTCDate(nextDateValue.getUTCDate() + 1);
+  const offScheduleDate = nextDateValue.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const offScheduleResult = await queue.openSession(doctor, offScheduleDate);
+  assert.match(offScheduleResult.error, /does not have an active weekly schedule/);
+  assert.equal(await db.collection("sessions").findOne({ key: queue.sessionKey(doctor.slug, offScheduleDate) }), null);
+});
+
 test("concurrent bookings never allocate the same serial or exceed capacity", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
   const doctor = {
     slug: "integration-doctor",
