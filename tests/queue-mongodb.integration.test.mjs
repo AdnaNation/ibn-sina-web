@@ -293,3 +293,101 @@ test("concurrent availability requests safely create one five-day window", { ski
   assert.equal(new Set(sessions.map((session) => session.key)).size, 5);
   assert.ok(sessions.every((session) => session.status === "scheduled"));
 });
+
+
+test("saving a weekly schedule updates untouched upcoming sessions and exposes hours on the live board", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async () => {
+  const doctor = {
+    slug: "weekly-live-sync-doctor",
+    name: "Weekly Live Sync Doctor",
+    department: "Testing",
+    unit: "Integration Test Unit",
+  };
+  const dateAt = (offset) => new Date(Date.now() + offset * 86400000)
+    .toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const today = dateAt(0);
+  const tomorrow = dateAt(1);
+  const weekdays = [
+    new Date(`${today}T12:00:00+06:00`).getDay(),
+    new Date(`${tomorrow}T12:00:00+06:00`).getDay(),
+  ];
+  const todayKey = queue.sessionKey(doctor.slug, today);
+  const tomorrowKey = queue.sessionKey(doctor.slug, tomorrow);
+
+  await db.collection("weekly_schedules").insertOne({
+    doctorSlug: doctor.slug,
+    doctorName: doctor.name,
+    department: doctor.department,
+    unit: doctor.unit,
+    weekdays,
+    startTime: "17:00",
+    endTime: "22:00",
+    maxPatients: 40,
+    avgMin: 8,
+    active: true,
+  });
+  await db.collection("sessions").insertMany([
+    {
+      key: todayKey,
+      date: today,
+      doctorSlug: doctor.slug,
+      doctorName: doctor.name,
+      department: doctor.department,
+      unit: doctor.unit,
+      status: "scheduled",
+      startTime: "17:00",
+      endTime: "22:00",
+      maxPatients: 40,
+      avgMin: 8,
+      current: 0,
+      lastSerial: 0,
+      autoOpened: true,
+      weeklyScheduleId: "previous-weekly-id",
+    },
+    {
+      key: tomorrowKey,
+      date: tomorrow,
+      doctorSlug: doctor.slug,
+      doctorName: doctor.name,
+      department: doctor.department,
+      unit: doctor.unit,
+      status: "scheduled",
+      startTime: "17:00",
+      endTime: "22:00",
+      maxPatients: 40,
+      avgMin: 8,
+      current: 0,
+      lastSerial: 3,
+      autoOpened: true,
+      weeklyScheduleId: "previous-weekly-id",
+    },
+  ]);
+
+  const result = await queue.saveWeeklySchedule({
+    doctor,
+    weekdays,
+    startTime: "14:00",
+    endTime: "20:00",
+    maxPatients: 25,
+    avgMin: 12,
+  });
+  assert.equal(result, "");
+
+  const untouched = await db.collection("sessions").findOne({ key: todayKey });
+  assert.equal(untouched.startTime, "14:00");
+  assert.equal(untouched.endTime, "20:00");
+  assert.equal(untouched.maxPatients, 25);
+  assert.equal(untouched.avgMin, 12);
+
+  const active = await db.collection("sessions").findOne({ key: tomorrowKey });
+  assert.equal(active.startTime, "17:00", "sessions with issued serials must not be rewritten");
+  assert.equal(active.endTime, "22:00");
+
+  const board = await queue.getBoard();
+  const live = board.sessions.find((session) => session.key === todayKey);
+  if (today === dateAt(0)) {
+    assert.equal(live?.startTime, "14:00");
+    assert.equal(live?.endTime, "20:00");
+    assert.ok(Number.isFinite(live?.sessionStartsAt));
+    assert.ok(Number.isFinite(live?.endsAt));
+  }
+});
