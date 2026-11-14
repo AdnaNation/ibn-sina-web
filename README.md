@@ -69,9 +69,9 @@ The `sessions` collection is the source of published appointment availability. T
 
 ## Automatic queue opening
 
-The scheduled job checks today's published doctor sessions every minute. It opens each queue automatically when its scheduled start time is within the next 60 minutes. The public live board also performs this check while refreshing, so the queue can open even if the scheduled job is temporarily unavailable. Before the doctor's actual start time, the public board shows **Queue open** rather than **Seeing patients**; it changes to **Seeing patients** at the scheduled time. Sessions that are already finished/cancelled or whose end time has passed are not reopened.
+The protected `/api/cron/open-queues` endpoint checks today's published doctor sessions and opens each eligible queue when its scheduled start time is within the next 60 minutes. The public live board also performs this check while refreshing, so the queue can open even if the external scheduled job is temporarily unavailable. Before the doctor's actual start time, the public board shows **Queue open** rather than **Seeing patients**; it changes to **Seeing patients** at the scheduled time. Sessions that are already finished/cancelled or whose end time has passed are not reopened.
 
-For Vercel scheduled execution, add a strong random `CRON_SECRET` environment variable (at least 32 characters) to the deployment environment. Vercel sends it as a Bearer token to the protected `/api/cron/open-queues` endpoint. The cron runs once per minute as configured in `vercel.json`. The same endpoint can be tested locally by sending `Authorization: Bearer <CRON_SECRET>`.
+Vercel Hobby permits only daily scheduled cron jobs, so this project intentionally does not configure a Vercel Cron Job. To run the background check every minute without upgrading, configure an external scheduler such as [cron-job.org](https://cron-job.org/) to send a GET request to `https://YOUR-PROJECT-DOMAIN/api/cron/open-queues` every minute. Add the HTTP header `Authorization: Bearer <CRON_SECRET>`. First add a strong random `CRON_SECRET` environment variable (at least 32 characters) to the hosting environment. Keep the value private; do not commit it to the repository. The same endpoint can be tested locally by sending that Bearer header.
 
 ## Multi-branch administration and permissions
 
