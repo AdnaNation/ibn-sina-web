@@ -175,7 +175,7 @@ export default async function ScheduleManager({ searchParams }) {
                             <div><p className="font-serif text-xl text-pine-900">{s.lastSerial || 0}</p><p className="text-[11px] text-ink/60">{tr("Last issued")}</p></div>
                           </div>
                           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                            <Link href={`/admin/queue?date=${date}&doc=${s.doctorSlug}`} prefetch={true} className="text-xs font-bold text-emerald-800 underline underline-offset-4">{tr("Open queue console ↗")}</Link>
+
                             {s.canRemove && <AdminActionForm action={removeScheduleAction} successMessage={tr("Unused schedule removed.", "অব্যবহৃত সময়সূচি সরানো হয়েছে।")} pendingMessage={tr("Removing schedule…", "সময়সূচি সরানো হচ্ছে…")}><input type="hidden" name="key" value={s.key} /><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">{tr("Remove unused schedule")}</button></AdminActionForm>}
                           </div>
                         </article>
