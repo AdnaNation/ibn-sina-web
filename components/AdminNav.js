@@ -25,7 +25,7 @@ export default async function AdminNav({ p, current }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-pine-100 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-2.5">
+      <div className="flex w-full items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
         <Link href={owner ? "/admin" : "/admin/queue"} className="flex min-w-0 items-center gap-2.5">
           <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-pine-900 text-white"><HeartPulse size={19} /></span>
           <span className="min-w-0 leading-tight">
@@ -51,7 +51,7 @@ export default async function AdminNav({ p, current }) {
         </div>
       </div>
       <nav aria-label="Admin" className="border-t border-pine-50">
-        <ul className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-3 py-1.5 text-sm font-semibold [scrollbar-width:none]">
+        <ul className="flex w-full gap-1 overflow-x-auto px-4 py-1.5 text-sm font-semibold [scrollbar-width:none] sm:px-6 lg:px-8">
           {links.map(([label, href]) => (
             <li key={href} className="shrink-0">
               <Link href={href} aria-current={current === href ? "page" : undefined}
