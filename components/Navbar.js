@@ -21,7 +21,7 @@ export default async function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 shadow-[0_8px_30px_rgba(9,54,40,.045)] backdrop-blur-xl">
-      <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="mx-auto flex h-[76px] max-w-7xl items-center justify-between gap-4 px-4">
+      <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="flex h-[76px] w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" prefetch={true} className="group flex min-w-0 items-center gap-3" aria-label={prototypeName + " home"}>
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-pine-900 text-white shadow-lg shadow-pine-900/15 transition group-hover:-rotate-3">
             <HeartPulse size={25} strokeWidth={2.1} />
