@@ -386,18 +386,92 @@ test("saving a weekly schedule updates untouched upcoming sessions and exposes h
   assert.equal(active.startTime, "17:00", "sessions with issued serials must not be rewritten");
   assert.equal(active.endTime, "22:00");
 
-  const board = await queue.getBoard();
-  const live = board.sessions.find((session) => session.key === todayKey);
-  if (today === dateAt(0)) {
-    assert.equal(live?.startTime, "14:00");
-    assert.equal(live?.endTime, "20:00");
-    assert.ok(Number.isFinite(live?.sessionStartsAt));
-    assert.ok(Number.isFinite(live?.endsAt));
-  }
-
   assert.equal(await queue.deactivateWeeklySchedule(doctor.slug, { role: "owner", name: "Integration Test" }), "");
   const cancelledEmpty = await db.collection("sessions").findOne({ key: todayKey });
   const protectedBooked = await db.collection("sessions").findOne({ key: tomorrowKey });
   assert.equal(cancelledEmpty.status, "cancelled", "disabling recurring hours closes an empty future session");
   assert.equal(protectedBooked.status, "scheduled", "disabling recurring hours preserves sessions with issued serials");
+});
+
+
+test("live board automatically opens today's weekly queue within one hour of its start", { skip: !enabled && "Set MONGODB_TEST_URI to run MongoDB integration tests" }, async (t) => {
+  const now = Date.now();
+  const start = new Date(now + 30 * 60000);
+  const end = new Date(now + 90 * 60000);
+  const date = start.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const today = new Date(now).toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  const endDate = end.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+  if (date !== today || endDate !== today) {
+    t.skip("The test's short schedule window must remain within today's Bangladesh date.");
+    return;
+  }
+  const time = (value) => new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Dhaka",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(value);
+  const startTime = time(start);
+  const endTime = time(end);
+  const weekday = new Date(date + "T12:00:00+06:00").getDay();
+  const doctor = {
+    slug: "auto-open-one-hour-doctor",
+    name: "Auto Open One Hour Doctor",
+    department: "Testing",
+    unit: "Integration Test Unit",
+  };
+  const futureDoctorSlug = "auto-open-not-yet-doctor";
+  const futureStart = new Date(now + 2 * 60 * 60000);
+  const futureEnd = new Date(now + 3 * 60 * 60000);
+  if (futureStart.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" }) !== today ||
+      futureEnd.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" }) !== today) {
+    t.skip("The two-hour comparison schedule must remain within today's Bangladesh date.");
+    return;
+  }
+
+  await db.collection("weekly_schedules").insertOne({
+    doctorSlug: doctor.slug,
+    doctorName: doctor.name,
+    department: doctor.department,
+    unit: doctor.unit,
+    weekdays: [weekday],
+    startTime,
+    endTime,
+    maxPatients: 30,
+    avgMin: 10,
+    active: true,
+  });
+  const futureKey = queue.sessionKey(futureDoctorSlug, today);
+  await db.collection("sessions").insertOne({
+    key: futureKey,
+    date: today,
+    doctorSlug: futureDoctorSlug,
+    doctorName: "Future Schedule Doctor",
+    department: "Testing",
+    unit: "Integration Test Unit",
+    status: "scheduled",
+    startTime: time(futureStart),
+    endTime: time(futureEnd),
+    maxPatients: 20,
+    avgMin: 10,
+    delayMin: 0,
+    current: 0,
+    lastSerial: 0,
+  });
+
+  const board = await queue.getBoard();
+  const key = queue.sessionKey(doctor.slug, today);
+  const opened = await db.collection("sessions").findOne({ key });
+  assert.equal(opened.status, "in_progress");
+  assert.equal(opened.autoOpenedEarly, true);
+  assert.ok(opened.autoOpenedAt instanceof Date);
+  const live = board.sessions.find((session) => session.key === key);
+  assert.equal(live?.phase, "open");
+  assert.equal(live?.startTime, startTime);
+  assert.equal(live?.endTime, endTime);
+  assert.ok(Number.isFinite(live?.sessionStartsAt));
+  assert.ok(Number.isFinite(live?.endsAt));
+
+  const notYet = await db.collection("sessions").findOne({ key: futureKey });
+  assert.equal(notYet.status, "scheduled", "queues more than one hour away remain scheduled");
 });
