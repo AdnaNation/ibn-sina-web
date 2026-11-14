@@ -78,7 +78,7 @@ export async function disableWeeklyScheduleAction(fd) {
 
 export async function removeScheduleAction(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired or you do not have permission." };
+  if (!p || !hasPermission(p, "schedules.manage")) return { error: "Your session expired or you do not have permission." };
   const key = val(fd, "key");
   const { sessionDoc } = await import("@/lib/queue");
   const target = await sessionDoc(key);
