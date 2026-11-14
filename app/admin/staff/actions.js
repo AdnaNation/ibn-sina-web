@@ -1,9 +1,9 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
-import { getDoctor, getUnits } from "@/lib/data";
+import { getUnits } from "@/lib/data";
 import { createStaff, listStaff, setStaffActive } from "@/lib/staff";
-import { STAFF_PERMISSIONS } from "@/lib/permissions";
+import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
@@ -15,32 +15,26 @@ export async function addStaff(fd) {
   const name = g(fd, "name").slice(0, 80), username = g(fd, "username").toLowerCase(), password = String(fd.get("password") || "");
   let role = g(fd, "role") || "staff";
   let unit = g(fd, "unit");
-  let doctorSlug = "", doctorName = "";
   const selected = fd.getAll("permissions").map(String);
-  const allowed = new Set(STAFF_PERMISSIONS.map((x) => x.key));
+  const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((x) => x.key));
   const permissions = [...new Set(selected)].filter((x) => allowed.has(x));
   let err = "";
   if (name.length < 2) err = "Enter a staff member’s name (2–80 characters).";
   else if (!validUsername(username)) err = "Username: 3 to 20 lowercase letters, numbers, dots, underscores or hyphens.";
   else if (password.length < 8 || password.length > 128) err = "Use a password between 8 and 128 characters.";
-  else if (p.role !== "owner" && role !== "staff") err = "Branch admins can create staff accounts only.";
-  else if (p.role !== "owner") unit = p.unit;
-  else if (!["branch_admin", "staff", "doctor"].includes(role)) err = "Choose a valid account role.";
+  else if (p.role === "owner" && role !== "branch_admin") err = "Main Admin can create Branch Admin accounts only.";
+  else if (isBranchAdmin(p) && role !== "staff") err = "Branch Admins can create staff accounts only.";
+  else if (isBranchAdmin(p)) unit = p.unit;
+  else if (p.role !== "owner") err = "Not allowed to create this account type.";
 
   if (!err && !unit) err = "Choose a branch.";
   if (!err) {
     const units = await getUnits();
     if (!units.some((u) => `${u.name}, ${u.area}` === unit && u.active !== false)) err = "Choose an active branch.";
   }
-  if (!err && role === "doctor") {
-    doctorSlug = g(fd, "doctorSlug");
-    const d = await getDoctor(doctorSlug);
-    if (!d || d.unit !== unit) err = "Choose a doctor from the selected branch.";
-    else doctorName = d.name;
-  }
   if (!err) {
-    const finalPermissions = role === "branch_admin" ? STAFF_PERMISSIONS.map((x) => x.key) : permissions;
-    err = await createStaff({ name, username, password, role, unit, doctorSlug, doctorName, permissions: finalPermissions });
+    const finalPermissions = role === "branch_admin" ? [] : permissions;
+    err = await createStaff({ name, username, password, role, unit, permissions: finalPermissions });
     if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, permissions: finalPermissions } });
   }
   if (err) return { error: err };
@@ -55,7 +49,7 @@ export async function removeStaff(fd) {
   const username = g(fd, "username");
   if (username && username === p.u) return { error: "You cannot deactivate your own account." };
   const target = (await listStaff(p.role === "owner" ? {} : { unit: p.unit })).find((x) => x.username === username);
-  if (!target || target.role === "owner" || (isBranchAdmin(p) && ["branch", "branch_admin"].includes(target.role))) return { error: "This account cannot be changed from your access level." };
+  if (!target || target.role === "owner" || (p.role === "owner" && !["branch", "branch_admin"].includes(target.role)) || (isBranchAdmin(p) && ["branch", "branch_admin"].includes(target.role))) return { error: "This account cannot be changed from your access level." };
   const error = await setStaffActive(username, false, p.role === "owner" ? {} : { unit: p.unit });
   if (!error) await writeAudit({ actor: p, action: "account.deactivated", targetType: "staff", targetId: username, details: { targetName: target.name, targetRole: target.role, unit: target.unit } });
   if (error) return { error };

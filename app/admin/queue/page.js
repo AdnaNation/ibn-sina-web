@@ -46,7 +46,7 @@ export default async function QueueConsole({ searchParams }) {
   const { tr } = await getAdmin();
   const p = await getSession();
   if (!p) redirect("/admin/login");
-  if (!hasPermission(p, "queue.manage")) redirect("/admin/login");
+  if (!hasPermission(p, "queue.manage")) redirect(p.role === "branch_admin" || p.role === "branch" ? "/admin/schedules" : "/admin");
   const canViewPatients = hasPermission(p, "patients.view");
   const sp = await searchParams;
   const requestedDate = typeof sp.date === "string" ? sp.date : "";

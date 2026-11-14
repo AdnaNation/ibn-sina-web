@@ -22,7 +22,7 @@ export async function toggleAccountAction(fd) {
   const p = await getSession(); if (!p || !(p.role === "owner" || p.role === "branch_admin" || p.role === "branch")) return { error: "Your session expired or you do not have permission." };
   const username = val(fd,"username"), active = val(fd,"active") === "true";
   const target = (await listStaff(p.role === "owner" ? {} : { unit: p.unit })).find((s) => s.username === username);
-  if (!target || target.role === "owner" || ((p.role !== "owner") && (["branch_admin","branch"].includes(target.role) || target.unit !== p.unit))) return { error: "This account cannot be changed from your access level." };
+  if (!target || target.username === p.u || target.role === "owner" || (p.role === "owner" && !["branch_admin","branch"].includes(target.role)) || (p.role !== "owner" && (["branch_admin","branch"].includes(target.role) || target.unit !== p.unit))) return { error: "This account cannot be changed from your access level." };
   const error = await setStaffActive(username, active, p.role === "owner" ? {} : { unit: p.unit });
   if (!error) await writeAudit({ actor: p, action: active ? "account.activated" : "account.deactivated", targetType: "staff", targetId: username, details: { targetName: target.name, targetRole: target.role, unit: target.unit } });
   if (error) return { error };
