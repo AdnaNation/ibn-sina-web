@@ -390,4 +390,10 @@ test("saving a weekly schedule updates untouched upcoming sessions and exposes h
     assert.ok(Number.isFinite(live?.sessionStartsAt));
     assert.ok(Number.isFinite(live?.endsAt));
   }
+
+  assert.equal(await queue.deactivateWeeklySchedule(doctor.slug, { role: "owner", name: "Integration Test" }), "");
+  const cancelledEmpty = await db.collection("sessions").findOne({ key: todayKey });
+  const protectedBooked = await db.collection("sessions").findOne({ key: tomorrowKey });
+  assert.equal(cancelledEmpty.status, "cancelled", "disabling recurring hours closes an empty future session");
+  assert.equal(protectedBooked.status, "scheduled", "disabling recurring hours preserves sessions with issued serials");
 });
