@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { getUnits, getDoctor } from "@/lib/data";
 import { createStaff, listStaff, setStaffActive, setStaffDoctor } from "@/lib/staff";
-import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
@@ -17,9 +16,6 @@ export async function addStaff(fd) {
   let unit = g(fd, "unit");
   const doctorSlug = g(fd, "doctorSlug");
   let doctor = null;
-  const selected = fd.getAll("permissions").map(String);
-  const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((x) => x.key));
-  const permissions = [...new Set(selected)].filter((x) => allowed.has(x));
   let err = "";
   if (name.length < 2) err = "Enter a staff member’s name (2–80 characters).";
   else if (!validUsername(username)) err = "Username: 3 to 20 lowercase letters, numbers, dots, underscores or hyphens.";
