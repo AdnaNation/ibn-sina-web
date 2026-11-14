@@ -1,6 +1,7 @@
 import { Newsreader, Noto_Sans_Bengali } from "next/font/google";
 import "./globals.css";
 import { getLang } from "@/lib/i18n";
+import { getPageRobots, getPublicSiteUrl } from "@/lib/seo.mjs";
 
 const serif = Newsreader({ subsets: ["latin"], variable: "--font-serif", display: "swap" });
 const sans = Noto_Sans_Bengali({
@@ -27,7 +28,8 @@ export async function generateMetadata() {
     description,
     openGraph: { title, description, siteName: bn ? "স্বাধীন স্বাস্থ্যসেবা প্রোটোটাইপ" : "Independent Healthcare Prototype", locale: bn ? "bn_BD" : "en_GB", type: "website" },
     twitter: { card: "summary", title, description },
-    robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+    robots: getPageRobots({ indexable: true }),
+    ...(getPublicSiteUrl() ? { alternates: { canonical: "/" } } : {}),
   };
 }
 
