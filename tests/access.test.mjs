@@ -28,6 +28,8 @@ test("staff and doctor permissions are least-privilege and explicit", () => {
   assert.equal(hasPermission({ role: "staff", permissions: ["queue.manage"] }, "queue.manage"), true);
   assert.equal(hasPermission({ role: "staff", permissions: ["queue.manage"] }, "patients.view"), false);
   assert.equal(hasPermission({ role: "staff" }, "queue.manage"), false);
+  assert.equal(hasPermission({ role: "staff", permissions: ["doctors.manage", "schedules.manage"] }, "doctors.manage"), false);
+  assert.equal(hasPermission({ role: "staff", permissions: ["doctors.manage", "schedules.manage"] }, "schedules.manage"), false);
   assert.equal(hasPermission({ role: "doctor" }, "queue.manage"), true);
   assert.equal(hasPermission({ role: "doctor" }, "patients.view"), false);
   assert.equal(hasPermission({ role: "doctor", permissions: [] }, "queue.manage"), false);
