@@ -1,6 +1,5 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { getSession, canSee, canDoctor, hasPermission } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
 import { isValidISODate } from "@/lib/time";
@@ -10,10 +9,7 @@ import { advance, apptKey, book, openSession, patchSession, recall, sessionDoc }
 const get = (fd, k) => String(fd.get(k) || "");
 const validDate = isValidISODate;
 const done = () => revalidatePath("/admin/queue");
-const failQueue = (key, message) => {
-  const [doc, date] = String(key).split("|");
-  redirect(`/admin/queue?date=${encodeURIComponent(date || "")}&doc=${encodeURIComponent(doc || "")}&err=${encodeURIComponent(message)}`);
-};
+const failQueue = (_key, message) => ({ error: message });
 
 async function guard(key) {
   const p = await getSession();
@@ -35,60 +31,67 @@ export async function callNext(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await advance(k);
-  if (result?.error) failQueue(k, result.error);
+  if (result?.error) return failQueue(k, result.error);
   await record(p, "queue.call_next", k);
   done();
+  return { success: true };
 }
 export async function skipCurrent(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await advance(k, { skip: true });
-  if (result?.error) failQueue(k, result.error);
+  if (result?.error) return failQueue(k, result.error);
   await record(p, "queue.patient_skipped", k);
   done();
+  return { success: true };
 }
 export async function finishSession(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await advance(k, { stop: true });
-  if (result?.error) failQueue(k, result.error);
+  if (result?.error) return failQueue(k, result.error);
   await record(p, "queue.session_finished", k);
   done();
+  return { success: true };
 }
 export async function setStatus(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const status = get(fd, "status");
   const result = await patchSession(k, { status });
-  if (result?.error) failQueue(k, result.error);
+  if (result?.error) return failQueue(k, result.error);
   await record(p, "queue.status_changed", k, { status });
   done();
+  return { success: true };
 }
 export async function setDelay(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const delayMin = get(fd, "delayMin");
   const result = await patchSession(k, { delayMin, notice: get(fd, "notice") });
-  if (result?.error) failQueue(k, result.error);
+  if (result?.error) return failQueue(k, result.error);
   await record(p, "queue.delay_updated", k, { delayMin });
   done();
+  return { success: true };
 }
 export async function saveSettings(fd) {
   const k = get(fd, "key");
   const p = await guard(k);
   const result = await patchSession(k, { startTime: get(fd, "startTime"), maxPatients: get(fd, "maxPatients") });
-  if (result?.error) failQueue(k, result.error);
+  if (result?.error) return failQueue(k, result.error);
   await record(p, "queue.settings_updated", k);
   done();
+  return { success: true };
 }
 export async function recallPatient(fd) {
   const ref = get(fd, "ref");
   const key = await apptKey(ref);
   const p = await guard(key);
   const result = await recall(ref);
-  if (result?.error) failQueue(key, result.error);
+  if (result?.error) return failQueue(key, result.error);
   await record(p, "queue.patient_recalled", key);
   done();
+  return { success: true };
 }
 export async function addWalkIn(fd) {
   const { p, doctor } = await guardDoctor(get(fd, "doctorSlug"));
@@ -98,13 +101,13 @@ export async function addWalkIn(fd) {
   const phone = get(fd, "phone").trim();
 
   if (name.length < 2 || name.length > 80) {
-    failQueue(key, "Enter a patient name between 2 and 80 characters.");
+    return failQueue(key, "Enter a patient name between 2 and 80 characters.");
   }
   if (phone && !/^(?:\+?88)?01[3-9]\d{8}$/.test(phone.replace(/[\s-]/g, ""))) {
-    failQueue(key, "Enter a valid Bangladesh mobile number or leave it blank.");
+    return failQueue(key, "Enter a valid Bangladesh mobile number or leave it blank.");
   }
   if (!validDate(date)) {
-    failQueue(key, "Choose a valid queue date.");
+    return failQueue(key, "Choose a valid queue date.");
   }
 
   const result = await book({
@@ -114,16 +117,18 @@ export async function addWalkIn(fd) {
     phone,
     walkIn: true,
   });
-  if (result?.error) failQueue(key, result.error);
+  if (result?.error) return failQueue(key, result.error);
   await record(p, "queue.walk_in_added", key, { doctor: doctor.name, date });
   done();
+  return { success: true };
 }
 export async function openNew(fd) {
   const { p, doctor } = await guardDoctor(get(fd, "doctorSlug"));
   const date = get(fd, "date");
-  if (!validDate(date)) failQueue(doctor.slug + "|" + date, "Choose a valid queue date.");
+  if (!validDate(date)) return failQueue(doctor.slug + "|" + date, "Choose a valid queue date.");
   const opened = await openSession(doctor, date);
-  if (opened?.error) failQueue(doctor.slug + "|" + date, opened.error);
+  if (opened?.error) return failQueue(doctor.slug + "|" + date, opened.error);
   await record(p, "queue.session_opened", doctor.slug, { date });
   done();
+  return { success: true };
 }

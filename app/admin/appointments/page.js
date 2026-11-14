@@ -1,3 +1,4 @@
+import AdminActionForm from "@/components/AdminActionForm";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Download, Search } from "lucide-react";
@@ -96,10 +97,10 @@ export default async function AppointmentsPage({ searchParams }) {
                           <div className="flex items-center justify-end gap-2">
                             <Link href={`/track/${r.ref}`} className="text-xs font-bold text-pine-700 underline underline-offset-4">{t("Ticket", "টিকিট")}</Link>
                             {canManage && r.status === "waiting" && (
-                              <form action={cancelAppointmentAction}>
+                              <AdminActionForm action={cancelAppointmentAction} successMessage="Appointment cancelled." pendingMessage="Cancelling appointment…">
                                 <input type="hidden" name="ref" value={r.ref} /><input type="hidden" name="back" value={back} />
                                 <button className="rounded-full border border-rose-200 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-50">{t("Cancel", "বাতিল")}</button>
-                              </form>
+                              </AdminActionForm>
                             )}
                           </div>
                         </td>

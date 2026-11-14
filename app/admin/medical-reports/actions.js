@@ -2,7 +2,6 @@
 
 import { randomBytes } from "crypto";
 import { GridFSBucket } from "mongodb";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSession, hasPermission } from "@/lib/auth";
 import { getDb } from "@/lib/mongodb";
@@ -32,8 +31,8 @@ const field = (fd, key, max = 120) => String(fd.get(key) || "").trim().slice(0, 
 
 export async function uploadMedicalReport(fd) {
   const p = await getSession();
-  if (!p) redirect("/admin/login");
-  if (!hasPermission(p, "reports.upload")) redirect("/admin");
+  if (!p) return { error: "Your session expired. Please sign in again." };
+  if (!hasPermission(p, "reports.upload")) return { error: "You do not have permission to manage medical reports." };
   const appointmentRef = field(fd, "appointmentRef", 32).toUpperCase();
   const title = field(fd, "title", 100);
   const type = field(fd, "type", 30);
@@ -50,20 +49,20 @@ export async function uploadMedicalReport(fd) {
   else if (!(file instanceof File) || !file.size) error = "Choose a PDF or image file.";
   else if (file.size > MAX_FILE_BYTES) error = "The file must be 8 MB or smaller.";
 
-  if (error) redirect(`/admin/medical-reports?err=${encodeURIComponent(error)}`);
+  if (error) return { error };
 
   const db = await getDb();
-  if (!db) redirect("/admin/medical-reports?err=Database%20is%20not%20connected.");
+  if (!db) return { error: "Database is not connected." };
   const appointment = await db.collection("appointments").findOne({
     ref: appointmentRef,
     ...scopeFilter(p),
   }, { projection: { ref: 1, name: 1, phone: 1, unit: 1, doctor: 1, date: 1 } });
-  if (!appointment) redirect("/admin/medical-reports?err=Appointment%20not%20found%20in%20your%20authorized%20scope.");
+  if (!appointment) return { error: "Appointment not found in your authorized scope." };
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  if (buffer.length !== file.size || buffer.length > MAX_FILE_BYTES) redirect("/admin/medical-reports?err=Invalid%20file%20size.");
+  if (buffer.length !== file.size || buffer.length > MAX_FILE_BYTES) return { error: "Invalid file size." };
   const detected = detectFile(buffer);
-  if (!detected) redirect("/admin/medical-reports?err=Only%20valid%20PDF,%20PNG,%20JPG%20or%20WEBP%20files%20are%20accepted.");
+  if (!detected) return { error: "Only valid PDF, PNG, JPG or WEBP files are accepted." };
 
   const reports = db.collection("medical_reports");
   await Promise.all([
@@ -111,7 +110,7 @@ export async function uploadMedicalReport(fd) {
       try { await bucket.delete(fileId); } catch {}
     }
     console.error("[medical-reports] upload failed:", e?.message);
-    redirect("/admin/medical-reports?err=The%20report%20could%20not%20be%20saved.");
+    return { error: "The report could not be saved." };
   }
 
   await writeAudit({
@@ -122,18 +121,19 @@ export async function uploadMedicalReport(fd) {
     details: { type, unit: appointment.unit, size: buffer.length, contentType: detected.mime },
   });
   revalidatePath("/admin/medical-reports");
-  redirect(`/admin/medical-reports?created=${encodeURIComponent(reportId)}`);
+  return { success: true, value: reportId };
 }
 
 export async function revokeMedicalReport(fd) {
   const p = await getSession();
-  if (!p) redirect("/admin/login");
-  if (!hasPermission(p, "reports.upload")) redirect("/admin");
+  if (!p) return { error: "Your session expired. Please sign in again." };
+  if (!hasPermission(p, "reports.upload")) return { error: "You do not have permission to manage medical reports." };
   const reportId = field(fd, "reportId", 32).toUpperCase();
   const error = await removeMedicalReport(p, reportId);
   if (!error) {
     await writeAudit({ actor: p, action: "medical_report.revoked", targetType: "medical_report", targetId: reportId, details: {} });
     revalidatePath("/admin/medical-reports");
   }
-  redirect(error ? `/admin/medical-reports?err=${encodeURIComponent(error)}` : "/admin/medical-reports?revoked=1");
+  if (error) return { error };
+  return { success: true };
 }
