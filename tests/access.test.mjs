@@ -25,7 +25,8 @@ test("Main Admin has oversight rather than clinic-operation permissions", () => 
 });
 
 test("staff and doctor permissions are least-privilege and explicit", () => {
-  assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage"] }, "queue.manage"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["queue.manage"] }, "queue.manage"), true);
+  assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage"] }, "queue.manage"), false);
   assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "appointments.view"), false);
   assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "patients.view"), false);
   assert.equal(hasPermission({ role: "staff", permissions: ["queue.manage"] }, "queue.manage"), false);
@@ -52,10 +53,10 @@ test("branch admins can manage only non-admin staff in their own exact branch", 
 test("branch and doctor data scopes fail closed when scope is missing", () => {
   assert.deepEqual(scopeOf({ role: "owner" }), {});
   assert.deepEqual(scopeFilter({ role: "branch_admin", unit: "Feni, Feni" }), { unit: "Feni, Feni" });
-  assert.deepEqual(reportScope({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a" }), { doctorSlug: "dr-a" });
+  assert.deepEqual(reportScope({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a" }), { doctorSlug: "dr-a", unit: "Feni, Feni" });
   assert.deepEqual(scopeOf({ role: "branch_admin" }), { unit: "__NO_BRANCH_SCOPE__" });
-  assert.deepEqual(scopeFilter({ role: "staff" }), { doctorSlug: "__NO_DOCTOR_SCOPE__" });
-  assert.deepEqual(scopeFilter({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a" }), { doctorSlug: "dr-a" });
+  assert.deepEqual(scopeFilter({ role: "staff" }), { doctorSlug: "__NO_DOCTOR_SCOPE__", unit: "__NO_BRANCH_SCOPE__" });
+  assert.deepEqual(scopeFilter({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a" }), { doctorSlug: "dr-a", unit: "Feni, Feni" });
   assert.deepEqual(reportScope({ role: "doctor" }), { doctorSlug: "__NO_DOCTOR_SCOPE__" });
   assert.deepEqual(scopeOf({ role: "unknown" }), { unit: "__NO_BRANCH_SCOPE__" });
 });
