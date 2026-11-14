@@ -4,9 +4,8 @@ import AdminNav from "@/components/AdminNav";
 import { getAdmin } from "@/lib/adminT";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { listStaff } from "@/lib/staff";
-import { getUnits } from "@/lib/data";
-import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
-import { addStaff } from "./actions";
+import { getUnits, getAllDoctors } from "@/lib/data";
+import { assignStaffDoctor, addStaff } from "./actions";
 import { toggleAccountAction } from "@/app/admin/branches/actions";
 
 export const dynamic = "force-dynamic";
@@ -18,18 +17,19 @@ export default async function StaffPage({ searchParams }) {
   if (!p || !(p.role === "owner" || isBranchAdmin(p))) redirect("/admin/login");
   const sp = await searchParams;
   const filter = p.role === "owner" ? { role: { $in: ["branch_admin", "branch"] } } : { unit: p.unit, role: { $nin: ["branch_admin", "branch", "owner"] } };
-  const [staff, units] = await Promise.all([listStaff(filter), getUnits()]);
+  const [staff, units, branchDoctors] = await Promise.all([listStaff(filter), getUnits(), p.role === "owner" ? Promise.resolve([]) : getAllDoctors()]);
   const branches = [...new Set(units.map((u) => `${u.name}, ${u.area}`))];
   
   const ownBranches = branches.filter((b) => p.role === "owner" || b === p.unit);
-  const permissionGroups = STAFF_ASSIGNABLE_PERMISSIONS.reduce((groups, item) => { (groups[item.group] ||= []).push(item); return groups; }, {});
+  const assignedDoctors = branchDoctors.filter((doctor) => doctor.unit === p.unit);
+  
 
   return <>
     <AdminNav p={p} current="/admin/staff" />
     <main className="mx-auto max-w-5xl px-4 py-8">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">{p.role === "owner" ? tr("Main administration") : tr("Branch administration")}</p>
       <h1 className="mt-2 font-serif text-3xl text-pine-900">{tr("Users & permissions")}</h1>
-      <p className="mt-1 text-ink/70">{p.role === "owner" ? tr("Create and manage Branch Admin accounts. Branch Admins create their own branch staff.") : tr("Create daily-operations staff accounts for your branch. You cannot create administrators or assign staff to another branch.")}</p>
+      <p className="mt-1 text-ink/70">{p.role === "owner" ? tr("Create and manage Branch Admin accounts. Branch Admins create their own branch staff.") : tr("Create a staff account for one specific doctor. That account can operate only the selected doctor's queue.")}</p>
       {sp.err && <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-rose-800">{sp.err}</p>}
       {sp.ok && <p role="status" className="mt-4 rounded-xl bg-pine-50 p-3">{tr("Account")} <strong>{sp.ok}</strong> {tr("created. Share the login credentials securely.")}</p>}
 
@@ -40,14 +40,13 @@ export default async function StaffPage({ searchParams }) {
         <label className="text-sm font-semibold text-pine-800">{tr("Temporary password")}<input name="password" type="password" required minLength={8} maxLength={128} className={input} /></label>
         {p.role === "owner" && <label className="text-sm font-semibold text-pine-800">{tr("Account type")}<select name="role" defaultValue="branch_admin" className={input}><option value="branch_admin">{tr("Branch administrator")}</option></select></label>}
         <label className="text-sm font-semibold text-pine-800">{tr("Assigned branch")}<select name="unit" required defaultValue={p.role === "owner" ? "" : p.unit} disabled={p.role !== "owner"} className={input}><option value="" disabled>{tr("Select branch")}</option>{ownBranches.map((b) => <option key={b} value={b}>{b.replace("Ibn Sina ", "")}</option>)}</select>{p.role !== "owner" && <input type="hidden" name="unit" value={p.unit} />}</label>
-        {p.role !== "owner" && <fieldset className="md:col-span-2 rounded-xl border border-pine-100 p-4"><legend className="px-2 font-semibold text-pine-900">{tr("Daily operations permissions")}</legend><p className="mb-3 text-xs text-ink/60">{tr("Choose the operational duties for this staff account. Doctor and schedule management remain with the Branch Admin.")}</p>
-          {Object.entries(permissionGroups).map(([group, items]) => <div key={group} className="mb-4 last:mb-0"><h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-emerald-800">{tr(group)}</h3><div className="grid gap-2 sm:grid-cols-2">{items.map((item) => <label key={item.key} className="flex items-start gap-2 text-sm"><input type="checkbox" name="permissions" value={item.key} defaultChecked={["appointments.view", "queue.manage"].includes(item.key)} className="mt-1 accent-emerald-700"/><span>{tr(item.label)}</span></label>)}</div></div>)}
-        </fieldset>}
+        {p.role !== "owner" && <label className="text-sm font-semibold text-pine-800">{tr("Assigned doctor")}<select name="doctorSlug" required defaultValue="" className={input}><option value="" disabled>{tr("Select a doctor")}</option>{assignedDoctors.map((doctor) => <option key={doctor.slug} value={doctor.slug}>{doctor.name} · {doctor.department}</option>)}</select><span className="mt-1 block text-xs font-normal text-ink/60">{tr("This staff account will see and operate only this doctor's queue.")}</span></label>}
+        {p.role !== "owner" && <div className="md:col-span-2 rounded-xl border border-pine-100 bg-pine-50 p-4"><p className="font-semibold text-pine-900">{tr("Queue-only access")}</p><p className="mt-1 text-sm text-ink/70">{tr("Staff can manage the assigned doctor's live queue. Other doctors, appointments, schedules and branch administration are not accessible.")}</p><input type="hidden" name="permissions" value="queue.manage" /></div>}
         <button className="justify-self-start rounded-full bg-pine-900 px-6 py-2.5 font-semibold text-white hover:bg-pine-700">{tr("Create account")}</button>
       </AdminActionForm>
 
       <section className="mt-8"><div className="mb-3 flex items-end justify-between"><h2 className="font-serif text-2xl text-pine-900">{p.role === "owner" ? tr("Branch administrator accounts") : tr("Your branch staff")}</h2><span className="text-sm text-ink/60">{staff.length} {tr("accounts")}</span></div>
-        <ul className="divide-y divide-pine-100 rounded-2xl border border-pine-100 bg-white">{staff.map((s) => <li key={s.username} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><strong>{s.name}</strong> <span className="text-ink/60">({s.username})</span><span className="block text-sm text-ink/70">{s.role === "branch_admin" || s.role === "branch" ? tr("Branch administrator") : s.role === "doctor" ? `Doctor access · ${s.doctorName}` : tr("Branch staff")} · {s.unit?.replace("Ibn Sina ", "")}</span><span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${s.active === false ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-800"}`}>{s.active === false ? tr("Inactive") : tr("Active")}</span><span className="mt-1 block text-xs text-emerald-800">{s.role === "branch_admin" || s.role === "branch" ? tr("All branch permissions") : (s.permissions || []).join(" · ") || tr("No extra permissions")}</span></div>{(p.role === "owner" || (s.role !== "branch_admin" && s.role !== "branch")) && <AdminActionForm action={toggleAccountAction} successMessage={tr("Account status updated.", "অ্যাকাউন্টের অবস্থা আপডেট হয়েছে।")} pendingMessage={tr("Updating account…", "অ্যাকাউন্ট আপডেট হচ্ছে…")}><input type="hidden" name="username" value={s.username}/><input type="hidden" name="active" value={String(s.active === false)}/><button className={`rounded-full px-3 py-2 text-xs font-bold ${s.active === false ? "bg-emerald-700 text-white" : "bg-rose-50 text-rose-700"}`}>{s.active === false ? tr("Reactivate") : tr("Deactivate")}</button></AdminActionForm>}</li>)}{!staff.length && <li className="p-4 text-ink/70">{tr("No accounts created yet.")}</li>}</ul>
+        <ul className="divide-y divide-pine-100 rounded-2xl border border-pine-100 bg-white">{staff.map((s) => <li key={s.username} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><strong>{s.name}</strong> <span className="text-ink/60">({s.username})</span><span className="block text-sm text-ink/70">{s.role === "branch_admin" || s.role === "branch" ? tr("Branch administrator") : s.role === "doctor" ? `Doctor access · ${s.doctorName}` : tr("Branch staff")} · {s.unit?.replace("Ibn Sina ", "")}</span><span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${s.active === false ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-800"}`}>{s.active === false ? tr("Inactive") : tr("Active")}</span><span className="mt-1 block text-xs text-emerald-800">{s.role === "branch_admin" || s.role === "branch" ? tr("Branch administration") : s.role === "staff" ? `${tr("Queue only")}${s.doctorName ? ` · ${s.doctorName}` : ""}` : (s.permissions || []).join(" · ") || tr("No extra permissions")}</span></div>{p.role !== "owner" && s.role === "staff" && <AdminActionForm action={assignStaffDoctor} successMessage={tr("Doctor assignment saved.", "ডাক্তার নির্ধারণ সংরক্ষিত হয়েছে।")} pendingMessage={tr("Saving doctor assignment…", "ডাক্তার নির্ধারণ সংরক্ষণ হচ্ছে…")}><input type="hidden" name="username" value={s.username}/><label className="text-xs font-semibold text-pine-800">{tr("Assigned doctor")}<select name="doctorSlug" required defaultValue={s.doctorSlug || ""} className={input}><option value="" disabled>{tr("Select a doctor")}</option>{assignedDoctors.map((doctor) => <option key={doctor.slug} value={doctor.slug}>{doctor.name}</option>)}</select></label><button className="mt-2 rounded-full border border-pine-200 px-3 py-2 text-xs font-bold text-pine-800">{tr("Save assignment")}</button></AdminActionForm>}{(p.role === "owner" || (s.role !== "branch_admin" && s.role !== "branch")) && <AdminActionForm action={toggleAccountAction} successMessage={tr("Account status updated.", "অ্যাকাউন্টের অবস্থা আপডেট হয়েছে।")} pendingMessage={tr("Updating account…", "অ্যাকাউন্ট আপডেট হচ্ছে…")}><input type="hidden" name="username" value={s.username}/><input type="hidden" name="active" value={String(s.active === false)}/><button className={`rounded-full px-3 py-2 text-xs font-bold ${s.active === false ? "bg-emerald-700 text-white" : "bg-rose-50 text-rose-700"}`}>{s.active === false ? tr("Reactivate") : tr("Deactivate")}</button></AdminActionForm>}</li>)}{!staff.length && <li className="p-4 text-ink/70">{tr("No accounts created yet.")}</li>}</ul>
       </section>
     </main>
   </>;

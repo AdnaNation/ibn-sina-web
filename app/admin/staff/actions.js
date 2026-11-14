@@ -1,9 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
-import { getUnits } from "@/lib/data";
-import { createStaff, listStaff, setStaffActive } from "@/lib/staff";
-import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
+import { getUnits, getDoctor } from "@/lib/data";
+import { createStaff, listStaff, setStaffActive, setStaffDoctor } from "@/lib/staff";
 import { writeAudit } from "@/lib/management";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
@@ -15,9 +14,8 @@ export async function addStaff(fd) {
   const name = g(fd, "name").slice(0, 80), username = g(fd, "username").toLowerCase(), password = String(fd.get("password") || "");
   let role = g(fd, "role") || "staff";
   let unit = g(fd, "unit");
-  const selected = fd.getAll("permissions").map(String);
-  const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((x) => x.key));
-  const permissions = [...new Set(selected)].filter((x) => allowed.has(x));
+  const doctorSlug = g(fd, "doctorSlug");
+  let doctor = null;
   let err = "";
   if (name.length < 2) err = "Enter a staff member’s name (2–80 characters).";
   else if (!validUsername(username)) err = "Username: 3 to 20 lowercase letters, numbers, dots, underscores or hyphens.";
@@ -32,15 +30,35 @@ export async function addStaff(fd) {
     const units = await getUnits();
     if (!units.some((u) => `${u.name}, ${u.area}` === unit && u.active !== false)) err = "Choose an active branch.";
   }
+  if (!err && role === "staff") {
+    doctor = await getDoctor(doctorSlug);
+    if (!doctor || doctor.unit !== unit) err = "Choose a valid doctor from your own branch.";
+  }
   if (!err) {
-    const finalPermissions = role === "branch_admin" ? [] : permissions;
-    err = await createStaff({ name, username, password, role, unit, permissions: finalPermissions });
-    if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, permissions: finalPermissions } });
+    const finalPermissions = role === "branch_admin" ? [] : ["queue.manage"];
+    err = await createStaff({ name, username, password, role, unit, doctorSlug: doctor?.slug || "", doctorName: doctor?.name || "", permissions: finalPermissions });
+    if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, doctorSlug: doctor?.slug || "", doctorName: doctor?.name || "", permissions: finalPermissions } });
   }
   if (err) return { error: err };
   revalidatePath("/admin/staff");
   revalidatePath("/admin/branches");
   return { success: true, value: username };
+}
+
+export async function assignStaffDoctor(fd) {
+  const p = await getSession();
+  if (!p || !isBranchAdmin(p)) return { error: "Only a Branch Admin can assign a doctor to staff." };
+  const username = g(fd, "username");
+  const doctorSlug = g(fd, "doctorSlug");
+  const target = (await listStaff({ username, unit: p.unit, role: "staff" }))[0];
+  const doctor = await getDoctor(doctorSlug);
+  if (!target || !doctor || doctor.unit !== p.unit) return { error: "Choose a staff account and doctor from your own branch." };
+  const error = await setStaffDoctor(username, { unit: p.unit, doctorSlug: doctor.slug, doctorName: doctor.name });
+  if (error) return { error };
+  await writeAudit({ actor: p, action: "staff.doctor_assigned", targetType: "staff", targetId: username, details: { doctorSlug: doctor.slug, doctorName: doctor.name, unit: p.unit } });
+  revalidatePath("/admin/staff");
+  revalidatePath("/admin/queue");
+  return { success: true };
 }
 
 export async function removeStaff(fd) {
