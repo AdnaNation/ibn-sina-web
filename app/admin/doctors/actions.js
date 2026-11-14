@@ -1,7 +1,6 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { getSession, hasPermission } from "@/lib/auth";
-import { writeAudit } from "@/lib/management";
 import { createDoctor, updateDoctor, deleteDoctor, importStarterDoctors } from "@/lib/doctors";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
