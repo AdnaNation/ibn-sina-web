@@ -11,7 +11,7 @@ const sans = Noto_Sans_Bengali({
   display: "swap",
 });
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+const SITE = getPublicSiteUrl() || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
 export async function generateMetadata() {
   const lang = await getLang();
