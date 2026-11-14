@@ -67,12 +67,6 @@ An unused future session can be removed. A session with issued serials or an act
 
 The `sessions` collection is the source of published appointment availability. The booking flow still enforces the published session and assigns serials atomically. Before going live, the hospital should verify every doctor, branch, clinic hour, capacity, and estimated consultation duration.
 
-## Automatic queue opening
-
-The scheduled job checks today's published doctor sessions every minute. It opens each queue automatically when its scheduled start time is within the next 60 minutes. The public live board also performs this check while refreshing, so the queue can open even if the scheduled job is temporarily unavailable. Before the doctor's actual start time, the public board shows **Queue open** rather than **Seeing patients**; it changes to **Seeing patients** at the scheduled time. Sessions that are already finished/cancelled or whose end time has passed are not reopened.
-
-For Vercel scheduled execution, add a strong random `CRON_SECRET` environment variable (at least 32 characters) to the deployment environment. Vercel sends it as a Bearer token to the protected `/api/cron/open-queues` endpoint. The cron runs once per minute as configured in `vercel.json`. The same endpoint can be tested locally by sending `Authorization: Bearer <CRON_SECRET>`.
-
 ## Multi-branch administration and permissions
 
 The administration area now supports a three-level account hierarchy:
