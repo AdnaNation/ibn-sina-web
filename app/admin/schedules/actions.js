@@ -35,10 +35,10 @@ export async function publishScheduleAction(fd) {
 
 export async function saveWeeklyScheduleAction(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired. Please sign in again." };
+  if (!p || !hasPermission(p, "schedules.manage")) return { error: "Your session expired. Please sign in again." };
   const doctor = await getDoctor(val(fd, "doctorSlug"));
   let error = "";
-  if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) error = "Choose a valid doctor from your branch.";
+  if (!doctor || doctor.unit !== p.unit) error = "Choose a valid doctor from your branch.";
   else {
     error = await saveWeeklySchedule({
       doctor,
@@ -67,7 +67,7 @@ export async function disableWeeklyScheduleAction(fd) {
   if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired or you do not have permission." };
   const doctorSlug = val(fd, "doctorSlug");
   const doctor = await getDoctor(doctorSlug);
-  if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) return { error: "Not allowed to change this doctor’s schedule." };
+  if (!doctor || doctor.unit !== p.unit) return { error: "Not allowed to change this doctor’s schedule." };
   const error = await deactivateWeeklySchedule(doctorSlug, p);
   if (!error) await writeAudit({ actor: p, action: "schedule.weekly_disabled", targetType: "weekly_schedule", targetId: doctorSlug });
   revalidatePath("/admin/schedules");
