@@ -10,11 +10,11 @@ const val = (fd, key) => String(fd.get(key) || "").trim();
 
 export async function publishScheduleAction(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired or you do not have permission." };
+  if (!p || !(isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired or you do not have permission." };
 
   const doctor = await getDoctor(val(fd, "doctorSlug"));
   let error = "";
-  if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) error = "Choose a valid doctor from your branch.";
+  if (!doctor || doctor.unit !== p.unit) error = "Choose a valid doctor from your branch.";
   else {
     error = await publishSchedule({
       doctor,
@@ -82,7 +82,7 @@ export async function removeScheduleAction(fd) {
   const key = val(fd, "key");
   const { sessionDoc } = await import("@/lib/queue");
   const target = await sessionDoc(key);
-  if (!target || (p.role !== "owner" && target.unit !== p.unit)) return { error: "Not allowed to remove this schedule." };
+  if (!target || target.unit !== p.unit) return { error: "Not allowed to remove this schedule." };
   const error = await removeEmptySchedule(key);
   if (!error) await writeAudit({ actor: p, action: "schedule.removed", targetType: "schedule", targetId: key });
   revalidatePath("/admin/schedules");
