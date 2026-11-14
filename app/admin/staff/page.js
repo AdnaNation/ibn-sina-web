@@ -4,9 +4,9 @@ import AdminNav from "@/components/AdminNav";
 import { getAdmin } from "@/lib/adminT";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { listStaff } from "@/lib/staff";
-import { getUnits, getAllDoctors } from "@/lib/data";
+import { getUnits } from "@/lib/data";
 import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
-import { addStaff, removeStaff } from "./actions";
+import { addStaff } from "./actions";
 import { toggleAccountAction } from "@/app/admin/branches/actions";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export default async function StaffPage({ searchParams }) {
   if (!p || !(p.role === "owner" || isBranchAdmin(p))) redirect("/admin/login");
   const sp = await searchParams;
   const filter = p.role === "owner" ? { role: { $in: ["branch_admin", "branch"] } } : { unit: p.unit, role: { $nin: ["branch_admin", "branch", "owner"] } };
-  const [staff, units, doctors] = await Promise.all([listStaff(filter), getUnits(), getAllDoctors()]);
+  const [staff, units] = await Promise.all([listStaff(filter), getUnits()]);
   const branches = [...new Set(units.map((u) => `${u.name}, ${u.area}`))];
   
   const ownBranches = branches.filter((b) => p.role === "owner" || b === p.unit);
