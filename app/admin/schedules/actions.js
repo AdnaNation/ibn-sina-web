@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
-import { publishSchedule, saveWeeklySchedule, removeEmptySchedule } from "@/lib/queue";
+import { publishSchedule, saveWeeklySchedule, deactivateWeeklySchedule, removeEmptySchedule } from "@/lib/queue";
 import { writeAudit } from "@/lib/management";
 
 const val = (fd, key) => String(fd.get(key) || "").trim();
@@ -63,6 +63,19 @@ export async function saveWeeklyScheduleAction(fd) {
   redirect(error
     ? `/admin/schedules?err=${encodeURIComponent(error)}`
     : "/admin/schedules?ok=weekly");
+}
+
+export async function disableWeeklyScheduleAction(fd) {
+  const p = await getSession();
+  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) redirect("/admin/login");
+  const doctorSlug = val(fd, "doctorSlug");
+  const doctor = await getDoctor(doctorSlug);
+  if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) redirect("/admin/schedules?err=Not%20allowed");
+  const error = await deactivateWeeklySchedule(doctorSlug, p);
+  if (!error) await writeAudit({ actor: p, action: "schedule.weekly_disabled", targetType: "weekly_schedule", targetId: doctorSlug });
+  revalidatePath("/admin/schedules");
+  revalidatePath("/appointment");
+  redirect(error ? `/admin/schedules?err=${encodeURIComponent(error)}` : "/admin/schedules?ok=weekly-disabled");
 }
 
 export async function removeScheduleAction(fd) {
