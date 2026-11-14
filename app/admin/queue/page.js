@@ -52,7 +52,7 @@ export default async function QueueConsole({ searchParams }) {
   const requestedDate = typeof sp.date === "string" ? sp.date : "";
   const date = isValidISODate(requestedDate) ? requestedDate : todayDhaka();
   const [sessions, doctors] = await Promise.all([
-    getConsole(date, p),
+    getConsole(date, p, typeof sp.doc === "string" ? sp.doc : ""),
     getAllDoctors(),
   ]);
   const s = sessions.find((x) => x.doctorSlug === sp.doc) || sessions[0];
@@ -106,7 +106,7 @@ export default async function QueueConsole({ searchParams }) {
             {sessions.map((x) => (
               <Link
                 key={x.key}
-                href={`/admin/queue?date=${date}&doc=${x.doctorSlug}`}
+                href={`/admin/queue?date=${date}&doc=${x.doctorSlug}`} prefetch={true} scroll={false}
                 className={`rounded-full px-4 py-2 text-sm font-semibold ${x.key === s.key ? "bg-pine-900 text-white" : "border border-pine-100 bg-white hover:bg-pine-50"}`}
               >
                 {x.doctorName}
