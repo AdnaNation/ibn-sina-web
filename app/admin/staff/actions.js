@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
-import { getUnits } from "@/lib/data";
+import { getUnits, getDoctor } from "@/lib/data";
 import { createStaff, listStaff, setStaffActive } from "@/lib/staff";
 import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
@@ -15,6 +15,8 @@ export async function addStaff(fd) {
   const name = g(fd, "name").slice(0, 80), username = g(fd, "username").toLowerCase(), password = String(fd.get("password") || "");
   let role = g(fd, "role") || "staff";
   let unit = g(fd, "unit");
+  const doctorSlug = g(fd, "doctorSlug");
+  let doctor = null;
   const selected = fd.getAll("permissions").map(String);
   const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((x) => x.key));
   const permissions = [...new Set(selected)].filter((x) => allowed.has(x));
@@ -32,10 +34,14 @@ export async function addStaff(fd) {
     const units = await getUnits();
     if (!units.some((u) => `${u.name}, ${u.area}` === unit && u.active !== false)) err = "Choose an active branch.";
   }
+  if (!err && role === "staff") {
+    doctor = await getDoctor(doctorSlug);
+    if (!doctor || doctor.unit !== unit) err = "Choose a valid doctor from your own branch.";
+  }
   if (!err) {
-    const finalPermissions = role === "branch_admin" ? [] : permissions;
-    err = await createStaff({ name, username, password, role, unit, permissions: finalPermissions });
-    if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, permissions: finalPermissions } });
+    const finalPermissions = role === "branch_admin" ? [] : ["queue.manage"];
+    err = await createStaff({ name, username, password, role, unit, doctorSlug: doctor?.slug || "", doctorName: doctor?.name || "", permissions: finalPermissions });
+    if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, doctorSlug: doctor?.slug || "", doctorName: doctor?.name || "", permissions: finalPermissions } });
   }
   if (err) return { error: err };
   revalidatePath("/admin/staff");
