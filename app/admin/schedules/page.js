@@ -33,9 +33,10 @@ export default async function ScheduleManager({ searchParams }) {
   const sp = await searchParams;
   const from = todayDhaka();
   const to = todayDhaka(14);
-  const [doctors, schedules] = await Promise.all([
+  const [doctors, schedules, weeklySchedules] = await Promise.all([
     getAllDoctors(),
     getScheduleList(from, to, p),
+    getWeeklyScheduleList(p),
   ]);
   const branchDoctors = doctors.filter((d) => p.role === "owner" || d.unit === p.unit);
   const grouped = (schedules || []).reduce((acc, item) => {
