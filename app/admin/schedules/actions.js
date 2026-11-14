@@ -37,7 +37,7 @@ export async function publishScheduleAction(fd) {
 
 export async function saveWeeklyScheduleAction(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) redirect("/admin/login");
+  if (!p || !(p.role === "owner" || isBranchAdmin(p) || hasPermission(p, "schedules.manage"))) return { error: "Your session expired. Please sign in again." };
   const doctor = await getDoctor(val(fd, "doctorSlug"));
   let error = "";
   if (!doctor || (p.role !== "owner" && doctor.unit !== p.unit)) error = "Choose a valid doctor from your branch.";
@@ -58,11 +58,10 @@ export async function saveWeeklyScheduleAction(fd) {
     targetId: doctor.slug,
     details: { doctor: doctor.name, unit: doctor.unit, weekdays: fd.getAll("weekdays") },
   });
+  if (error) return { error };
   revalidatePath("/admin/schedules");
   revalidatePath("/appointment");
-  redirect(error
-    ? `/admin/schedules?err=${encodeURIComponent(error)}`
-    : "/admin/schedules?ok=weekly");
+  return { success: true };
 }
 
 export async function disableWeeklyScheduleAction(fd) {
