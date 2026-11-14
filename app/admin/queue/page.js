@@ -106,7 +106,7 @@ export default async function QueueConsole({ searchParams }) {
             {sessions.map((x) => (
               <Link
                 key={x.key}
-                href={`/admin/queue?date=${date}&doc=${x.doctorSlug}`}
+                href={`/admin/queue?date=${date}&doc=${x.doctorSlug}`} prefetch={true} scroll={false}
                 className={`rounded-full px-4 py-2 text-sm font-semibold ${x.key === s.key ? "bg-pine-900 text-white" : "border border-pine-100 bg-white hover:bg-pine-50"}`}
               >
                 {x.doctorName}
