@@ -1,5 +1,4 @@
 "use server";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { getDoctor, getUnits } from "@/lib/data";
@@ -12,7 +11,7 @@ const validUsername = (u) => /^[a-z0-9._-]{3,20}$/.test(u) && u !== "admin";
 
 export async function addStaff(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p))) redirect("/admin/login");
+  if (!p || !(p.role === "owner" || isBranchAdmin(p))) return { error: "Your session expired. Please sign in again." };
   const name = g(fd, "name").slice(0, 80), username = g(fd, "username").toLowerCase(), password = String(fd.get("password") || "");
   let role = g(fd, "role") || "staff";
   let unit = g(fd, "unit");
@@ -44,18 +43,23 @@ export async function addStaff(fd) {
     err = await createStaff({ name, username, password, role, unit, doctorSlug, doctorName, permissions: finalPermissions });
     if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, permissions: finalPermissions } });
   }
+  if (err) return { error: err };
   revalidatePath("/admin/staff");
-  redirect(err ? `/admin/staff?err=${encodeURIComponent(err)}` : `/admin/staff?ok=${encodeURIComponent(username)}`);
+  revalidatePath("/admin/branches");
+  return { success: true, value: username };
 }
 
 export async function removeStaff(fd) {
   const p = await getSession();
-  if (!p || !(p.role === "owner" || isBranchAdmin(p))) return;
+  if (!p || !(p.role === "owner" || isBranchAdmin(p))) return { error: "Your session expired. Please sign in again." };
   const username = g(fd, "username");
-  if (username && username === p.u) return;
+  if (username && username === p.u) return { error: "You cannot deactivate your own account." };
   const target = (await listStaff(p.role === "owner" ? {} : { unit: p.unit })).find((x) => x.username === username);
-  if (!target || target.role === "owner" || (isBranchAdmin(p) && ["branch", "branch_admin"].includes(target.role))) return;
+  if (!target || target.role === "owner" || (isBranchAdmin(p) && ["branch", "branch_admin"].includes(target.role))) return { error: "This account cannot be changed from your access level." };
   const error = await setStaffActive(username, false, p.role === "owner" ? {} : { unit: p.unit });
   if (!error) await writeAudit({ actor: p, action: "account.deactivated", targetType: "staff", targetId: username, details: { targetName: target.name, targetRole: target.role, unit: target.unit } });
+  if (error) return { error };
   revalidatePath("/admin/staff");
+  revalidatePath("/admin/branches");
+  return { success: true };
 }

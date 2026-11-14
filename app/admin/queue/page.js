@@ -1,3 +1,4 @@
+import AdminActionForm from "@/components/AdminActionForm";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import AdminNav from "@/components/AdminNav";
@@ -142,7 +143,7 @@ export default async function QueueConsole({ searchParams }) {
                 <p className="text-lg">{tr("This queue has ended for the day.")}</p>
               ) : (
                 <div>
-                  <form action={A.callNext}>
+                  <AdminActionForm action={A.callNext} successMessage={tr("Queue updated.", "সিরিয়াল আপডেট হয়েছে।")} pendingMessage={tr("Updating queue…", "সিরিয়াল আপডেট হচ্ছে…")}>
                     <Key k={s.key} />
                     <Btn t="go" big disabled={!serving && waiting === 0}>
                       {serving
@@ -151,14 +152,14 @@ export default async function QueueConsole({ searchParams }) {
                           : tr("Finish this patient")
                         : tr("Call next patient")}
                     </Btn>
-                  </form>
+                  </AdminActionForm>
                   <p className="mt-2 text-sm text-ink/70">
                     {waiting} patient{waiting === 1 ? " is" : "s are"} waiting.
                     Patients see the change on their phones straight away.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {serving && (
-                      <form action={A.skipCurrent}>
+                      <AdminActionForm action={A.skipCurrent} successMessage={tr("Patient marked as absent.", "রোগীকে অনুপস্থিত হিসেবে চিহ্নিত করা হয়েছে।")} pendingMessage={tr("Updating queue…", "সিরিয়াল আপডেট হচ্ছে…")}>
                         <Key k={s.key} />
                         <Btn
                           t="warn"
@@ -166,17 +167,17 @@ export default async function QueueConsole({ searchParams }) {
                         >
                           {tr("Patient did not come")}
                         </Btn>
-                      </form>
+                      </AdminActionForm>
                     )}
                     {s.status === "in_progress" && (
-                      <form action={A.setStatus}>
+                      <AdminActionForm action={A.setStatus} successMessage={tr("Queue status updated.", "সিরিয়ালের অবস্থা আপডেট হয়েছে।")} pendingMessage={tr("Updating status…", "অবস্থা আপডেট হচ্ছে…")}>
                         <Key k={s.key} />
                         <input type="hidden" name="status" value="break" />
                         <Btn>{tr("Doctor is on a break")}</Btn>
-                      </form>
+                      </AdminActionForm>
                     )}
                     {s.status === "break" && (
-                      <form action={A.setStatus}>
+                      <AdminActionForm action={A.setStatus} successMessage={tr("Queue status updated.", "সিরিয়ালের অবস্থা আপডেট হয়েছে।")} pendingMessage={tr("Updating status…", "অবস্থা আপডেট হচ্ছে…")}>
                         <Key k={s.key} />
                         <input
                           type="hidden"
@@ -184,10 +185,10 @@ export default async function QueueConsole({ searchParams }) {
                           value="in_progress"
                         />
                         <Btn t="go">{tr("Doctor is back")}</Btn>
-                      </form>
+                      </AdminActionForm>
                     )}
                     {s.status === "scheduled" && (
-                      <form action={A.setStatus}>
+                      <AdminActionForm action={A.setStatus} successMessage={tr("Queue status updated.", "সিরিয়ালের অবস্থা আপডেট হয়েছে।")} pendingMessage={tr("Updating status…", "অবস্থা আপডেট হচ্ছে…")}>
                         <Key k={s.key} />
                         <input
                           type="hidden"
@@ -195,7 +196,7 @@ export default async function QueueConsole({ searchParams }) {
                           value="in_progress"
                         />
                         <Btn t="go">{tr("Doctor has arrived")}</Btn>
-                      </form>
+                      </AdminActionForm>
                     )}
                   </div>
                 </div>
@@ -209,7 +210,7 @@ export default async function QueueConsole({ searchParams }) {
                   <p className="text-sm text-ink/70">
                     {tr("Tap one. Every waiting patient sees it and their time estimate updates.")}
                   </p>
-                  <form action={A.setDelay} className="mt-3 space-y-3">
+                  <AdminActionForm action={A.setDelay} className="mt-3 space-y-3" successMessage={tr("Delay notice updated.", "দেরির নোটিশ আপডেট হয়েছে।")} pendingMessage={tr("Saving notice…", "নোটিশ সংরক্ষণ হচ্ছে…")}>
                     <Key k={s.key} />
                     <input
                       name="notice"
@@ -236,7 +237,7 @@ export default async function QueueConsole({ searchParams }) {
                         </Btn>
                       ))}
                     </div>
-                  </form>
+                  </AdminActionForm>
                 </div>
 
                 <div className="rounded-2xl bg-pine-50 p-4">
@@ -246,10 +247,7 @@ export default async function QueueConsole({ searchParams }) {
                   <p className="text-sm text-ink/70">
                     {tr("Add them here and they get the next serial.")}
                   </p>
-                  <form
-                    action={A.addWalkIn}
-                    className="mt-3 flex flex-wrap gap-2"
-                  >
+                  <AdminActionForm action={A.addWalkIn} className="mt-3 flex flex-wrap gap-2" successMessage={tr("Walk-in patient added.", "সরাসরি আসা রোগী যোগ করা হয়েছে।")} pendingMessage={tr("Adding patient…", "রোগী যোগ হচ্ছে…")} resetOnSuccess>
                     <input
                       type="hidden"
                       name="doctorSlug"
@@ -270,7 +268,7 @@ export default async function QueueConsole({ searchParams }) {
                       className={`${input} w-40`}
                     />
                     <Btn>{tr("Add")}</Btn>
-                  </form>
+                  </AdminActionForm>
                 </div>
               </div>
             )}
@@ -311,10 +309,10 @@ export default async function QueueConsole({ searchParams }) {
                     {tr(WORD[x.status])}
                   </span>
                   {x.status === "skipped" && !over && (
-                    <form action={A.recallPatient}>
+                    <AdminActionForm action={A.recallPatient} successMessage={tr("Patient called again.", "রোগীকে আবার ডাকা হয়েছে।")} pendingMessage={tr("Updating queue…", "সিরিয়াল আপডেট হচ্ছে…")}>
                       <input type="hidden" name="ref" value={x.ref} />
                       <Btn>{tr("Call again")}</Btn>
-                    </form>
+                    </AdminActionForm>
                   )}
                 </li>
               ))}
@@ -333,10 +331,7 @@ export default async function QueueConsole({ searchParams }) {
                   {tr("More options")}
                 </summary>
                 <div className="mt-3 flex flex-wrap items-end gap-6">
-                  <form
-                    action={A.saveSettings}
-                    className="flex flex-wrap items-end gap-2"
-                  >
+                  <AdminActionForm action={A.saveSettings} className="flex flex-wrap items-end gap-2" successMessage={tr("Queue settings saved.", "সিরিয়ালের সেটিংস সংরক্ষিত হয়েছে।")} pendingMessage={tr("Saving settings…", "সেটিংস সংরক্ষণ হচ্ছে…")}>
                     <Key k={s.key} />
                     <label>
                       {tr("Starts at")}
@@ -359,11 +354,11 @@ export default async function QueueConsole({ searchParams }) {
                       />
                     </label>
                     <Btn>{tr("Save")}</Btn>
-                  </form>
-                  <form action={A.finishSession}>
+                  </AdminActionForm>
+                  <AdminActionForm action={A.finishSession} successMessage={tr("Queue ended.", "আজকের সিরিয়াল শেষ হয়েছে।")} pendingMessage={tr("Ending queue…", "সিরিয়াল শেষ করা হচ্ছে…")}>
                     <Key k={s.key} />
                     <Btn t="warn">{tr("End today’s queue")}</Btn>
-                  </form>
+                  </AdminActionForm>
                 </div>
               </details>
             )}
@@ -373,10 +368,7 @@ export default async function QueueConsole({ searchParams }) {
         {idle.length > 0 && (
           <section className="mt-8">
             <h2 className="font-semibold">{tr("Start a queue for another doctor")}</h2>
-            <form
-              action={A.openNew}
-              className="mt-3 flex flex-wrap items-center gap-2"
-            >
+            <AdminActionForm action={A.openNew} className="mt-3 flex flex-wrap items-center gap-2" successMessage={tr("Queue started.", "সিরিয়াল শুরু হয়েছে।")} pendingMessage={tr("Starting queue…", "সিরিয়াল শুরু হচ্ছে…")}>
               <input type="hidden" name="date" value={date} />
               <select
                 name="doctorSlug"
@@ -391,7 +383,7 @@ export default async function QueueConsole({ searchParams }) {
                 ))}
               </select>
               <Btn t="go">{tr("Start queue")}</Btn>
-            </form>
+            </AdminActionForm>
           </section>
         )}
 

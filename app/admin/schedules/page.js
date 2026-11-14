@@ -1,3 +1,4 @@
+import AdminActionForm from "@/components/AdminActionForm";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
@@ -84,7 +85,7 @@ export default async function ScheduleManager({ searchParams }) {
                     <p className="font-semibold text-pine-950">{item.doctorName}</p>
                     <p className="mt-1 text-xs text-ink/65">{(item.weekdays || []).map((day) => ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][day]).join(", ")} · {item.startTime}–{item.endTime}</p>
                     <p className="mt-1 text-xs text-ink/50">{item.maxPatients} serials/day · {item.endsOn ? `Until ${item.endsOn}` : "Repeats until changed"}</p>
-                    <form action={disableWeeklyScheduleAction} className="mt-2"><input type="hidden" name="doctorSlug" value={item.doctorSlug}/><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">Disable recurring schedule</button></form>
+                    <AdminActionForm action={disableWeeklyScheduleAction} className="mt-2" successMessage={tr("Weekly schedule disabled.", "সাপ্তাহিক সময়সূচি বন্ধ করা হয়েছে।")} pendingMessage={tr("Disabling schedule…", "সময়সূচি বন্ধ হচ্ছে…")}><input type="hidden" name="doctorSlug" value={item.doctorSlug}/><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">Disable recurring schedule</button></AdminActionForm>
                   </div>
                 ))}
               </div>
@@ -104,7 +105,7 @@ export default async function ScheduleManager({ searchParams }) {
             {!branchDoctors.length ? (
               <p className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">{tr("No doctors are available in the directory. Add doctor records before publishing schedules.")}</p>
             ) : (
-              <form action={publishScheduleAction} className="mt-6 space-y-4">
+              <AdminActionForm action={publishScheduleAction} className="mt-6 space-y-4" successMessage={tr("Doctor session published.", "ডাক্তারের সেশন প্রকাশিত হয়েছে।")} pendingMessage={tr("Publishing session…", "সেশন প্রকাশ করা হচ্ছে…")} resetOnSuccess>
                 <label className="block text-sm font-semibold text-pine-900">{tr("Doctor")}
                   <select name="doctorSlug" required defaultValue="" className={field}>
                     <option value="" disabled>{tr("Select a doctor")}</option>
@@ -129,7 +130,7 @@ export default async function ScheduleManager({ searchParams }) {
                 </div>
                 <div className="rounded-2xl bg-pine-50 p-4 text-xs leading-5 text-pine-900/80">{tr("Publishing a session makes the date bookable. Serial numbers are assigned atomically, and patients can track their estimated turn online.")}</div>
                 <button className="w-full rounded-full bg-pine-900 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-pine-700">{tr("Publish doctor schedule")}</button>
-              </form>
+              </AdminActionForm>
             )}
           </div>
 
@@ -176,7 +177,7 @@ export default async function ScheduleManager({ searchParams }) {
                           </div>
                           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                             <Link href={`/admin/queue?date=${date}&doc=${s.doctorSlug}`} className="text-xs font-bold text-emerald-800 underline underline-offset-4">{tr("Open queue console ↗")}</Link>
-                            {s.canRemove && <form action={removeScheduleAction}><input type="hidden" name="key" value={s.key} /><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">{tr("Remove unused schedule")}</button></form>}
+                            {s.canRemove && <AdminActionForm action={removeScheduleAction} successMessage={tr("Unused schedule removed.", "অব্যবহৃত সময়সূচি সরানো হয়েছে।")} pendingMessage={tr("Removing schedule…", "সময়সূচি সরানো হচ্ছে…")}><input type="hidden" name="key" value={s.key} /><button className="text-xs font-semibold text-rose-700 underline underline-offset-4">{tr("Remove unused schedule")}</button></AdminActionForm>}
                           </div>
                         </article>
                       ))}
