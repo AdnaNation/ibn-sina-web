@@ -36,7 +36,7 @@ export default async function AdminNav({ p, current }) {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-0.5 rounded-full bg-pine-50 p-0.5" role="group" aria-label="Language">
             <Languages size={14} className="ml-2 text-pine-700" aria-hidden="true" />
-            { [["en", "EN"], ["bn", "বাংলা"]].map(([code, label]) => (
+            {[["en", "EN"], ["bn", "বাংলা"]].map(([code, label]) => (
               <form key={code} action={setLang}>
                 <input type="hidden" name="lang" value={code} />
                 <button aria-pressed={lang === code} className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${lang === code ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-white"}`}>{label}</button>
