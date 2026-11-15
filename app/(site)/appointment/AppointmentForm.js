@@ -7,7 +7,7 @@ import {deptName,doctorName,unitName,normalizeBangladeshMobile} from "@/lib/bnDa
 
 const field="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-pine-500 focus:ring-4 focus:ring-pine-100";
 function Panel({number,title,icon,done,children,lang="en",completeLabel="Complete",stepLabel="STEP"}){const Icon=icon;return <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,45,35,.035)]"><div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6"><span className={`grid size-9 place-items-center rounded-xl ${done?"bg-pine-800 text-white":"bg-pine-50 text-pine-800"}`}>{done?<CheckCircle2 size={18}/>:<Icon size={18}/>}</span><div className="min-w-0"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">{stepLabel} {number}</p><h2 className="text-sm font-bold text-slate-900 sm:text-base">{title}</h2></div>{done&&<span className="ml-auto text-[11px] font-bold text-pine-700">{completeLabel}</span>}</div><div className="p-5 sm:p-6">{children}</div></section>}
-export default function AppointmentForm({doctors,selected,minDate,maxDate,lang="en",t}){
+export default function AppointmentForm({doctors,selected,minDate,lang="en",t}){
  const copy=t||{};
  const [state,action,pending]=useActionState(bookAppointment,{});
  const [q,setQ]=useState("");
@@ -27,7 +27,7 @@ export default function AppointmentForm({doctors,selected,minDate,maxDate,lang="
  const tomorrowDate=new Date(new Date(`${minDate}T12:00:00+06:00`).getTime()+86400000).toISOString().slice(0,10);
  const dateLabel=(value)=>{if(value===minDate)return copy.today;if(value===tomorrowDate)return copy.tomorrow;return new Intl.DateTimeFormat(bn?"bn-BD":"en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"Asia/Dhaka"}).format(new Date(`${value}T12:00:00+06:00`))};
  const update=(key,value)=>setPatient(p=>({...p,[key]:value}));
- const days=availability.days.filter(a=>!maxDate||a.date<=maxDate);
+ const days=availability.days;
  return <form action={action} aria-busy={pending} className="space-y-5">
   <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true"/>
   <input type="hidden" name="doctor" value={doctor?.slug||""}/><input type="hidden" name="date" value={date}/>
