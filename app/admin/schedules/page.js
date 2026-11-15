@@ -2,7 +2,7 @@ import AdminActionForm from "@/components/AdminActionForm";
 import { redirect } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
 import { getAdmin } from "@/lib/adminT";
-import { getSession, hasPermission } from "@/lib/auth";
+import { getSession, hasPermission, isBranchAdmin } from "@/lib/auth";
 import { getAllDoctors } from "@/lib/data";
 import { getScheduleList, getWeeklyScheduleList } from "@/lib/queue";
 import { todayDhaka, fmtDate } from "@/lib/time";
@@ -39,7 +39,8 @@ export default async function ScheduleManager({ searchParams }) {
     getScheduleList(from, to, p),
     getWeeklyScheduleList(p),
   ]);
-  const branchDoctors = doctors.filter((d) => d.unit === p.unit);
+  const assignedSlugs = Array.isArray(p.doctorSlugs) ? p.doctorSlugs : p.doctorSlug ? [p.doctorSlug] : [];
+  const branchDoctors = doctors.filter((d) => d.unit === p.unit && (isBranchAdmin(p) || (p.role === "staff" && (p.allDoctors === true || assignedSlugs.includes(d.slug)))));
   const grouped = (schedules || []).reduce((acc, item) => {
     (acc[item.date] ||= []).push(item);
     return acc;
