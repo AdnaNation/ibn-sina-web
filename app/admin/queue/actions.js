@@ -4,7 +4,8 @@ import { getSession, canSee, canDoctor, hasPermission } from "@/lib/auth";
 import { getDoctor } from "@/lib/data";
 import { isValidISODate } from "@/lib/time";
 import { writeAudit } from "@/lib/management";
-import { advance, apptKey, book, openSession, patchSession, recall, sessionDoc } from "@/lib/queue";
+import { advance, apptKey, book, clearEmergencyPriority, openSession, patchSession, recall, sessionDoc, setEmergencyPriority } from "@/lib/queue";
+import { validateEmergencyPriority } from "@/lib/queue-rules.mjs";
 
 const get = (fd, k) => String(fd.get(k) || "");
 const validDate = isValidISODate;
@@ -83,6 +84,34 @@ export async function saveSettings(fd) {
   done();
   return { success: true };
 }
+export async function markEmergency(fd) {
+  const ref = get(fd, "ref");
+  const key = await apptKey(ref);
+  const p = await guard(key);
+  const validation = validateEmergencyPriority(get(fd, "reason"), get(fd, "doctorConfirmed") === "yes");
+  if (validation.error) return failQueue(key, validation.error);
+  const result = await setEmergencyPriority(ref, {
+    reason: validation.reason,
+    actorName: p.name,
+    actorRole: p.role,
+  });
+  if (result?.error) return failQueue(key, result.error);
+  await record(p, "queue.emergency_priority_added", key, { ref, reason: validation.reason });
+  done();
+  return { success: true };
+}
+
+export async function removeEmergency(fd) {
+  const ref = get(fd, "ref");
+  const key = await apptKey(ref);
+  const p = await guard(key);
+  const result = await clearEmergencyPriority(ref);
+  if (result?.error) return failQueue(key, result.error);
+  await record(p, "queue.emergency_priority_removed", key, { ref });
+  done();
+  return { success: true };
+}
+
 export async function recallPatient(fd) {
   const ref = get(fd, "ref");
   const key = await apptKey(ref);
