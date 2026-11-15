@@ -5,7 +5,8 @@ import { getAdmin } from "@/lib/adminT";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { listStaff } from "@/lib/staff";
 import { getUnits, getAllDoctors } from "@/lib/data";
-import { updateStaffAccess, addStaff } from "./actions";\nimport { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
+import { updateStaffAccess, addStaff } from "./actions";
+import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { toggleAccountAction } from "@/app/admin/branches/actions";
 
 export const dynamic = "force-dynamic";
