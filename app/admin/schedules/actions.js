@@ -7,6 +7,13 @@ import { publishSchedule, saveWeeklySchedule, deactivateWeeklySchedule, removeEm
 import { writeAudit } from "@/lib/management";
 
 const val = (fd, key) => String(fd.get(key) || "").trim();
+function canManageDoctorSchedule(user, doctor) {
+  if (!user || !doctor || doctor.unit !== user.unit) return false;
+  if (isBranchAdmin(user)) return true;
+  if (user.role !== "staff" || !hasPermission(user, "schedules.manage")) return false;
+  const assigned = Array.isArray(user.doctorSlugs) ? user.doctorSlugs : user.doctorSlug ? [user.doctorSlug] : [];
+  return user.allDoctors === true || assigned.includes(doctor.slug);
+}
 
 export async function publishScheduleAction(fd) {
   const p = await getSession();
@@ -14,7 +21,7 @@ export async function publishScheduleAction(fd) {
 
   const doctor = await getDoctor(val(fd, "doctorSlug"));
   let error = "";
-  if (!doctor || doctor.unit !== p.unit) error = "Choose a valid doctor from your branch.";
+  if (!canManageDoctorSchedule(p, doctor)) error = "Choose a doctor assigned to your account in your branch.";
   else {
     error = await publishSchedule({
       doctor,
@@ -67,7 +74,7 @@ export async function disableWeeklyScheduleAction(fd) {
   if (!p || !hasPermission(p, "schedules.manage")) return { error: "Your session expired or you do not have permission." };
   const doctorSlug = val(fd, "doctorSlug");
   const doctor = await getDoctor(doctorSlug);
-  if (!doctor || doctor.unit !== p.unit) return { error: "Not allowed to change this doctor’s schedule." };
+  if (!canManageDoctorSchedule(p, doctor)) return { error: "Not allowed to change this doctor’s schedule." };
   const error = await deactivateWeeklySchedule(doctorSlug, p);
   if (!error) await writeAudit({ actor: p, action: "schedule.weekly_disabled", targetType: "weekly_schedule", targetId: doctorSlug });
   revalidatePath("/admin/schedules");
@@ -82,7 +89,8 @@ export async function removeScheduleAction(fd) {
   const key = val(fd, "key");
   const { sessionDoc } = await import("@/lib/queue");
   const target = await sessionDoc(key);
-  if (!target || target.unit !== p.unit) return { error: "Not allowed to remove this schedule." };
+  const doctor = target ? await getDoctor(target.doctorSlug) : null;
+  if (!target || !canManageDoctorSchedule(p, doctor)) return { error: "Not allowed to remove this schedule." };
   const error = await removeEmptySchedule(key);
   if (!error) await writeAudit({ actor: p, action: "schedule.removed", targetType: "schedule", targetId: key });
   revalidatePath("/admin/schedules");
