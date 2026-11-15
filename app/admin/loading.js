@@ -1,16 +1,11 @@
-import AdminNav from "@/components/AdminNav";
-import { getSession } from "@/lib/auth";
 
 function Skeleton({ className = "" }) {
   return <div aria-hidden="true" className={`animate-pulse rounded-xl bg-slate-200/80 ${className}`} />;
 }
 
-export default async function AdminLoading() {
-  const p = await getSession();
-
+export default function AdminLoading() {
   return (
     <>
-      {p ? <AdminNav p={p} current="" /> : null}
       <main
         aria-busy="true"
         aria-live="polite"
