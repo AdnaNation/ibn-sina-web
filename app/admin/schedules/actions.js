@@ -45,7 +45,7 @@ export async function saveWeeklyScheduleAction(fd) {
   if (!p || !hasPermission(p, "schedules.manage")) return { error: "Your session expired. Please sign in again." };
   const doctor = await getDoctor(val(fd, "doctorSlug"));
   let error = "";
-  if (!doctor || doctor.unit !== p.unit) error = "Choose a valid doctor from your branch.";
+  if (!canManageDoctorSchedule(p, doctor)) error = "Choose a doctor assigned to your account in your branch.";
   else {
     error = await saveWeeklySchedule({
       doctor,
