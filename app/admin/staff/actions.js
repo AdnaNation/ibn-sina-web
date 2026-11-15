@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { getUnits, getDoctor } from "@/lib/data";
-import { createStaff, listStaff, setStaffActive, setStaffDoctor } from "@/lib/staff";
+import { createStaff, listStaff, setStaffActive, setStaffAccess } from "@/lib/staff";\nimport { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
