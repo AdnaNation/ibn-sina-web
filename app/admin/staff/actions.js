@@ -2,7 +2,8 @@
 import { revalidatePath } from "next/cache";
 import { getSession, isBranchAdmin } from "@/lib/auth";
 import { getUnits, getDoctor } from "@/lib/data";
-import { createStaff, listStaff, setStaffActive, setStaffDoctor } from "@/lib/staff";
+import { createStaff, listStaff, setStaffActive, setStaffAccess } from "@/lib/staff";
+import { STAFF_ASSIGNABLE_PERMISSIONS } from "@/lib/permissions";
 import { writeAudit } from "@/lib/management";
 
 const g = (fd, k) => String(fd.get(k) || "").trim();
@@ -45,19 +46,38 @@ export async function addStaff(fd) {
   return { success: true, value: username };
 }
 
-export async function assignStaffDoctor(fd) {
+export async function updateStaffAccess(fd) {
   const p = await getSession();
-  if (!p || !isBranchAdmin(p)) return { error: "Only a Branch Admin can assign a doctor to staff." };
+  if (!p || !isBranchAdmin(p)) return { error: "Only a Branch Admin can edit staff access." };
   const username = g(fd, "username");
-  const doctorSlug = g(fd, "doctorSlug");
   const target = (await listStaff({ username, unit: p.unit, role: "staff" }))[0];
-  const doctor = await getDoctor(doctorSlug);
+  const doctor = await getDoctor(g(fd, "doctorSlug"));
   if (!target || !doctor || doctor.unit !== p.unit) return { error: "Choose a staff account and doctor from your own branch." };
-  const error = await setStaffDoctor(username, { unit: p.unit, doctorSlug: doctor.slug, doctorName: doctor.name });
+
+  const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((permission) => permission.key));
+  const permissions = [...new Set(fd.getAll("permissions").map((value) => String(value)).filter((value) => allowed.has(value)))];
+  const error = await setStaffAccess(username, {
+    unit: p.unit,
+    doctorSlug: doctor.slug,
+    doctorName: doctor.name,
+    permissions,
+  });
   if (error) return { error };
-  await writeAudit({ actor: p, action: "staff.doctor_assigned", targetType: "staff", targetId: username, details: { doctorSlug: doctor.slug, doctorName: doctor.name, unit: p.unit } });
-  revalidatePath("/admin/staff");
-  revalidatePath("/admin/queue");
+  await writeAudit({
+    actor: p,
+    action: "staff.access_updated",
+    targetType: "staff",
+    targetId: username,
+    details: {
+      unit: p.unit,
+      doctorSlug: doctor.slug,
+      doctorName: doctor.name,
+      previousDoctorSlug: target.doctorSlug || "",
+      previousPermissions: target.permissions || [],
+      permissions,
+    },
+  });
+  ["/admin/staff", "/admin/queue", "/admin/appointments", "/admin/reports", "/admin/medical-reports", "/admin/doctors"].forEach((path) => revalidatePath(path));
   return { success: true };
 }
 
