@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildSessionPatch } from "../lib/queue-rules.mjs";
+import { buildSessionPatch, validateEmergencyPriority } from "../lib/queue-rules.mjs";
 
 const session = (overrides = {}) => ({
   status: "scheduled",
@@ -57,4 +57,14 @@ test("empty updates are rejected and valid mixed updates are normalized", () => 
   assert.deepEqual(buildSessionPatch(session(), { delayMin: "15", notice: "  Updated  " }), {
     set: { delayMin: 15, notice: "Updated" },
   });
+});
+
+test("emergency priority requires doctor confirmation and a meaningful reason", () => {
+  assert.ok(validateEmergencyPriority("Patient needs urgent review", false).error);
+  assert.ok(validateEmergencyPriority("   ", true).error);
+  assert.ok(validateEmergencyPriority("urgent", true).error);
+  assert.deepEqual(validateEmergencyPriority("  Patient needs urgent review  ", true), {
+    reason: "Patient needs urgent review",
+  });
+  assert.equal(validateEmergencyPriority("x".repeat(300), true).reason.length, 240);
 });
