@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getDoctor } from "@/lib/data";
-import { book } from "@/lib/queue";
+import { book, getAvailability } from "@/lib/queue";
 import { todayDhaka, isValidISODate } from "@/lib/time";
 import { getLang } from "@/lib/i18n";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
@@ -42,12 +42,12 @@ export async function bookAppointment(_prev, formData) {
 
   const doctor = f.doctor ? await getDoctor(String(f.doctor)) : null;
   if (!doctor) return fail(bn ? "একজন চিকিৎসক নির্বাচন করুন।" : "Choose a doctor.");
-  if (
-    !isValidISODate(date) ||
-    date < todayDhaka() ||
-    date > todayDhaka(4)
-  ) {
-    return fail(bn ? "আগামী ৫ দিনের মধ্যে একটি তারিখ নির্বাচন করুন।" : "Choose a date within the next 5 days.");
+  if (!isValidISODate(date) || date < todayDhaka()) {
+    return fail(bn ? "আজ অথবা পরবর্তী কোনো তারিখ নির্বাচন করুন।" : "Choose today or a future date.");
+  }
+  const availableDates = await getAvailability(doctor, 5);
+  if (!availableDates?.some((item) => item.date === date && !item.closed && item.left > 0)) {
+    return fail(bn ? "এই তারিখে আর অনলাইন সিরিয়াল পাওয়া যাচ্ছে না। হালনাগাদ তালিকা থেকে একটি তারিখ নির্বাচন করুন।" : "This date is no longer available. Choose a date from the refreshed availability list.");
   }
 
   let r;
