@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Building2, Users, ClipboardList, ShieldCheck } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
-import { getSession } from "@/lib/auth";
+import { getSession, hasPermission } from "@/lib/auth";
 import { getAdmin } from "@/lib/adminT";
 import { getOrganizationStats, getAuditLogs } from "@/lib/management";
 import { todayDhaka } from "@/lib/time";
@@ -18,9 +18,9 @@ export default async function Overview() {
   if (!p) redirect("/admin/login");
   if (p.role !== "owner") {
     if (p.role === "branch_admin" || p.role === "branch") redirect("/admin/schedules");
-    if (p.permissions?.includes("queue.manage")) redirect("/admin/queue");
-    if (p.permissions?.includes("appointments.view")) redirect("/admin/appointments");
-    if (p.permissions?.includes("schedules.manage")) redirect("/admin/schedules");
+    if (hasPermission(p, "queue.manage")) redirect("/admin/queue");
+    if (hasPermission(p, "appointments.view")) redirect("/admin/appointments");
+    if (hasPermission(p, "schedules.manage")) redirect("/admin/schedules");
     return <><AdminNav p={p} current="/admin"/><main className="mx-auto max-w-4xl px-4 py-10"><h1 className="font-serif text-3xl text-pine-950">Welcome, {p.name}</h1><p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">No modules have been assigned to your account. Contact your branch administrator.</p></main></>;
   }
   const { bn } = await getAdmin();
