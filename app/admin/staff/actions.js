@@ -15,8 +15,9 @@ export async function addStaff(fd) {
   const name = g(fd, "name").slice(0, 80), username = g(fd, "username").toLowerCase(), password = String(fd.get("password") || "");
   let role = g(fd, "role") || "staff";
   let unit = g(fd, "unit");
-  const doctorSlug = g(fd, "doctorSlug");
-  let doctor = null;
+  const doctorSlugs = [...new Set(fd.getAll("doctorSlugs").map((value) => String(value).trim()).filter(Boolean))];
+  const allDoctors = g(fd, "allDoctors") === "yes";
+  let doctors = [];
   let err = "";
   if (name.length < 2) err = "Enter a staff member’s name (2–80 characters).";
   else if (!validUsername(username)) err = "Username: 3 to 20 lowercase letters, numbers, dots, underscores or hyphens.";
@@ -32,13 +33,17 @@ export async function addStaff(fd) {
     if (!units.some((u) => `${u.name}, ${u.area}` === unit && u.active !== false)) err = "Choose an active branch.";
   }
   if (!err && role === "staff") {
-    doctor = await getDoctor(doctorSlug);
-    if (!doctor || doctor.unit !== unit) err = "Choose a valid doctor from your own branch.";
+    if (!allDoctors && !doctorSlugs.length) err = "Select at least one doctor or choose all doctors in this branch.";
+    if (!err && !allDoctors) {
+      doctors = await Promise.all(doctorSlugs.map((slug) => getDoctor(slug)));
+      if (doctors.some((doctor) => !doctor || doctor.unit !== unit)) err = "Choose doctors from your own branch only.";
+    }
   }
   if (!err) {
     const finalPermissions = role === "branch_admin" ? [] : ["queue.manage"];
-    err = await createStaff({ name, username, password, role, unit, doctorSlug: doctor?.slug || "", doctorName: doctor?.name || "", permissions: finalPermissions });
-    if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, doctorSlug: doctor?.slug || "", doctorName: doctor?.name || "", permissions: finalPermissions } });
+    const assignedSlugs = allDoctors ? [] : doctors.map((doctor) => doctor.slug);
+    err = await createStaff({ name, username, password, role, unit, doctorSlugs: assignedSlugs, allDoctors, doctorSlug: assignedSlugs[0] || "", doctorName: doctors.map((doctor) => doctor.name).join(", "), permissions: finalPermissions });
+    if (!err) await writeAudit({ actor: p, action: "account.created", targetType: "staff", targetId: username, details: { targetName: name, targetRole: role, unit, doctorSlugs: assignedSlugs, allDoctors, permissions: finalPermissions } });
   }
   if (err) return { error: err };
   revalidatePath("/admin/staff");
@@ -51,15 +56,19 @@ export async function updateStaffAccess(fd) {
   if (!p || !isBranchAdmin(p)) return { error: "Only a Branch Admin can edit staff access." };
   const username = g(fd, "username");
   const target = (await listStaff({ username, unit: p.unit, role: "staff" }))[0];
-  const doctor = await getDoctor(g(fd, "doctorSlug"));
-  if (!target || !doctor || doctor.unit !== p.unit) return { error: "Choose a staff account and doctor from your own branch." };
+  const allDoctors = g(fd, "allDoctors") === "yes";
+  const doctorSlugs = [...new Set(fd.getAll("doctorSlugs").map((value) => String(value).trim()).filter(Boolean))];
+  const doctors = allDoctors ? [] : await Promise.all(doctorSlugs.map((slug) => getDoctor(slug)));
+  if (!target || (!allDoctors && (!doctors.length || doctors.some((doctor) => !doctor || doctor.unit !== p.unit)))) return { error: "Choose one or more doctors from your own branch, or select all doctors." };
 
   const allowed = new Set(STAFF_ASSIGNABLE_PERMISSIONS.map((permission) => permission.key));
   const permissions = [...new Set(fd.getAll("permissions").map((value) => String(value)).filter((value) => allowed.has(value)))];
   const error = await setStaffAccess(username, {
     unit: p.unit,
-    doctorSlug: doctor.slug,
-    doctorName: doctor.name,
+    doctorSlugs: doctors.map((doctor) => doctor.slug),
+    allDoctors,
+    doctorSlug: doctors[0]?.slug || "",
+    doctorName: doctors.map((doctor) => doctor.name).join(", "),
     permissions,
   });
   if (error) return { error };
@@ -70,9 +79,9 @@ export async function updateStaffAccess(fd) {
     targetId: username,
     details: {
       unit: p.unit,
-      doctorSlug: doctor.slug,
-      doctorName: doctor.name,
-      previousDoctorSlug: target.doctorSlug || "",
+      doctorSlugs: doctors.map((doctor) => doctor.slug),
+      allDoctors,
+      previousDoctorSlugs: target.doctorSlugs || (target.doctorSlug ? [target.doctorSlug] : []),
       previousPermissions: target.permissions || [],
       permissions,
     },
