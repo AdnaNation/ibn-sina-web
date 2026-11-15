@@ -303,11 +303,39 @@ export default async function QueueConsole({ searchParams }) {
                       {canViewPatients ? (x.phone || tr("no phone")) : tr("contact details restricted")} · {x.ref}
                     </span>
                   </span>
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm ${CHIP[x.status]}`}
-                  >
+                  <span className={`rounded-full px-3 py-1 text-sm ${CHIP[x.status]}`}>
                     {tr(WORD[x.status])}
                   </span>
+                  {x.emergencyPriority && (
+                    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-800">
+                      {tr("Emergency priority")}
+                    </span>
+                  )}
+                  {x.status === "waiting" && !over && !x.emergencyPriority && (
+                    <details className="text-sm">
+                      <summary className="cursor-pointer rounded-full border border-red-200 px-3 py-2 font-semibold text-red-700 hover:bg-red-50">
+                        {tr("Mark emergency")}
+                      </summary>
+                      <AdminActionForm action={A.markEmergency} className="mt-2 min-w-56 space-y-2 rounded-xl border border-red-100 bg-red-50 p-3" successMessage={tr("Emergency priority added. This patient will be called after the current consultation.", "জরুরি অগ্রাধিকার যোগ হয়েছে। বর্তমান সাক্ষাৎ শেষে রোগীকে ডাকা হবে।")} pendingMessage={tr("Updating emergency priority…", "জরুরি অগ্রাধিকার আপডেট হচ্ছে…")}>
+                        <input type="hidden" name="ref" value={x.ref} />
+                        <label className="block text-xs font-semibold text-red-900">
+                          {tr("Reason for emergency priority")}
+                          <textarea name="reason" required minLength={5} maxLength={240} rows={2} className="mt-1 w-full rounded-lg border border-red-200 bg-white p-2" placeholder={tr("Briefly explain why this patient cannot wait")} />
+                        </label>
+                        <label className="flex items-start gap-2 text-xs text-red-900">
+                          <input type="checkbox" name="doctorConfirmed" value="yes" required className="mt-0.5" />
+                          <span>{tr("The doctor has assessed and approved this priority.")}</span>
+                        </label>
+                        <Btn t="warn">{tr("Confirm emergency priority")}</Btn>
+                      </AdminActionForm>
+                    </details>
+                  )}
+                  {x.status === "waiting" && !over && x.emergencyPriority && (
+                    <AdminActionForm action={A.removeEmergency} successMessage={tr("Emergency priority removed.", "জরুরি অগ্রাধিকার সরানো হয়েছে।")} pendingMessage={tr("Updating queue…", "সিরিয়াল আপডেট হচ্ছে…")}>
+                      <input type="hidden" name="ref" value={x.ref} />
+                      <Btn t="plain">{tr("Remove priority")}</Btn>
+                    </AdminActionForm>
+                  )}
                   {x.status === "skipped" && !over && (
                     <AdminActionForm action={A.recallPatient} successMessage={tr("Patient called again.", "রোগীকে আবার ডাকা হয়েছে।")} pendingMessage={tr("Updating queue…", "সিরিয়াল আপডেট হচ্ছে…")}>
                       <input type="hidden" name="ref" value={x.ref} />
@@ -394,8 +422,7 @@ export default async function QueueConsole({ searchParams }) {
           <ol className="mt-2 list-decimal space-y-1 pl-5 text-ink/80">
             <li>{tr("Patients book online and get a serial number.")}</li>
             <li>
-              {tr("When the doctor is ready, press")} <strong>{tr("Call next patient")}</strong>
-              .
+              {tr("When the doctor is ready, press")} <strong>{tr("Call next patient")}</strong>. {tr("Doctor-approved emergency patients are called before regular waiting patients, after the current consultation is finished.")}
             </li>
             <li>
               {tr("If the doctor is late, tap how late. Patients are told, so they don’t wait at the hospital.")}
