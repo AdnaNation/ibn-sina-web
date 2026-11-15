@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { HeartPulse, LockKeyhole, ShieldCheck } from "lucide-react";
-import { login } from "@/lib/auth";
+import { login, getSession } from "@/lib/auth";
+import { getLoginDestination } from "@/lib/access.mjs";
 import { getLang } from "@/lib/i18n";
 import { consumeRateLimit, requestFingerprint } from "@/lib/rateLimit";
 import { writeAudit } from "@/lib/management";
@@ -35,7 +36,9 @@ export default async function Login({ searchParams }) {
       redirect("/admin/login?error=1");
     }
     await writeAudit({ actor: { u: username, name: username }, action: "login.success", targetType: "session", targetId: fingerprint });
-    redirect("/admin");
+    const session = await getSession();
+    if (!session) redirect("/admin/login?error=unavailable");
+    redirect(getLoginDestination(session));
   }
 
   return (
