@@ -77,7 +77,7 @@ export async function updateStaffAccess(fd) {
       permissions,
     },
   });
-  ["/admin/staff", "/admin/queue", "/admin/appointments", "/admin/reports", "/admin/medical-reports", "/admin/doctors"].forEach(revalidatePath);
+  ["/admin/staff", "/admin/queue", "/admin/appointments", "/admin/reports", "/admin/medical-reports", "/admin/doctors"].forEach((path) => revalidatePath(path));
   return { success: true };
 }
 
