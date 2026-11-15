@@ -34,12 +34,7 @@ test("availability stays closed without a configured weekly schedule", { skip: !
     unit: "Integration Test Unit",
   };
   const days = await queue.getAvailability(doctor);
-  assert.equal(days.length, 5);
-  assert.deepEqual(days.map((day) => day.date), Array.from({ length: 5 }, (_, index) => {
-    const date = new Date(Date.now() + index * 86400000);
-    return date.toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
-  }));
-  assert.ok(days.every((day) => day.closed && day.unscheduled && day.left === 0));
+  assert.deepEqual(days, [], "a doctor without a published one-off or active weekly schedule has no bookable dates");
   const sessions = await db.collection("sessions")
     .find({ doctorSlug: doctor.slug })
     .toArray();
