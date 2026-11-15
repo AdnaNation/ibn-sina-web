@@ -57,7 +57,7 @@ export default async function StaffPage({ searchParams }) {
                   <legend className="mb-1 text-xs font-bold uppercase tracking-wide text-pine-700">{tr("Allowed tasks")}</legend>
                   {STAFF_ASSIGNABLE_PERMISSIONS.map((permission) => <label key={permission.key} className="flex items-start gap-2 rounded-lg bg-white px-3 py-2 text-xs text-ink/80">
                     <input type="checkbox" name="permissions" value={permission.key} defaultChecked={(s.permissions || []).includes(permission.key)} className="mt-0.5 size-4 shrink-0 accent-emerald-700"/>
-                    <span><strong className="block text-pine-900">{tr(permission.label)}</strong><span className="text-ink/55">{permission.group}</span></span>
+                    <span><strong className="block text-pine-900">{tr(permission.label)}</strong><span className="text-ink/55">{tr(permission.group)}</span></span>
                   </label>)}
                 </fieldset>
                 <p className="text-[11px] leading-5 text-ink/55">{tr("Staff access remains limited to the selected doctors (or all doctors) in this branch. Schedule management applies only to those doctors; doctor administration remains restricted to Branch Admins.")}</p>
