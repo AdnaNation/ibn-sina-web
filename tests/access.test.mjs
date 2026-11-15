@@ -27,8 +27,12 @@ test("Main Admin has oversight rather than clinic-operation permissions", () => 
 test("staff and doctor permissions are least-privilege and explicit", () => {
   assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["queue.manage"] }, "queue.manage"), true);
   assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage"] }, "queue.manage"), false);
-  assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "appointments.view"), false);
-  assert.equal(hasPermission({ role: "staff", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "patients.view"), false);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "appointments.view"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "patients.view"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["reports.view"] }, "reports.view"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["doctors.manage", "schedules.manage"] }, "doctors.manage"), false);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["doctors.manage", "schedules.manage"] }, "schedules.manage"), false);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", permissions: ["appointments.view"] }, "appointments.view"), false);
   assert.equal(hasPermission({ role: "staff", permissions: ["queue.manage"] }, "queue.manage"), false);
   assert.equal(hasPermission({ role: "staff", permissions: ["doctors.manage", "schedules.manage"] }, "doctors.manage"), false);
   assert.equal(hasPermission({ role: "staff", permissions: ["doctors.manage", "schedules.manage"] }, "schedules.manage"), false);
