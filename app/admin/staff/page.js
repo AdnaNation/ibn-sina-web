@@ -31,7 +31,7 @@ export default async function StaffPage({ searchParams }) {
     <main className="mx-auto max-w-5xl px-4 py-8">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-emerald-700">{p.role === "owner" ? tr("Main administration") : tr("Branch administration")}</p>
       <h1 className="mt-2 font-serif text-3xl text-pine-900">{tr("Users & permissions")}</h1>
-      <p className="mt-1 text-ink/70">{p.role === "owner" ? tr("Create and manage Branch Admin accounts. Branch Admins create their own branch staff.") : tr("Create a staff account for one or more doctors, or grant access to every doctor in this branch.")}</p>
+      <p className="mt-1 text-ink/70">{p.role === "owner" ? tr("Create and manage Branch Admin accounts. Branch Admins create their own branch staff.") : tr("Create staff accounts for selected doctors, then grant only the tasks each person needs.")}</p>
       {sp.err && <p role="alert" className="mt-4 rounded-xl bg-rose-50 p-3 text-rose-800">{sp.err}</p>}
       {sp.ok && <p role="status" className="mt-4 rounded-xl bg-pine-50 p-3">{tr("Account")} <strong>{sp.ok}</strong> {tr("created. Share the login credentials securely.")}</p>}
 
@@ -43,7 +43,7 @@ export default async function StaffPage({ searchParams }) {
         {p.role === "owner" && <label className="text-sm font-semibold text-pine-800">{tr("Account type")}<select name="role" defaultValue="branch_admin" className={input}><option value="branch_admin">{tr("Branch administrator")}</option></select></label>}
         <label className="text-sm font-semibold text-pine-800">{tr("Assigned branch")}<select name="unit" required defaultValue={p.role === "owner" ? "" : p.unit} disabled={p.role !== "owner"} className={input}><option value="" disabled>{tr("Select branch")}</option>{ownBranches.map((b) => <option key={b} value={b}>{b.replace("Ibn Sina ", "")}</option>)}</select>{p.role !== "owner" && <input type="hidden" name="unit" value={p.unit} />}</label>
         {p.role !== "owner" && <div className="md:col-span-2"><DoctorAssignmentPicker doctors={assignedDoctors} allDoctorsLabel={tr("Allow this staff member to operate all doctors in this branch")} selectAllLabel={tr("Select all current doctors")} assignedLabel={tr("Choose one or more doctors for this staff member.")} futureHelp={tr("This option also includes doctors added to the branch in the future.")} /></div>}
-        {p.role !== "owner" && <div className="md:col-span-2 rounded-xl border border-pine-100 bg-pine-50 p-4"><p className="font-semibold text-pine-900">{tr("Queue-only access")}</p><p className="mt-1 text-sm text-ink/70">{tr("Staff can manage queues for their assigned doctors. All-doctor access automatically includes doctors added to this branch later. Other branch administration privileges are not granted.")}</p><input type="hidden" name="permissions" value="queue.manage" /></div>}
+        {p.role !== "owner" && <div className="md:col-span-2 rounded-xl border border-pine-100 bg-pine-50 p-4"><p className="font-semibold text-pine-900">{tr("Queue-only access")}</p><p className="mt-1 text-sm text-ink/70">{tr("Staff can manage queues for their assigned doctors. Schedule management can be enabled separately under Edit staff access. Other branch administration privileges are not granted.")}</p><input type="hidden" name="permissions" value="queue.manage" /></div>}
         <button className="justify-self-start rounded-full bg-pine-900 px-6 py-2.5 font-semibold text-white hover:bg-pine-700">{tr("Create account")}</button>
       </AdminActionForm>
 
@@ -60,7 +60,7 @@ export default async function StaffPage({ searchParams }) {
                     <span><strong className="block text-pine-900">{tr(permission.label)}</strong><span className="text-ink/55">{permission.group}</span></span>
                   </label>)}
                 </fieldset>
-                <p className="text-[11px] leading-5 text-ink/55">{tr("Staff access remains limited to the selected doctors (or all doctors) in this branch. Doctor and schedule administration cannot be granted to staff here.")}</p>
+                <p className="text-[11px] leading-5 text-ink/55">{tr("Staff access remains limited to the selected doctors (or all doctors) in this branch. Schedule management applies only to those doctors; doctor administration remains restricted to Branch Admins.")}</p>
                 <button className="justify-self-start rounded-full bg-pine-900 px-4 py-2 text-xs font-bold text-white">{tr("Save access")}</button>
               </AdminActionForm>
             </details>}{(p.role === "owner" || (s.role !== "branch_admin" && s.role !== "branch")) && <AdminActionForm action={toggleAccountAction} successMessage={tr("Account status updated.", "অ্যাকাউন্টের অবস্থা আপডেট হয়েছে।")} pendingMessage={tr("Updating account…", "অ্যাকাউন্ট আপডেট হচ্ছে…")}><input type="hidden" name="username" value={s.username}/><input type="hidden" name="active" value={String(s.active === false)}/><button className={`rounded-full px-3 py-2 text-xs font-bold ${s.active === false ? "bg-emerald-700 text-white" : "bg-rose-50 text-rose-700"}`}>{s.active === false ? tr("Reactivate") : tr("Deactivate")}</button></AdminActionForm>}</li>)}{!staff.length && <li className="p-4 text-ink/70">{tr("No accounts created yet.")}</li>}</ul>
