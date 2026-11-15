@@ -33,7 +33,10 @@ test("staff and doctor permissions are least-privilege and explicit", () => {
   assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["queue.manage", "appointments.view", "patients.view"] }, "patients.view"), true);
   assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["reports.view"] }, "reports.view"), true);
   assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["doctors.manage", "schedules.manage"] }, "doctors.manage"), false);
-  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["doctors.manage", "schedules.manage"] }, "schedules.manage"), false);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["schedules.manage"] }, "schedules.manage"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlugs: ["dr-a", "dr-b"], permissions: ["schedules.manage"] }, "schedules.manage"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", allDoctors: true, permissions: ["schedules.manage"] }, "schedules.manage"), true);
+  assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["doctors.manage", "schedules.manage"] }, "doctors.manage"), false);
   assert.equal(hasPermission({ role: "staff", unit: "Feni, Feni", permissions: ["appointments.view"] }, "appointments.view"), false);
   assert.equal(hasPermission({ role: "staff", permissions: ["queue.manage"] }, "queue.manage"), false);
   assert.equal(hasPermission({ role: "staff", permissions: ["doctors.manage", "schedules.manage"] }, "doctors.manage"), false);
