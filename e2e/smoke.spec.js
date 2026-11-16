@@ -35,10 +35,10 @@ test("public pages render and tracking exposes no direct patient contact details
 
 test("fictional appointment booking creates a trackable ticket", async ({ page }) => {
   await page.goto("/appointment?doctor=prof-dr-muhammad-salahuddin");
-  const dateChoice = page.locator('form button[aria-pressed="false"]').first();
+  const dateChoice = page.locator('form:has(input[name="doctor"]) button[aria-pressed="false"]').first();
   await expect(dateChoice).toBeVisible({ timeout: 20_000 });
   await dateChoice.click();
-  await expect(page.locator('form button[aria-pressed="true"]').first()).toBeVisible();
+  await expect(page.locator('form:has(input[name="doctor"]) button[aria-pressed="true"]').first()).toBeVisible();
   await page.locator('input[name="name"]').fill("Demo Browser Patient");
   await page.locator('input[name="phone"]').fill("01712345678");
   await page.locator('textarea[name="note"]').fill("Fictional browser acceptance note");
