@@ -44,7 +44,7 @@ npm run seed
 - `/track` and `/track/[ref]` — appointment tracking
 - `/live` — public live queue
 - `/admin` — Main Admin overview or staff landing page
-- `/admin/schedules` — publish and manage doctor sessions (Main Admin across all branches; authorized branch users within their branch)
+- `/admin/schedules` — publish and manage doctor sessions (Branch Admin within their branch; staff only for assigned doctors when granted `schedules.manage`)
 - `/admin/queue` — live patient queue console
 - `/admin/staff` — Main Admin creates branch admins/staff; Branch Admin creates staff for their own branch
 - `/admin/reports` — scoped operational reports with date, doctor and queue-status aggregates (maximum 31-day range)
@@ -61,7 +61,7 @@ npm run seed
 
 ## Doctor schedule management
 
-Sign in as the owner and open **Admin → Schedules**. Choose a doctor, consultation date, start time, daily serial capacity, and estimated average consultation duration, then publish the session. Only published sessions are shown as available for online appointment booking. The schedule manager lists the next 14 days and links each session to its live queue console.
+Sign in as a Branch Admin or an authorized staff account with `schedules.manage` and open **Admin → Schedules**. Choose a doctor assigned to that account, consultation date, start time, daily serial capacity, and estimated average consultation duration, then publish the session. Only published sessions are shown as available for online appointment booking. The schedule manager lists the next 14 days and links each session to its live queue console.
 
 An unused future session can be removed. A session with issued serials or an active consultation cannot be removed from the schedule manager; manage it from the queue console instead. This avoids silently deleting or invalidating patient tickets.
 
@@ -71,8 +71,8 @@ The `sessions` collection is the source of published appointment availability. T
 
 The administration area now supports a three-level account hierarchy:
 
-1. **Main Admin (`owner`)** — signs in with username `admin` and `ADMIN_PASSWORD`. Can view the organization-wide overview, publish schedules across branches, and create branch administrators or branch staff.
-2. **Branch Admin (`branch_admin`)** — created by the Main Admin and assigned to one exact branch/unit. Can manage schedules and the queue for that branch, and create/remove staff accounts only inside that same branch. A branch admin cannot create another branch admin or access another branch by changing a URL.
+1. **Main Admin (`owner`)** — signs in with username `admin` and `ADMIN_PASSWORD`. Can view the organization-wide overview, create and maintain branches, manage Branch Admin accounts, and review audit activity. Main Admin is an oversight role and does not perform branch-level doctor, schedule, appointment, or queue operations.
+2. **Branch Admin (`branch_admin`)** — created by the Main Admin and assigned to one exact branch/unit. Can manage doctors, schedules, staff, appointment visibility, and reports within that branch. Branch Admin does not operate the live queue; queue actions belong to staff accounts with `queue.manage`. A Branch Admin cannot create another Branch Admin or access another branch by changing a URL.
 3. **Branch Staff (`staff`)** — created by their Branch Admin. The Branch Admin chooses an individual permission set when creating the account. The staff member is restricted to the assigned branch.
 
 Open `/admin/staff` as Main Admin to create a Branch Admin or a staff account. Select the branch and account type. For a Branch Admin, the system grants the full branch-admin role. To create staff, select the individual permissions such as viewing appointments, operating the live queue, or managing schedules. A Branch Admin sees only their own branch and creates staff with that branch preselected and locked.
@@ -119,7 +119,7 @@ The public navigation now uses native anchor navigation for page links instead o
 
 ## Before going live
 
-1. Admin → Doctors → Import starter doctors, then replace the sample list with the real, verified roster.
+1. A Branch Admin should review and manage the doctors for their branch. The Main Admin may import the starter directory as a one-time setup action, but every entry must be verified and approved before public use.
 2. Publish real schedules in Admin → Schedules.
 3. Shared MongoDB-backed rate limiting is used for staff sign-in and public tracking, availability, queue-board and cancellation endpoints. Monitor it under load and add privileged-account MFA before production.
 4. Add a reviewed privacy notice and publish only contact numbers and service-hour claims verified and approved by the Trust.
@@ -237,3 +237,10 @@ Administrators with schedule-management access can configure a doctor's recurrin
 The patient booking availability endpoint creates sessions only on configured weekdays within the existing five-day booking window. Dates outside the doctor's weekly schedule remain unavailable. Existing individually published sessions are retained. Changing a weekly schedule affects newly generated sessions; already-created sessions with patient activity are not rewritten. Disabling a recurring schedule stops future automatic session generation but does not erase existing appointments or already-published sessions.
 
 All schedule times use Bangladesh local time. Verify each doctor's actual branch, clinic days and hours with the institution before publishing. This remains demonstration functionality and must use fictional patient data only.
+
+
+## Audit, demonstration, and authority handover
+
+The current role boundaries and remaining risks are documented in [docs/TECHNICAL-AUDIT.md](docs/TECHNICAL-AUDIT.md). Use [docs/DEMO-RUNBOOK.md](docs/DEMO-RUNBOOK.md) and [docs/DEMO-ACCEPTANCE-CHECKLIST.md](docs/DEMO-ACCEPTANCE-CHECKLIST.md) before any walkthrough. A neutral presentation outline is in [docs/AUTHORITY-PRESENTATION.md](docs/AUTHORITY-PRESENTATION.md), with an initial outreach draft in [docs/OUTREACH-EMAIL.md](docs/OUTREACH-EMAIL.md).
+
+The automated browser acceptance suite uses temporary CI-only accounts and a fictional appointment in an isolated GitHub Actions MongoDB replica set. These credentials and records are never intended for the deployed demonstration database.

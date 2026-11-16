@@ -64,3 +64,18 @@ jobs:
 
       - name: Build production application
         run: npm run build
+
+      - name: Seed starter directory in isolated CI database
+        run: node scripts/seed.mjs
+
+      - name: Seed fictional browser-test accounts and queue ticket
+        run: node e2e/seed.mjs
+
+      - name: Install browser-test runner
+        run: npm install --no-save --package-lock=false @playwright/test
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser acceptance tests
+        run: npx playwright test
