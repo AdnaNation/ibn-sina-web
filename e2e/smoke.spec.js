@@ -38,7 +38,7 @@ test("fictional appointment booking creates a trackable ticket", async ({ page }
   const dateChoice = page.locator('form button[aria-pressed="false"]').first();
   await expect(dateChoice).toBeVisible({ timeout: 20_000 });
   await dateChoice.click();
-  await expect(dateChoice).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('form button[aria-pressed="true"]').first()).toBeVisible();
   await page.locator('input[name="name"]').fill("Demo Browser Patient");
   await page.locator('input[name="phone"]').fill("01712345678");
   await page.locator('textarea[name="note"]').fill("Fictional browser acceptance note");
