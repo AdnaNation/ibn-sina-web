@@ -39,12 +39,10 @@ test("fictional appointment booking creates a trackable ticket", async ({ page }
   await expect(dateChoice).toBeVisible({ timeout: 20_000 });
   await dateChoice.click();
   await expect(page.locator('form:has(input[name="doctor"]) button[aria-pressed="true"]').first()).toBeVisible();
-  console.log("Appointment form after date selection:", await page.locator('form:has(input[name="doctor"])').innerText());
-  console.log("Patient name field count:", await page.locator('input[name="name"]').count());
   await page.locator('input[name="name"]').fill("Demo Browser Patient");
   await page.locator('input[name="phone"]').fill("01712345678");
   await page.locator('textarea[name="note"]').fill("Fictional browser acceptance note");
-  await page.locator('form button[type="submit"]').click();
+  await page.locator('form:has(input[name="doctor"]) button[type="submit"]').click();
   await page.waitForURL((url) => url.pathname.startsWith("/track/"));
   const ref = new URL(page.url()).pathname.split("/").pop();
   expect(ref).toMatch(/^IST-[A-Z0-9]{12}$/);
