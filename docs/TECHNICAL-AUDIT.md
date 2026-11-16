@@ -68,6 +68,13 @@ The README already identifies privileged-account MFA and first-login password re
 
 The application enforces these permissions on the server; navigation visibility is not the security boundary.
 
+## Deployment configuration observed on 16 November 2026
+
+- The production alias ibn-sina-webs.vercel.app points to the main commit c8912381c9650c630630b8ddbfe32eeef1f75236 and the deployment is READY.
+- The project has SSO protection enabled for deployments except custom domains. The main Vercel domain is public; preview deployments require the configured SSO access.
+- Vercel environment variables MONGODB_URI and MONGODB_DB are currently configured for both production and preview targets. A preview deployment is therefore not automatically backed by an isolated database. Before using preview deployments for tests with mutable records, configure a dedicated staging database for preview or remove production database access from preview.
+- ENABLE_PUBLIC_BOOKING is true for production and preview; ENABLE_PUBLIC_CANCELLATION is false. Keep public booking enabled only while the connected database contains fictional demo records and is isolated from real systems.
+
 ## Verification status
 
 - Existing main commit c8912381c9650c630630b8ddbfe32eeef1f75236: GitHub Actions unit tests and Next.js production build passed.
