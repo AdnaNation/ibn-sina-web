@@ -87,8 +87,8 @@ test("Queue staff can operate the assigned doctor's queue without patient contac
   await expect(page.locator("body")).toContainText("Fictional E2E Patient");
   await expect(page.locator("body")).not.toContainText("01700000000");
   await expect(page.locator("body")).not.toContainText("E2E-only private note");
-  await page.getByRole("button", { name: /Call next patient/ }).click();
-  await expect(page.locator("body")).toContainText("Queue updated.");
+  await page.getByRole("button", { name: /Call next patient|পরবর্তী রোগীকে ডাকুন/ }).click();
+  await expect(page.locator("body")).toContainText(/Queue updated\\.|সিরিয়াল আপডেট হয়েছে।/);
   const ticket = await page.request.get("/api/queue/IST-E2EABC123456");
   expect((await ticket.json()).status).toBe("serving");
   await page.goto("/admin/appointments");
