@@ -32,6 +32,28 @@ test("public pages render and tracking exposes no direct patient contact details
   expect(JSON.stringify(ticket)).not.toContain("01700000000");
 });
 
+
+test("fictional appointment booking creates a trackable ticket", async ({ page }) => {
+  await page.goto("/appointment?doctor=prof-dr-muhammad-salahuddin");
+  const dateChoice = page.locator('button[aria-pressed="false"]').first();
+  await expect(dateChoice).toBeVisible({ timeout: 20_000 });
+  await dateChoice.click();
+  await page.locator('input[name="name"]').fill("Demo Browser Patient");
+  await page.locator('input[name="phone"]').fill("01712345678");
+  await page.locator('textarea[name="note"]').fill("Fictional browser acceptance note");
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForURL((url) => url.pathname.startsWith("/track/"));
+  const ref = new URL(page.url()).pathname.split("/").pop();
+  expect(ref).toMatch(/^IST-[A-Z0-9]{12}$/);
+  const response = await page.request.get("/api/queue/" + ref);
+  expect(response.status()).toBe(200);
+  const ticket = await response.json();
+  expect(ticket.firstName).toBe("Demo");
+  expect(ticket.status).toBe("waiting");
+  expect(ticket).not.toHaveProperty("phone");
+  expect(ticket).not.toHaveProperty("note");
+});
+
 test("Main Admin has organization oversight but cannot enter branch operations", async ({ page }) => {
   await signIn(page, "admin", "ci-only-password-not-for-real-use");
   await expect(page).toHaveURL(/\/admin$/);
@@ -65,6 +87,10 @@ test("Queue staff can operate the assigned doctor's queue without patient contac
   await expect(page.locator("body")).toContainText("Fictional E2E Patient");
   await expect(page.locator("body")).not.toContainText("01700000000");
   await expect(page.locator("body")).not.toContainText("E2E-only private note");
+  await page.getByRole("button", { name: /Call next patient/ }).click();
+  await expect(page.locator("body")).toContainText("Queue updated.");
+  const ticket = await page.request.get("/api/queue/IST-E2EABC123456");
+  expect((await ticket.json()).status).toBe("serving");
   await page.goto("/admin/appointments");
   await expect(page).toHaveURL(/\/admin\/queue$/);
 });
