@@ -12,7 +12,7 @@ export default async function DoctorCard({ d }) {
   const name = doctorName(d, lang);
   const phone = d.phone || "10615";
   return (
-    <li className="group flex min-h-[250px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgba(15,45,35,.035)] transition duration-300 hover:-translate-y-1 hover:border-pine-200 hover:shadow-[0_18px_45px_rgba(15,75,55,.10)]">
+    <li className="premium-doctor-card group flex min-h-[250px] flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgba(15,45,35,.035)] transition duration-300 hover:-translate-y-1 hover:border-pine-200 hover:shadow-[0_18px_45px_rgba(15,75,55,.10)]">
       <Link href={`/doctors/${d.slug}`} className="flex items-start gap-3.5">
         {d.photo ? (
           <img src={d.photo} alt={name} loading="lazy" className="size-[62px] shrink-0 rounded-2xl object-cover" />

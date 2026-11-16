@@ -16,7 +16,7 @@ export default async function Hero({ units, departments }) {
   const input = "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-pine-500 focus:bg-white focus:ring-4 focus:ring-pine-100";
 
   return (
-    <section className="relative isolate overflow-hidden bg-[#f4f8f5]">
+    <section className="premium-hero relative isolate overflow-hidden">
       <div className="lattice absolute inset-0 -z-10 bg-pine-900 opacity-[.035]" aria-hidden="true" />
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_15%,rgba(35,145,105,.16),transparent_34%),radial-gradient(circle_at_5%_95%,rgba(233,168,32,.12),transparent_30%)]" aria-hidden="true" />
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-14 pt-10 md:pb-20 md:pt-14 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
@@ -24,8 +24,8 @@ export default async function Hero({ units, departments }) {
           <div className="inline-flex items-center gap-2 rounded-full border border-pine-100 bg-white/90 px-3.5 py-2 text-xs font-bold text-pine-800 shadow-sm">
             <ShieldCheck size={15} /> {bn ? "স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ" : "Independent demonstration prototype"}
           </div>
-          <h1 className="mt-5 max-w-2xl font-serif text-[40px] font-semibold leading-[1.15] text-pine-950 sm:text-5xl lg:text-[58px]">{t.h1}</h1>
-          <p className="mt-5 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t.heroSub}</p>
+          <h1 className="premium-enter mt-5 max-w-2xl font-serif text-[40px] font-semibold leading-[1.15] text-pine-950 sm:text-5xl lg:text-[58px]">{t.h1}</h1>
+          <p className="premium-enter mt-5 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t.heroSub}</p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/appointment" className="inline-flex items-center gap-2 rounded-full bg-pine-800 px-7 py-4 text-base font-bold text-white shadow-xl shadow-pine-900/20 transition hover:-translate-y-0.5 hover:bg-pine-700">{t.book}<ArrowRight size={18} /></Link>
             <Link href="/units" className="inline-flex items-center gap-2 rounded-full border border-pine-200 bg-white px-6 py-4 text-base font-bold text-pine-900 transition hover:border-pine-400 hover:bg-pine-50">{bn ? "শাখা ও অবস্থান দেখুন" : "Explore locations"}<MapPin size={18} /></Link>
@@ -41,7 +41,7 @@ export default async function Hero({ units, departments }) {
         </div>
         <div className="relative mx-auto w-full max-w-[600px] lg:ml-auto">
           <div className="absolute -inset-4 rounded-[2.2rem] bg-pine-200/40 blur-2xl" aria-hidden="true" />
-          <div className="relative rounded-[1.75rem] border border-pine-100 bg-white p-5 shadow-[0_30px_80px_rgba(8,58,42,.14)] sm:p-7">
+          <div className="premium-hero-panel relative rounded-[1.75rem] border border-pine-100 bg-white/95 p-5 sm:p-7">
             <p className="text-xs font-bold uppercase tracking-[.18em] text-pine-700">{bn ? "ডেমো দ্রুত প্রবেশ" : "Demo quick access"}</p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {tiles.map(([Icon, title, sub, href, cls, subCls]) => (
