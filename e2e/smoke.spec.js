@@ -6,7 +6,7 @@ async function signIn(page, username, password = E2E_PASSWORD) {
   await page.goto("/admin/login");
   await page.locator('input[name="username"]').fill(username);
   await page.locator('input[name="password"]').fill(password);
-  await page.locator('form button[type="submit"]').click();
+  await page.locator('form button').click();
   await page.waitForURL((url) => url.pathname !== "/admin/login");
 }
 
