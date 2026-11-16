@@ -18,3 +18,19 @@ Kind regards,
 
 Azizul Islam Adnan
 Web Developer
+
+
+## Suggested contact route
+
+Do not guess a personal email address or send the prototype to an individual trustee without an introduction. Start with the official contact channel and ask to be routed to the team responsible for IT/digital services, administration, or business development.
+
+- Official Trust contact page: https://www.ibnsinatrust.com/contact.php
+- Central hotline listed by the Trust: 10615 or +88 09610010615.
+- Chattogram branch listed by the Trust: Ibn Sina Diagnostic & Consultation Center, H#12/A, Road #02, Katalganj R/A, Panchlaish, Chattogram; hotline 09610009622; customer care 01886610117.
+- Head office listed by the Trust: House #48, Road #9/A, Dhanmondi, Dhaka-1209.
+
+Suggested phone opening:
+
+“Assalamu Alaikum. I am a web developer and have independently prepared a small hospital website and patient-queue prototype for discussion. I am not representing the Trust. Could you please guide me to the appropriate IT, digital-services, or administration contact so I can request a short demonstration meeting?”
+
+Ask for the correct department, a named contact, and an official email address before sending the deck. Verify contact details again on the day of outreach. The official website currently lists general contact information but does not identify a dedicated public IT-proposal inbox.
