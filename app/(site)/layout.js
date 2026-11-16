@@ -16,7 +16,7 @@ export default function SiteLayout({ children }) {
       </a>
       <PrototypeNotice />
       <Navbar />
-      <main id="main" className="pb-20 lg:pb-0">{children}</main>
+      <main id="main" className="premium-public pb-20 lg:pb-0">{children}</main>
       <Footer />
       <MobileActionBar />
     </>
