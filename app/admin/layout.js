@@ -9,7 +9,7 @@ export const metadata = {
 export default async function AdminLayout({ children }) {
   const bn = (await getLang()) === "bn";
   return (
-    <div className="min-h-screen bg-[#f3f7f5] text-ink">
+    <div className="premium-admin min-h-screen text-ink">
       <aside
         role="note"
         aria-label={bn ? "প্রোটোটাইপ সংক্রান্ত ঘোষণা" : "Prototype notice"}
