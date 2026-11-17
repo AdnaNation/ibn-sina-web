@@ -1,8 +1,9 @@
-import { ArrowUpRight, ChevronDown, HeartPulse } from "lucide-react";
+import { ArrowUpRight, HeartPulse } from "lucide-react";
 import { getT } from "@/lib/i18n";
 import { setLang } from "@/app/actions";
 import Link from "next/link";
 import MobileNavMenu from "@/components/MobileNavMenu";
+import PublicNavDropdown from "@/components/PublicNavDropdown";
 
 export default async function Navbar() {
   const { lang, t } = await getT();
@@ -48,19 +49,7 @@ export default async function Navbar() {
             <Link key={href} href={href} prefetch={true} className="whitespace-nowrap text-[13px] font-semibold text-slate-600 transition hover:text-pine-800">{label}</Link>
           ))}
           {groups.map((group) => (
-            <details key={group.label} className="group/nav relative">
-              <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap text-[13px] font-semibold text-slate-600 transition hover:text-pine-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine-100 [&::-webkit-details-marker]:hidden">
-                {group.label}
-                <ChevronDown size={14} className="transition group-open/nav:rotate-180" />
-              </summary>
-              <div className="absolute left-0 top-full z-50 mt-3 min-w-52 rounded-2xl border border-pine-100 bg-white p-2 shadow-xl shadow-pine-950/10">
-                {group.links.map(([label, href]) => (
-                  <Link key={href} href={href} prefetch={true} className="block whitespace-nowrap rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-pine-50 hover:text-pine-800">
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </details>
+            <PublicNavDropdown key={group.label} group={group} bn={bn} />
           ))}
         </div>
 

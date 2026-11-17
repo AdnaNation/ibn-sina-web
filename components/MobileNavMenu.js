@@ -15,7 +15,7 @@ export default function MobileNavMenu({ primaryLinks, groups, trackLabel, bookLa
   }, [pathname]);
 
   const closeMenu = () => setOpen(false);
-  const linkClass = "block rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-pine-50 hover:text-pine-800";
+  const linkClass = "block rounded-2xl px-4 py-3.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:translate-x-0.5 hover:bg-pine-50 hover:text-pine-900";
 
   return (
     <div className="relative xl:hidden">
@@ -33,21 +33,21 @@ export default function MobileNavMenu({ primaryLinks, groups, trackLabel, bookLa
       {open && (
         <div
           id="mobile-primary-menu"
-          className="absolute right-0 top-[58px] z-50 max-h-[min(78vh,620px)] w-[min(88vw,340px)] overflow-y-auto rounded-2xl border border-pine-100 bg-white p-3 shadow-2xl shadow-pine-950/15"
+          className="absolute right-0 top-[58px] z-50 max-h-[min(78vh,620px)] w-[min(90vw,360px)] overflow-y-auto rounded-[26px] border border-pine-100/90 bg-white p-3 shadow-[0_24px_70px_rgba(8,45,34,.2)] ring-1 ring-black/[0.03]"
         >
-          <nav aria-label={bn ? "মোবাইল নেভিগেশন" : "Mobile navigation"} className="space-y-1">
+          <nav aria-label={bn ? "মোবাইল নেভিগেশন" : "Mobile navigation"} className="space-y-1.5">
             {primaryLinks.map(([label, href]) => (
               <Link key={href} href={href} prefetch={true} onClick={closeMenu} className={linkClass}>
                 {label}
               </Link>
             ))}
             {groups.map((group) => (
-              <details key={group.label} className="group/mobile rounded-xl">
-                <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-pine-50 hover:text-pine-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine-100 [&::-webkit-details-marker]:hidden">
+              <details key={group.label} className="group/mobile overflow-hidden rounded-2xl border border-transparent transition data-[open=true]:border-pine-100 data-[open=true]:bg-pine-50/50">
+                <summary className="flex cursor-pointer list-none items-center justify-between rounded-2xl px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-pine-50 hover:text-pine-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine-100 [&::-webkit-details-marker]:hidden">
                   {group.label}
                   <ChevronDown size={16} className="transition group-open/mobile:rotate-180" />
                 </summary>
-                <div className="ml-3 border-l border-pine-100 pl-2">
+                <div className="ml-4 mb-2 space-y-0.5 border-l-2 border-pine-200 pl-2">
                   {group.links.map(([label, href]) => (
                     <Link key={href} href={href} prefetch={true} onClick={closeMenu} className={linkClass}>
                       {label}
@@ -64,7 +64,7 @@ export default function MobileNavMenu({ primaryLinks, groups, trackLabel, bookLa
             href="/appointment"
             prefetch={true}
             onClick={closeMenu}
-            className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-pine-800 px-4 py-3 text-sm font-bold text-white transition hover:bg-pine-700"
+            className="mt-3 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-pine-900 to-pine-700 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-pine-900/15 transition hover:-translate-y-0.5 hover:shadow-xl"
           >
             {bookLabel}
             <ArrowUpRight size={16} />
