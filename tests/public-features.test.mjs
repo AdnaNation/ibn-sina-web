@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { isDemoEnvironment, isPublicBookingEnabled, isPublicCancellationEnabled } from "../lib/publicFeatures.mjs";
 
-test("public self-service cancellation is enabled by default for the demo and can be disabled", () => {
-  assert.equal(isPublicCancellationEnabled({}), true);
+test("public self-service cancellation is disabled by default and requires an explicit opt-in", () => {
+  assert.equal(isPublicCancellationEnabled({}), false);
   assert.equal(isPublicCancellationEnabled({ ENABLE_PUBLIC_CANCELLATION: "true" }), true);
   assert.equal(isPublicCancellationEnabled({ ENABLE_PUBLIC_CANCELLATION: "false" }), false);
 });
