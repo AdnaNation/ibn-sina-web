@@ -1,9 +1,17 @@
 import { Plus } from "lucide-react";
 import { getT } from "@/lib/i18n";
+import { isPublicCancellationEnabled } from "@/lib/publicFeatures.mjs";
 
 // Native <details>: works without JavaScript and is keyboard accessible.
 export default async function Faq() {
-  const { t } = await getT();
+  const { t, lang } = await getT();
+  const cancellationEnabled = isPublicCancellationEnabled();
+  const cancelQuestion = lang === "bn" ? "বুকিং বাতিল করা যাবে?" : "Can I cancel my booking?";
+  const faq = t.faq.map(([question, answer]) => question === cancelQuestion && !cancellationEnabled
+    ? [question, lang === "bn"
+      ? "এই প্রদর্শনীমূলক প্রোটোটাইপে স্বয়ংক্রিয় বুকিং বাতিলের সুবিধা বর্তমানে বন্ধ।"
+      : "Self-service booking cancellation is currently disabled in this demonstration prototype."]
+    : [question, answer]);
   return (
     <section className="mx-auto max-w-3xl px-4 py-16 md:py-20">
       <div className="text-center">
@@ -11,7 +19,7 @@ export default async function Faq() {
         <h2 className="mt-3 font-serif text-3xl font-semibold text-pine-950 md:text-4xl">{t.faqTitle}</h2>
       </div>
       <div className="mt-8 space-y-3">
-        {t.faq.map(([q, a]) => (
+        {faq.map(([q, a]) => (
           <details key={q} className="group rounded-2xl border border-slate-200 bg-white px-5 py-4 open:border-pine-200 open:shadow-sm">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-bold text-pine-950 [&::-webkit-details-marker]:hidden">
               {q}
