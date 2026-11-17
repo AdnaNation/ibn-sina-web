@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   canManageBranchStaff,
+  getLoginDestination,
   hasPermission,
   isBranchAdmin,
   reportScope,
@@ -70,4 +71,15 @@ test("branch and doctor data scopes fail closed when scope is missing", () => {
   assert.deepEqual(scopeFilter({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a" }), { doctorSlug: "dr-a", unit: "Feni, Feni" });
   assert.deepEqual(reportScope({ role: "doctor" }), { doctorSlug: "__NO_DOCTOR_SCOPE__" });
   assert.deepEqual(scopeOf({ role: "unknown" }), { unit: "__NO_BRANCH_SCOPE__" });
+});
+
+
+test("login redirects directly to the first permitted staff destination", () => {
+  assert.equal(getLoginDestination({ role: "owner" }), "/admin");
+  assert.equal(getLoginDestination({ role: "branch_admin", unit: "Feni, Feni" }), "/admin/schedules");
+  assert.equal(getLoginDestination({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["queue.manage"] }), "/admin/queue");
+  assert.equal(getLoginDestination({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["appointments.view"] }), "/admin/appointments");
+  assert.equal(getLoginDestination({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: ["schedules.manage"] }), "/admin/schedules");
+  assert.equal(getLoginDestination({ role: "staff", unit: "Feni, Feni", doctorSlug: "dr-a", permissions: [] }), "/admin");
+  assert.equal(getLoginDestination(null), "/admin/login");
 });
