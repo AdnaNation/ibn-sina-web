@@ -1,4 +1,4 @@
-import { ArrowUpRight, HeartPulse } from "lucide-react";
+import { ArrowUpRight, ChevronDown, HeartPulse } from "lucide-react";
 import { getT } from "@/lib/i18n";
 import { setLang } from "@/app/actions";
 import Link from "next/link";
@@ -19,9 +19,21 @@ export default async function Navbar() {
     [bn ? "মেডিকেল রিপোর্ট" : "Medical reports", "/medical-reports"],
   ];
 
+  const primaryLinks = [links[0], links[3]];
+  const groups = [
+    {
+      label: bn ? "সেবা ও শাখা" : "Explore",
+      links: [links[1], links[2]],
+    },
+    {
+      label: bn ? "সহায়িকা" : "Resources",
+      links: [links[4], links[5], links[6]],
+    },
+  ];
+
   return (
     <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 shadow-[0_8px_30px_rgba(9,54,40,.045)] backdrop-blur-xl">
-      <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="flex h-[76px] w-full items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="flex h-[76px] w-full items-center justify-between gap-3 px-4 sm:px-6 lg:gap-5 lg:px-8">
         <Link href="/" prefetch={true} className="group flex min-w-0 items-center gap-3" aria-label={prototypeName + " home"}>
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-pine-900 text-white shadow-lg shadow-pine-900/15 transition group-hover:-rotate-3">
             <HeartPulse size={25} strokeWidth={2.1} />
@@ -31,15 +43,30 @@ export default async function Navbar() {
           </span>
         </Link>
 
-        <div className="hidden items-center gap-7 lg:flex">
-          {links.map(([label, href]) => (
-            <Link key={href} href={href} prefetch={true} className="text-[13px] font-semibold text-slate-600 transition hover:text-pine-800">{label}</Link>
+        <div className="hidden min-w-0 items-center gap-5 xl:flex">
+          {primaryLinks.map(([label, href]) => (
+            <Link key={href} href={href} prefetch={true} className="whitespace-nowrap text-[13px] font-semibold text-slate-600 transition hover:text-pine-800">{label}</Link>
+          ))}
+          {groups.map((group) => (
+            <details key={group.label} className="group/nav relative">
+              <summary className="flex cursor-pointer list-none items-center gap-1 whitespace-nowrap text-[13px] font-semibold text-slate-600 transition hover:text-pine-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pine-100 [&::-webkit-details-marker]:hidden">
+                {group.label}
+                <ChevronDown size={14} className="transition group-open/nav:rotate-180" />
+              </summary>
+              <div className="absolute left-0 top-full z-50 mt-3 min-w-52 rounded-2xl border border-pine-100 bg-white p-2 shadow-xl shadow-pine-950/10">
+                {group.links.map(([label, href]) => (
+                  <Link key={href} href={href} prefetch={true} className="block whitespace-nowrap rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-pine-50 hover:text-pine-800">
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </details>
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/track" prefetch={true} className="text-[13px] font-semibold text-pine-800 hover:text-pine-600">{t.track}</Link>
-          <Link href="/appointment" prefetch={true} className="inline-flex items-center gap-2 rounded-full bg-pine-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-pine-900/15 transition hover:-translate-y-0.5 hover:bg-pine-700">
+        <div className="hidden shrink-0 items-center gap-3 xl:flex">
+          <Link href="/track" prefetch={true} className="whitespace-nowrap text-[13px] font-semibold text-pine-800 hover:text-pine-600">{t.track}</Link>
+          <Link href="/appointment" prefetch={true} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-pine-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-pine-900/15 transition hover:-translate-y-0.5 hover:bg-pine-700">
             {t.book}<ArrowUpRight size={16} />
           </Link>
         </div>
@@ -58,7 +85,7 @@ export default async function Navbar() {
             </form>
           ))}
         </div>
-        <MobileNavMenu links={links} trackLabel={t.track} bookLabel={t.book} bn={bn} />
+        <MobileNavMenu primaryLinks={primaryLinks} groups={groups} trackLabel={t.track} bookLabel={t.book} bn={bn} />
       </nav>
     </header>
   );
