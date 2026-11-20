@@ -22,8 +22,8 @@ export default async function Hero({ units, departments }) {
           <div className="inline-flex items-center gap-2 text-xs font-medium text-pine-800">
             <ShieldCheck size={15} /> {bn ? "স্বাধীন প্রদর্শনীমূলক প্রোটোটাইপ" : "Independent demonstration prototype"}
           </div>
-          <h1 className="premium-enter mt-4 max-w-2xl font-serif text-[40px] font-medium leading-[1.15] text-pine-950 sm:text-5xl lg:text-[56px]">{t.h1}</h1>
-          <p className="premium-enter mt-5 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t.heroSub}</p>
+          <h1 className="mt-4 max-w-2xl font-serif text-[40px] font-medium leading-[1.15] text-pine-950 sm:text-5xl lg:text-[56px]">{t.h1}</h1>
+          <p className="mt-5 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">{t.heroSub}</p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link href="/appointment" className="inline-flex items-center gap-2 rounded-[8px] bg-pine-800 px-6 py-3 text-base font-medium text-white transition hover:bg-pine-700">{t.book}<ArrowRight size={18} /></Link>
             <Link href="/units" className="inline-flex items-center gap-2 rounded-[8px] border border-pine-200 bg-white px-5 py-3 text-base font-medium text-pine-900 transition hover:border-pine-400 hover:bg-pine-50">{bn ? "শাখা ও অবস্থান দেখুন" : "Explore locations"}<MapPin size={18} /></Link>

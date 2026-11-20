@@ -14,7 +14,7 @@ export default async function Stats({ units, departments }) {
       <dl className="grid grid-cols-1 gap-y-6 rounded-[16px] border border-pine-100 bg-white p-6 sm:grid-cols-3 sm:p-8">
         {items.map(([value, label], i) => (
           <div key={label} className={`px-2 sm:px-6 ${i > 0 ? "sm:border-l sm:border-pine-100" : ""}`}>
-            <dd className="font-serif text-4xl font-semibold text-pine-900 sm:text-5xl">{n(value)}</dd>
+            <dd className="font-serif text-[32px] font-medium text-pine-900 sm:text-[36px]">{n(value)}</dd>
             <dt className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">{label}</dt>
           </div>
         ))}

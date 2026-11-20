@@ -13,9 +13,9 @@ export default async function HowItWorks() {
         </div>
         <ol className="mt-10 grid gap-5 md:grid-cols-3">
           {steps.map(([Icon, title, text], i) => (
-            <li key={title} className="relative rounded-3xl border border-pine-100 bg-paper p-7">
-              <span className="absolute right-6 top-5 font-serif text-6xl font-semibold text-pine-100" aria-hidden="true">{n(i + 1)}</span>
-              <span className="grid size-12 place-items-center rounded-2xl bg-pine-800 text-white"><Icon size={22} /></span>
+            <li key={title} className="relative rounded-xl border border-slate-200 bg-paper p-7">
+              <span className="absolute right-6 top-5 font-serif text-5xl font-medium text-slate-200" aria-hidden="true">{n(i + 1)}</span>
+              <span className="grid size-12 place-items-center rounded-lg bg-pine-900 text-white"><Icon size={22} /></span>
               <h3 className="mt-5 text-xl font-bold text-pine-950">{title}</h3>
               <p className="mt-2 text-[15px] leading-7 text-slate-600">{text}</p>
             </li>

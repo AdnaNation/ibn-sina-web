@@ -33,7 +33,7 @@ export default async function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white">
       <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="flex h-[72px] w-full items-center justify-between gap-3 px-4 sm:px-6 lg:gap-5 lg:px-8">
         <Link href="/" prefetch={true} className="group flex min-w-0 items-center gap-3" aria-label={prototypeName + " home"}>
           <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-pine-900 text-white transition">
@@ -46,7 +46,7 @@ export default async function Navbar() {
 
         <div className="hidden min-w-0 items-center gap-5 xl:flex">
           {primaryLinks.map(([label, href]) => (
-            <Link key={href} href={href} prefetch={true} className="whitespace-nowrap text-[13px] font-semibold text-slate-600 transition hover:text-pine-800">{label}</Link>
+            <Link key={href} href={href} prefetch={true} className="whitespace-nowrap text-[13px] font-medium text-slate-600 transition hover:text-pine-800">{label}</Link>
           ))}
           {groups.map((group) => (
             <PublicNavDropdown key={group.label} group={group} bn={bn} />
@@ -54,7 +54,7 @@ export default async function Navbar() {
         </div>
 
         <div className="hidden shrink-0 items-center gap-3 xl:flex">
-          <Link href="/track" prefetch={true} className="whitespace-nowrap text-[13px] font-semibold text-pine-800 hover:text-pine-600">{t.track}</Link>
+          <Link href="/track" prefetch={true} className="whitespace-nowrap text-[13px] font-medium text-pine-800 hover:text-pine-600">{t.track}</Link>
           <Link href="/appointment" prefetch={true} className="inline-flex items-center gap-2 whitespace-nowrap rounded-[8px] bg-pine-800 px-5 py-3 text-sm font-medium text-white transition hover:bg-pine-700">
             {t.book}<ArrowUpRight size={16} />
           </Link>
