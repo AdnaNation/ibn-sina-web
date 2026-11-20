@@ -170,6 +170,18 @@ button:active:not(:disabled) { transform: scale(.98); }
 .premium-public .shadow-2xl,
 .premium-public .shadow-xl { box-shadow: 0 8px 24px rgba(30,41,37,.07) !important; }
 
+
+.premium-public h1,
+.premium-public h2,
+.premium-public h3 { font-weight: 500; }
+.premium-public .rounded-3xl { border-radius: 16px !important; }
+.premium-public .rounded-2xl { border-radius: 14px !important; }
+.premium-public input,
+.premium-public select,
+.premium-public textarea { border-radius: 8px; }
+.premium-public button,
+.premium-public a[class*="bg-pine-"] { border-radius: 8px; }
+
 @media (max-width: 768px) {
   .premium-admin main { min-width: 0; }
   .premium-admin main table { display: block; overflow-x: auto; white-space: nowrap; }
