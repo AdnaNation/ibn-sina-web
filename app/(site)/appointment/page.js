@@ -24,11 +24,11 @@ export default async function AppointmentPage({ searchParams }) {
   ]);
   return (
     <div className="min-h-screen bg-[#f5f8f6]">
-      <div className="relative overflow-hidden text-white bg-pine-950">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,rgba(53,155,116,.3),transparent_35%)]" />
+      <div className="bg-pine-950 text-white">
+        
         <div className="relative px-4 py-12 mx-auto max-w-7xl md:py-16">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-pine-100">
+            <span className="inline-flex items-center gap-2 rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-pine-100">
               <CalendarDays size={14} />
               {lang === "bn"
                 ? "প্রোটোটাইপ বুকিং ডেমো"
@@ -99,8 +99,8 @@ export default async function AppointmentPage({ searchParams }) {
               </p>
             </div>
           </div>
-          <div className="rounded-3xl bg-[#e9f3ed] p-6">
-            <p className="text-xs font-bold uppercase tracking-[.15em] text-pine-700">
+          <div className="rounded-xl border border-slate-200 bg-[#f1efe8] p-6">
+            <p className="text-sm font-medium text-pine-800">
               {lang === "bn" ? "প্রোটোটাইপ সহায়তা" : "Prototype guidance"}
             </p>
             <h3 className="mt-2 font-serif text-2xl text-pine-950">
