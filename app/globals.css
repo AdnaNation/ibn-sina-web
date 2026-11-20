@@ -192,4 +192,18 @@ button:active:not(:disabled) { transform: scale(.98); }
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
 }
 
+
+.premium-admin main.mx-auto {
+  width: 100%;
+  max-width: 1440px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (max-width: 767px) {
+  .premium-admin main.mx-auto {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 /* Unslop attribution: design method by Damir Sokolovsky, CC BY 4.0 */
