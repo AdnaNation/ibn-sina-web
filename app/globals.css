@@ -166,3 +166,210 @@ a:focus-visible, button:focus-visible { outline: 3px solid rgba(36, 132, 94, .45
   .premium-enter { animation: none; }
   .premium-live-card:hover, .premium-doctor-card:hover { transform: none; }
 }
+
+
+/* =========================================================
+   Editorial healthcare design system — public + workspace
+   ========================================================= */
+:root {
+  --ui-ink: #172b25;
+  --ui-muted: #65736c;
+  --ui-paper: #f6f5f0;
+  --ui-white: #fffefa;
+  --ui-green: #174b3b;
+  --ui-green-strong: #0e392d;
+  --ui-green-soft: #e7eee8;
+  --ui-line: #dfe5df;
+  --ui-accent: #c66b4b;
+  --ui-radius: 18px;
+  --ui-shadow: 0 16px 42px rgba(22, 49, 39, .07);
+}
+html { background: var(--ui-paper); }
+body {
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+  font-feature-settings: "ss01" on;
+}
+::selection { background: #d9e7dc; color: #143b2f; }
+a { text-underline-offset: 4px; }
+a:hover { text-decoration-thickness: 1px; }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: 2px solid #b96d4e; outline-offset: 3px; }
+
+/* Public site: editorial spacing, warm surfaces, restrained detail. */
+.premium-public {
+  color: var(--ui-ink);
+  background: var(--ui-paper);
+}
+.premium-public > section { position: relative; }
+.premium-public section h2 {
+  max-width: 18ch;
+  letter-spacing: -.035em;
+  line-height: 1.08;
+}
+.premium-public section p { text-wrap: pretty; }
+.premium-public .premium-hero {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 78% 16%, rgba(220, 230, 218, .62), transparent 34%),
+    linear-gradient(112deg, #f5f4ee 0%, #eef3ed 58%, #e5eee6 100%);
+}
+.premium-public .premium-hero::before {
+  content: "";
+  position: absolute;
+  width: 34rem;
+  height: 34rem;
+  right: -15rem;
+  top: -18rem;
+  border: 1px solid rgba(23, 75, 59, .12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 44px rgba(23,75,59,.025), 0 0 0 90px rgba(23,75,59,.02);
+  pointer-events: none;
+}
+.premium-public .premium-hero-panel {
+  border: 1px solid rgba(23, 75, 59, .14);
+  border-radius: 22px;
+  background: rgba(255, 254, 250, .92);
+  box-shadow: 0 28px 70px rgba(22, 49, 39, .10);
+}
+.premium-public .premium-hero-panel input,
+.premium-public .premium-hero-panel select {
+  min-height: 48px;
+  border-radius: 10px;
+  border-color: #dce3dc;
+  background: #fafbf8;
+}
+.premium-public .premium-hero-panel button[type="submit"] {
+  min-height: 48px;
+  border-radius: 10px;
+  background: var(--ui-green);
+}
+.premium-public .premium-hero-panel button[type="submit"]:hover { background: var(--ui-green-strong); }
+.premium-public .premium-doctor-card {
+  border-radius: 16px;
+  background: var(--ui-white);
+  box-shadow: 0 5px 22px rgba(22,49,39,.045);
+}
+.premium-public .premium-doctor-card:hover {
+  box-shadow: 0 20px 48px rgba(22,49,39,.10);
+}
+.premium-public .rounded-2xl.border,
+.premium-public .rounded-3xl.border {
+  border-color: var(--ui-line);
+  box-shadow: 0 8px 26px rgba(22,49,39,.045);
+}
+.premium-public .premium-live-board {
+  background:
+    radial-gradient(ellipse at 12% 0%, rgba(105, 148, 119, .24), transparent 38%),
+    linear-gradient(130deg, #102f27, #174b3b 62%, #1d5542);
+}
+.premium-public footer {
+  background: #102f27;
+}
+
+/* Shared navigation surfaces */
+.premium-public header {
+  border-color: rgba(23,75,59,.12);
+  background: rgba(255,254,250,.94);
+  box-shadow: 0 4px 22px rgba(22,49,39,.035);
+}
+.premium-public header nav { min-height: 70px; }
+.premium-public header a { text-decoration: none; }
+.premium-public header a:hover { color: var(--ui-accent); }
+.premium-public header a[href="/appointment"] {
+  border-radius: 10px;
+  background: var(--ui-green);
+  box-shadow: 0 5px 14px rgba(23,75,59,.13);
+}
+.premium-public header a[href="/appointment"]:hover {
+  background: var(--ui-green-strong);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Workspace: quiet canvas, strong navigation, readable data density. */
+.premium-admin {
+  min-height: 100vh;
+  color: var(--ui-ink);
+  background:
+    radial-gradient(ellipse at 92% 0%, rgba(219, 230, 218, .52), transparent 28%),
+    #f5f6f2;
+}
+.premium-admin-nav {
+  border-color: rgba(23,75,59,.12);
+  background: rgba(255,254,250,.96);
+  box-shadow: 0 4px 20px rgba(22,49,39,.045);
+}
+.premium-admin-nav nav ul { scrollbar-width: thin; scrollbar-color: #c7d4ca transparent; }
+.premium-admin-nav nav a { border-radius: 9px; }
+.premium-admin-nav nav a[aria-current="page"] {
+  background: var(--ui-green);
+  box-shadow: 0 4px 12px rgba(23,75,59,.14);
+}
+.premium-admin main { color: var(--ui-ink); }
+.premium-admin main h1 {
+  color: #173b30;
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  font-weight: 650;
+  letter-spacing: -.04em;
+  line-height: 1.12;
+}
+.premium-admin main h2,
+.premium-admin main h3 { color: #244b3d; letter-spacing: -.02em; }
+.premium-admin main section,
+.premium-admin main article,
+.premium-admin main form {
+  border-color: #e0e6df;
+  border-radius: 15px;
+  background: rgba(255,254,250,.94);
+  box-shadow: 0 7px 24px rgba(22,49,39,.04);
+}
+.premium-admin main table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid #e1e7e0;
+  border-radius: 12px;
+  background: #fffefa;
+}
+.premium-admin main table th {
+  color: #53645a;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+.premium-admin main table td,
+.premium-admin main table th { padding: .8rem 1rem; }
+.premium-admin main tbody tr + tr td { border-top: 1px solid #edf0eb; }
+.premium-admin main input,
+.premium-admin main select,
+.premium-admin main textarea {
+  min-height: 42px;
+  border: 1px solid #dce4dc;
+  border-radius: 9px;
+  background: #fffefa;
+}
+.premium-admin main input:focus,
+.premium-admin main select:focus,
+.premium-admin main textarea:focus {
+  border-color: #648a72;
+  box-shadow: 0 0 0 3px rgba(100,138,114,.14);
+}
+.premium-admin main button {
+  border-radius: 9px;
+}
+.premium-admin main button:not(:disabled):active { transform: translateY(1px); }
+
+/* Mobile ergonomics and reduced-motion respect. */
+@media (max-width: 768px) {
+  .premium-public .premium-hero { background: linear-gradient(150deg, #f5f4ee, #e9f0e8); }
+  .premium-public .premium-hero-panel { border-radius: 17px; }
+  .premium-admin-nav > div { padding-top: .65rem; padding-bottom: .65rem; }
+  .premium-admin main { min-width: 0; }
+  .premium-admin main table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .premium-public *, .premium-admin * { scroll-behavior: auto !important; }
+}
