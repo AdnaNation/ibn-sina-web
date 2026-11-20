@@ -25,31 +25,32 @@ export default async function AdminNav({ p, current }) {
     !owner && !branchAdmin && hasPermission(p, "doctors.view") && ["Doctors", "/admin/doctors"],
   ].filter(Boolean);
   const roleLabel = owner ? "Main Admin" : branchAdmin ? "Branch Admin" : p.role === "doctor" ? "Doctor" : "Staff";
+  const home = owner ? "/admin" : branchAdmin ? "/admin/schedules" : hasPermission(p, "queue.manage") ? "/admin/queue" : hasPermission(p, "appointments.view") ? "/admin/appointments" : hasPermission(p, "schedules.manage") ? "/admin/schedules" : "/admin";
 
   return (
-    <header className="premium-admin-nav sticky top-0 z-40 border-b border-pine-100 bg-white/95 backdrop-blur">
-      <div className="flex w-full items-center justify-between gap-3 px-4 py-2.5 sm:px-6 lg:px-8">
-        <Link href={owner ? "/admin" : branchAdmin ? "/admin/schedules" : hasPermission(p, "queue.manage") ? "/admin/queue" : hasPermission(p, "appointments.view") ? "/admin/appointments" : hasPermission(p, "schedules.manage") ? "/admin/schedules" : "/admin"} prefetch={true} className="flex min-w-0 items-center gap-2.5">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-pine-900 text-white"><HeartPulse size={19} /></span>
+    <header className="premium-admin-nav sticky top-0 z-40 border-b">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        <Link href={home} prefetch className="flex min-w-0 items-center gap-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-pine-900 text-white"><HeartPulse size={19} strokeWidth={1.8}/></span>
           <span className="min-w-0 leading-tight">
-            <span className="block truncate text-sm font-bold text-pine-950">{p.name}</span>
-            <span className="block truncate text-[11px] text-ink/60">{tr(roleLabel)}{p.scope ? ` · ${p.scope}` : ""}</span>
+            <span className="block truncate text-sm font-medium text-[#202421]">{p.name}</span>
+            <span className="mt-0.5 block truncate text-xs text-[#68716b]">{tr(roleLabel)}{p.scope ? ` · ${p.scope}` : ""}</span>
           </span>
         </Link>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-0.5 rounded-full bg-pine-50 p-0.5" role="group" aria-label="Language">
-            <Languages size={14} className="ml-2 text-pine-700" aria-hidden="true" />
-            {["en", "bn"].map((code) => {
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="flex items-center gap-1 rounded-lg border border-black/10 bg-[#f4f3ef] p-1" role="group" aria-label="Language">
+            <Languages size={14} className="ml-1 text-[#68716b]" aria-hidden="true"/>
+            {["en", "bn"].map(code => {
               const label = code === "en" ? "EN" : "বাংলা";
-              return <form key={code} action={setLang}><input type="hidden" name="lang" value={code} /><button aria-pressed={lang === code} className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${lang === code ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-white"}`}>{label}</button></form>;
+              return <form key={code} action={setLang}><input type="hidden" name="lang" value={code}/><button aria-pressed={lang === code} className={`rounded-md px-2 py-1 text-xs font-medium ${lang === code ? "bg-white text-[#202421] shadow-sm" : "text-[#68716b] hover:text-[#202421]"}`}>{label}</button></form>;
             })}
           </div>
-          <form action={logoutAction}><button className="inline-flex items-center gap-1.5 rounded-full border border-pine-100 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:bg-pine-50"><LogOut size={14} /> <span className="hidden sm:inline">{tr("Sign out")}</span></button></form>
+          <form action={logoutAction}><button className="inline-flex items-center gap-2 rounded-lg border border-black/10 bg-white px-3 py-2 text-xs font-medium text-[#4c5650] hover:bg-[#f4f3ef]"><LogOut size={14}/><span className="hidden sm:inline">{tr("Sign out")}</span></button></form>
         </div>
       </div>
-      <nav aria-label="Admin" className="border-t border-pine-50">
-        <ul className="flex w-full gap-1 overflow-x-auto px-4 py-1.5 text-sm font-semibold [scrollbar-width:none] sm:px-6 lg:px-8">
-          {links.map(([label, href]) => <li key={href} className="shrink-0"><Link href={href} prefetch={true} aria-current={current === href ? "page" : undefined} className={`block rounded-lg px-3.5 py-2 ${current === href ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-pine-50"}`}>{tr(label)}</Link></li>)}
+      <nav aria-label="Admin" className="border-t border-black/[.07]">
+        <ul className="mx-auto flex w-full max-w-[1600px] gap-1 overflow-x-auto px-4 py-2 text-[13px] sm:px-6 lg:px-8">
+          {links.map(([label, href]) => <li key={href} className="shrink-0"><Link href={href} prefetch aria-current={current === href ? "page" : undefined} className={`block rounded-md px-3 py-2 transition-colors ${current === href ? "bg-[#e9e8e1] font-medium text-[#202421]" : "text-[#626c65] hover:bg-[#f4f3ef] hover:text-[#202421]"}`}>{tr(label)}</Link></li>)}
         </ul>
       </nav>
     </header>
