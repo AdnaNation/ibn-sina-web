@@ -155,6 +155,21 @@ button:active:not(:disabled) { transform: scale(.98); }
 .premium-admin main .border-pine-100,
 .premium-admin main .border-pine-50 { border-color: rgba(32,36,33,.10); }
 
+
+/* Final sweep: remove template tells on secondary public routes too */
+.premium-public [class*="bg-gradient-"] { background-image: none !important; }
+.premium-public [class*="blur-3xl"] { display: none !important; }
+.premium-public [class*="animate-pulse"],
+.premium-public [class*="animate-ping"] { animation: none !important; }
+.premium-public [class*="uppercase"] { text-transform: none !important; }
+.premium-public [class*="tracking-["] { letter-spacing: normal !important; }
+.premium-public a.rounded-full,
+.premium-public button.rounded-full { border-radius: 8px !important; }
+.premium-public a:hover,
+.premium-public button:hover { transform: none; }
+.premium-public .shadow-2xl,
+.premium-public .shadow-xl { box-shadow: 0 8px 24px rgba(30,41,37,.07) !important; }
+
 @media (max-width: 768px) {
   .premium-admin main { min-width: 0; }
   .premium-admin main table { display: block; overflow-x: auto; white-space: nowrap; }
