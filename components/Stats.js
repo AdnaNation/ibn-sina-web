@@ -11,7 +11,7 @@ export default async function Stats({ units, departments }) {
   ];
   return (
     <section id="about" className="relative z-10 mx-auto max-w-7xl px-4 py-8">
-      <dl className="grid grid-cols-1 gap-y-6 rounded-3xl border border-pine-100 bg-white p-6 shadow-[0_18px_50px_rgba(8,58,42,.07)] sm:grid-cols-3 sm:p-8">
+      <dl className="grid grid-cols-1 gap-y-6 rounded-[16px] border border-pine-100 bg-white p-6 sm:grid-cols-3 sm:p-8">
         {items.map(([value, label], i) => (
           <div key={label} className={`px-2 sm:px-6 ${i > 0 ? "sm:border-l sm:border-pine-100" : ""}`}>
             <dd className="font-serif text-4xl font-semibold text-pine-900 sm:text-5xl">{n(value)}</dd>

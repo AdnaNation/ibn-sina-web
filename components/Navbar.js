@@ -33,10 +33,10 @@ export default async function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 shadow-[0_8px_30px_rgba(9,54,40,.045)] backdrop-blur-xl">
-      <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="flex h-[76px] w-full items-center justify-between gap-3 px-4 sm:px-6 lg:gap-5 lg:px-8">
+    <header className="sticky top-0 z-50 border-b border-pine-100/80 bg-white/95 backdrop-blur-xl">
+      <nav aria-label={bn ? "প্রধান নেভিগেশন" : "Main navigation"} className="flex h-[72px] w-full items-center justify-between gap-3 px-4 sm:px-6 lg:gap-5 lg:px-8">
         <Link href="/" prefetch={true} className="group flex min-w-0 items-center gap-3" aria-label={prototypeName + " home"}>
-          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-pine-900 text-white shadow-lg shadow-pine-900/15 transition group-hover:-rotate-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-pine-900 text-white transition">
             <HeartPulse size={25} strokeWidth={2.1} />
           </span>
           <span className="min-w-0">
@@ -55,12 +55,12 @@ export default async function Navbar() {
 
         <div className="hidden shrink-0 items-center gap-3 xl:flex">
           <Link href="/track" prefetch={true} className="whitespace-nowrap text-[13px] font-semibold text-pine-800 hover:text-pine-600">{t.track}</Link>
-          <Link href="/appointment" prefetch={true} className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-pine-800 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-pine-900/15 transition hover:-translate-y-0.5 hover:bg-pine-700">
+          <Link href="/appointment" prefetch={true} className="inline-flex items-center gap-2 whitespace-nowrap rounded-[8px] bg-pine-800 px-5 py-3 text-sm font-medium text-white transition hover:bg-pine-700">
             {t.book}<ArrowUpRight size={16} />
           </Link>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 rounded-full border border-pine-100 bg-pine-50 p-0.5">
+        <div className="flex shrink-0 items-center gap-1 rounded-[8px] border border-pine-100 bg-pine-50 p-0.5">
           {[
             ["en", "EN"],
             ["bn", "বাংলা"],
@@ -68,7 +68,7 @@ export default async function Navbar() {
             <form key={code} action={setLang}>
               <input type="hidden" name="lang" value={code} />
               <button type="submit" aria-label={`Change language to ${label}`} aria-pressed={lang === code}
-                className={`rounded-full px-2 py-1.5 text-[10px] font-bold transition ${lang === code ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-pine-100"}`}>
+                className={`rounded-[6px] px-2 py-1.5 text-[10px] font-medium transition ${lang === code ? "bg-pine-900 text-white" : "text-pine-800 hover:bg-pine-100"}`}>
                 {label}
               </button>
             </form>

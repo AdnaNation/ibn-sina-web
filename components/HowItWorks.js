@@ -8,8 +8,8 @@ export default async function HowItWorks() {
     <section className="bg-white py-16 md:py-20">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-bold uppercase tracking-[.2em] text-pine-700">{t.howEyebrow}</p>
-          <h2 className="mt-3 font-serif text-3xl font-semibold text-pine-950 md:text-4xl">{t.howTitle}</h2>
+          <p className="text-xs font-medium text-pine-700">{t.howEyebrow}</p>
+          <h2 className="mt-3 font-serif text-3xl font-medium text-pine-950 md:text-4xl">{t.howTitle}</h2>
         </div>
         <ol className="mt-10 grid gap-5 md:grid-cols-3">
           {steps.map(([Icon, title, text], i) => (
