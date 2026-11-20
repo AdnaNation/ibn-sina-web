@@ -24,7 +24,7 @@ export default async function Footer() {
           </p>
         </div>
         <nav aria-label={bn ? "দ্রুত লিংক" : "Quick links"}>
-          <h2 className="text-xs font-bold uppercase tracking-[.18em] text-white">{bn ? "দ্রুত লিংক" : "Explore"}</h2>
+          <h2 className="text-sm font-medium text-white">{bn ? "দ্রুত লিংক" : "Explore"}</h2>
           <ul className="mt-5 grid grid-cols-2 gap-3 text-sm text-pine-100/75">
             {links.map(([label, href]) => <li key={href}><Link href={href} className="hover:text-white">{label}</Link></li>)}
           </ul>
